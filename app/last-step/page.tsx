@@ -93,24 +93,27 @@ export default function BookingPage() {
     { id: "custom", label: "Custom split", popular: false },
   ]
 
-  const handleSplitOptionSelect = (optionId: string) => {
-    setSelectedSplitOption(optionId)
-    if (optionId !== "custom") {
-      setCustomSplit({ now: "", delivery: "" })
-    }
+const handleSplitOptionSelect = (optionId: string) => {
+  setSelectedSplitOption(optionId)
+  if (optionId !== "custom") {
+    setCustomSplit({ now: "", delivery: "" })
   }
+}
 
-  const handleCustomSplitChange = (field: "now" | "delivery", value: string) => {
-    const numValue = Number.parseInt(value) || 0
-    if (numValue >= 0 && numValue <= 100) {
-      const otherField = field === "now" ? "delivery" : "now"
-      const otherValue = 100 - numValue
-      setCustomSplit({
-        [field]: value,
-        [otherField]: otherValue.toString(),
-      })
-    }
+const handleCustomSplitChange = (field: "now" | "delivery", value: string) => {
+  const numValue = Number.parseInt(value) || 0
+  if (numValue >= 0 && numValue <= 100) {
+    const otherField = field === "now" ? "delivery" : "now"
+    const otherValue = 100 - numValue
+
+    // Исправленный вариант с prev
+    setCustomSplit(prev => ({
+      ...prev, // сохраняем остальные поля
+      [field]: value,
+      [otherField]: otherValue.toString(),
+    }))
   }
+}
 
   const handleBookingSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
