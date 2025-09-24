@@ -451,29 +451,28 @@ export default function BookingPage() {
                         )}
                         <div className="flex items-center space-x-6">
                           <div className="flex items-center space-x-2">
-                            <Checkbox
-                              id="from-residential"
-                              checked={shipFromResidential}
-                              onCheckedChange={setShipFromResidential}
-                            />
-                            <Label htmlFor="from-residential" className="flex items-center">
-                              <Home className="w-4 h-4 mr-2" />
-                              Residential address
-                            </Label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <Checkbox
-                              id="from-business"
-                              checked={!shipFromResidential}
-                              onCheckedChange={(checked) => setShipFromResidential(!checked)}
-                            />
-                            <Label htmlFor="from-business" className="flex items-center">
-                              <Building2 className="w-4 h-4 mr-2" />
-                              Business address
-                            </Label>
-                          </div>
-                        </div>
-                      </div>
+<Checkbox
+    id="from-residential"
+    checked={shipFromResidential}
+    onCheckedChange={(checked) => setShipFromResidential(!!checked)}
+  />
+  <Label htmlFor="from-residential" className="flex items-center">
+    <Home className="w-4 h-4 mr-2" />
+    Residential address
+  </Label>
+</div>
+
+<div className="flex items-center space-x-2">
+  <Checkbox
+    id="from-business"
+    checked={!shipFromResidential}
+    onCheckedChange={(checked) => setShipFromResidential(!!!checked)}
+  />
+  <Label htmlFor="from-business" className="flex items-center">
+    <Building2 className="w-4 h-4 mr-2" />
+    Business address
+  </Label>
+</div>
 
                       {/* Ship To */}
                       <div className="space-y-4">
@@ -543,29 +542,28 @@ export default function BookingPage() {
                         )}
                         <div className="flex items-center space-x-6">
                           <div className="flex items-center space-x-2">
-                            <Checkbox
-                              id="to-residential"
-                              checked={shipToResidential}
-                              onCheckedChange={setShipToResidential}
-                            />
-                            <Label htmlFor="to-residential" className="flex items-center">
-                              <Home className="w-4 h-4 mr-2" />
-                              Residential address
-                            </Label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <Checkbox
-                              id="to-business"
-                              checked={!shipToResidential}
-                              onCheckedChange={(checked) => setShipToResidential(!checked)}
-                            />
-                            <Label htmlFor="to-business" className="flex items-center">
-                              <Building2 className="w-4 h-4 mr-2" />
-                              Business address
-                            </Label>
-                          </div>
-                        </div>
-                      </div>
+  <Checkbox
+    id="to-residential"
+    checked={shipToResidential}
+    onCheckedChange={(checked) => setShipToResidential(!!checked)}
+  />
+  <Label htmlFor="to-residential" className="flex items-center">
+    <Home className="w-4 h-4 mr-2" />
+    Residential address
+  </Label>
+</div>
+
+<div className="flex items-center space-x-2">
+  <Checkbox
+    id="to-business"
+    checked={!shipToResidential}
+    onCheckedChange={(checked) => setShipToResidential(!!!checked)}
+  />
+  <Label htmlFor="to-business" className="flex items-center">
+    <Building2 className="w-4 h-4 mr-2" />
+    Business address
+  </Label>
+</div>
                       <div className="border-t border-dashed border-[#6371BE] my-2"></div>
 
                       {/* Contact Options */}
