@@ -648,8 +648,13 @@ export default function BookingPage() {
                                 onKeyDown={(e) => {
                                   const target = e.target as HTMLInputElement
                                   const cursorPosition = target.selectionStart
+
                                   // Prevent deletion of "+1 " prefix
-                                  if ((e.key === "Backspace" || e.key === "Delete") && cursorPosition <= 3) {
+                                  if (
+                                    (e.key === "Backspace" || e.key === "Delete") &&
+                                    cursorPosition !== null &&
+                                    cursorPosition <= 3
+                                  ) {
                                     e.preventDefault()
                                     return
                                   }
