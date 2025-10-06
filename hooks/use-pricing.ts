@@ -1,3 +1,5 @@
+"use client"
+
 import { useState, useEffect } from "react"
 import { VehicleTransportPricingCalculator, type PricingFactors, type PricingResult } from "@/lib/pricing-calculator"
 import { useZipLookup } from "./use-zip-lookup"
@@ -9,7 +11,7 @@ export function usePricing(
   toState: string,
   vehicleModel: string,
   vehicleCondition: string,
-  pickupDate?: Date,
+  pickupStartDate?: Date,
   fromZip?: string,
   toZip?: string,
   vehicleCategory?: string,
@@ -17,7 +19,7 @@ export function usePricing(
   const [pricing, setPricing] = useState<PricingResult | null>(null)
   const [isCalculating, setIsCalculating] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  
+
   const { zipDatabase } = useZipLookup()
 
   useEffect(() => {
@@ -42,15 +44,10 @@ export function usePricing(
             toState,
             fromZip,
             toZip,
-            zipDatabase
+            zipDatabase,
           )
         } else {
-          distance = VehicleTransportPricingCalculator.calculateDistance(
-            fromCity,
-            fromState,
-            toCity,
-            toState
-          )
+          distance = VehicleTransportPricingCalculator.calculateDistance(fromCity, fromState, toCity, toState)
         }
 
         // Determine vehicle type from model (simplified mapping)
@@ -66,10 +63,8 @@ export function usePricing(
           vehicleType = "classic"
         }
 
-        // Determine season from pickup date
-        const season = pickupDate 
-          ? VehicleTransportPricingCalculator.getSeason(pickupDate)
-          : "normal"
+        // Determine season from pickupStartDate
+        const season = pickupStartDate ? VehicleTransportPricingCalculator.getSeason(pickupStartDate) : "normal"
 
         const factors: PricingFactors = {
           distance,
@@ -87,7 +82,6 @@ export function usePricing(
         // Log pricing breakdown for debugging
         const breakdown = VehicleTransportPricingCalculator.getPricingBreakdown(factors, fromState, toState)
         console.log("Pricing Breakdown:", breakdown)
-
       } catch (err) {
         console.error("Error calculating pricing:", err)
         setError(err instanceof Error ? err.message : "Failed to calculate pricing")
@@ -105,7 +99,7 @@ export function usePricing(
     toState,
     vehicleModel,
     vehicleCondition,
-    pickupDate,
+    pickupStartDate,
     fromZip,
     toZip,
     vehicleCategory,

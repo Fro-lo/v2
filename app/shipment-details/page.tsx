@@ -449,130 +449,123 @@ export default function BookingPage() {
                             </p>
                           </div>
                         )}
-<div className="flex flex-col lg:flex-row lg:items-start lg:space-x-6">
-  {/* Ship From */}
-  <div className="flex flex-col space-y-2 mb-4 lg:mb-0">
-    <h3 className="text-lg font-semibold text-gray-900">Ship From</h3>
-    <div className="flex items-center space-x-2">
-      <Checkbox
-        id="from-residential"
-        checked={shipFromResidential}
-        onCheckedChange={(checked: boolean | "indeterminate") =>
-          setShipFromResidential(Boolean(checked))
-        }
-      />
-      <Label htmlFor="from-residential" className="flex items-center">
-        <Home className="w-4 h-4 mr-2" />
-        Residential address
-      </Label>
-    </div>
+                        <div className="flex items-center space-x-6">
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="from-residential"
+                              checked={shipFromResidential}
+                              onCheckedChange={setShipFromResidential}
+                            />
+                            <Label htmlFor="from-residential" className="flex items-center">
+                              <Home className="w-4 h-4 mr-2" />
+                              Residential address
+                            </Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="from-business"
+                              checked={!shipFromResidential}
+                              onCheckedChange={(checked) => setShipFromResidential(!checked)}
+                            />
+                            <Label htmlFor="from-business" className="flex items-center">
+                              <Building2 className="w-4 h-4 mr-2" />
+                              Business address
+                            </Label>
+                          </div>
+                        </div>
+                      </div>
 
-    <div className="flex items-center space-x-2">
-      <Checkbox
-        id="from-business"
-        checked={!shipFromResidential}
-        onCheckedChange={(checked: boolean | "indeterminate") =>
-          setShipFromResidential(!Boolean(checked))
-        }
-      />
-      <Label htmlFor="from-business" className="flex items-center">
-        <Building2 className="w-4 h-4 mr-2" />
-        Business address
-      </Label>
-    </div>
-  </div>
-
-  {/* Ship To */}
-  <div className="flex-1 space-y-4">
-    <div className="flex items-center justify-between">
-      <h3 className="text-lg font-semibold text-gray-900">Ship To</h3>
-      <Button
-        variant="ghost"
-        size="sm"
-        className="text-[#6371BE] hover:text-[#081C8B]"
-        onClick={() => setEditingTo(!editingTo)}
-      >
-        <Edit3 className="w-4 h-4 mr-2" />
-        {editingTo ? "Save" : "Edit"}
-      </Button>
-    </div>
-
-    {editingTo ? (
-      <div className="space-y-3">
-        {/* Inputs */}
-        <div className="grid grid-cols-2 gap-3">
-          <input
-            type="text"
-            value={toAddress.houseNumber}
-            onChange={(e) => setToAddress({ ...toAddress, houseNumber: e.target.value })}
-            placeholder="House number"
-          />
-          <input
-            type="text"
-            value={toAddress.streetName}
-            onChange={(e) => setToAddress({ ...toAddress, streetName: e.target.value })}
-            placeholder="Street name"
-          />
-        </div>
-        <input
-          type="text"
-          value={toAddress.city}
-          onChange={(e) => setToAddress({ ...toAddress, city: e.target.value })}
-          placeholder="City"
-        />
-        <div className="grid grid-cols-2 gap-3">
-          <input
-            type="text"
-            value={toAddress.state}
-            onChange={(e) => setToAddress({ ...toAddress, state: e.target.value })}
-            placeholder="State"
-          />
-          <input
-            type="text"
-            value={toAddress.postalCode}
-            onChange={(e) => setToAddress({ ...toAddress, postalCode: e.target.value })}
-            placeholder="Postal code"
-          />
-        </div>
-
-        {/* Ship To Checkboxes */}
-        <div className="flex items-center space-x-2">
-          <Checkbox
-            id="to-residential"
-            checked={shipToResidential}
-            onCheckedChange={(checked: boolean | "indeterminate") =>
-              setShipToResidential(Boolean(checked))
-            }
-          />
-          <Label htmlFor="to-residential" className="flex items-center">
-            <Home className="w-4 h-4 mr-2" />
-            Residential address
-          </Label>
-        </div>
-
-        <div className="flex items-center space-x-2">
-          <Checkbox
-            id="to-business"
-            checked={!shipToResidential}
-            onCheckedChange={(checked: boolean | "indeterminate") =>
-              setShipToResidential(!Boolean(checked))
-            }
-          />
-          <Label htmlFor="to-business" className="flex items-center">
-            <Building2 className="w-4 h-4 mr-2" />
-            Business address
-          </Label>
-        </div>
-      </div>
-    ) : (
-      <div className="bg-gray-50 p-4 rounded-lg">
-        <p>{toAddress.houseNumber} {toAddress.streetName}</p>
-        <p>{toAddress.city}, {toAddress.state} {toAddress.postalCode}</p>
-      </div>
-    )}
-  </div>
-</div>
-
+                      {/* Ship To */}
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-lg font-semibold text-gray-900">Ship To</h3>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-[#6371BE] hover:text-[#081C8B]"
+                            onClick={() => setEditingTo(!editingTo)}
+                          >
+                            <Edit3 className="w-4 h-4 mr-2" />
+                            {editingTo ? "Save" : "Edit"}
+                          </Button>
+                        </div>
+                        {editingTo ? (
+                          <div className="space-y-3">
+                            <div className="grid grid-cols-2 gap-3">
+                              <input
+                                type="text"
+                                value={toAddress.houseNumber}
+                                onChange={(e) => setToAddress({ ...toAddress, houseNumber: e.target.value })}
+                                className="w-full p-3 border border-gray-300 rounded-lg focus:border-[#081C8B] focus:ring-[#081C8B] focus:ring-1"
+                                placeholder="House number"
+                              />
+                              <input
+                                type="text"
+                                value={toAddress.streetName}
+                                onChange={(e) => setToAddress({ ...toAddress, streetName: e.target.value })}
+                                className="w-full p-3 border border-gray-300 rounded-lg focus:border-[#081C8B] focus:ring-[#081C8B] focus:ring-1"
+                                placeholder="Street name"
+                              />
+                            </div>
+                            <input
+                              type="text"
+                              value={toAddress.city}
+                              onChange={(e) => setToAddress({ ...toAddress, city: e.target.value })}
+                              className="w-full p-3 border border-gray-300 rounded-lg focus:border-[#081C8B] focus:ring-[#081C8B] focus:ring-1"
+                              placeholder="City"
+                            />
+                            <div className="grid grid-cols-2 gap-3">
+                              <input
+                                type="text"
+                                value={toAddress.state}
+                                onChange={(e) => setToAddress({ ...toAddress, state: e.target.value })}
+                                className="w-full p-3 border border-gray-300 rounded-lg focus:border-[#081C8B] focus:ring-[#081C8B] focus:ring-1"
+                                placeholder="State"
+                              />
+                              <input
+                                type="text"
+                                value={toAddress.postalCode}
+                                onChange={(e) => setToAddress({ ...toAddress, postalCode: e.target.value })}
+                                className="w-full p-3 border border-gray-300 rounded-lg focus:border-[#081C8B] focus:ring-[#081C8B] focus:ring-1"
+                                placeholder="Postal code"
+                              />
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="bg-gray-50 p-4 rounded-lg">
+                            <p className="text-gray-500">
+                              {toAddress.houseNumber} {toAddress.streetName}
+                            </p>
+                            <p className="text-gray-500">
+                              {toAddress.city}, {toAddress.state} {toAddress.postalCode}
+                            </p>
+                          </div>
+                        )}
+                        <div className="flex items-center space-x-6">
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="to-residential"
+                              checked={shipToResidential}
+                              onCheckedChange={setShipToResidential}
+                            />
+                            <Label htmlFor="to-residential" className="flex items-center">
+                              <Home className="w-4 h-4 mr-2" />
+                              Residential address
+                            </Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="to-business"
+                              checked={!shipToResidential}
+                              onCheckedChange={(checked) => setShipToResidential(!checked)}
+                            />
+                            <Label htmlFor="to-business" className="flex items-center">
+                              <Building2 className="w-4 h-4 mr-2" />
+                              Business address
+                            </Label>
+                          </div>
+                        </div>
+                      </div>
                       <div className="border-t border-dashed border-[#6371BE] my-2"></div>
 
                       {/* Contact Options */}
