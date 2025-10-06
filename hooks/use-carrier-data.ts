@@ -32,6 +32,33 @@ interface Quote {
 
 const CACHE_DURATION = 5 * 60 * 1000 // 5 minutes
 const DATA_FRESHNESS_THRESHOLD = 2 * 60 * 1000 // 2 minutes
+const AVERAGE_TRUCK_MILES_PER_DAY = 600 // Average distance a truck can travel per day
+
+// Helper function to parse pickup timeframe and get max days
+function parsePickupTimeframeMaxDays(timeframe: string): number {
+  const timeframeLower = timeframe.toLowerCase()
+
+  if (timeframeLower.includes("same day")) {
+    return 0
+  } else if (timeframeLower.includes("next day")) {
+    return 1
+  } else {
+    // Extract numbers from timeframe like "1-3 days" or "2-5 days"
+    const matches = timeframeLower.match(/(\d+)[-–](\d+)\s*days?/)
+    if (matches) {
+      return Number.parseInt(matches[2]) // Return the MAX days
+    } else {
+      // Try to extract single number like "3 days"
+      const singleMatch = timeframeLower.match(/(\d+)\s*days?/)
+      if (singleMatch) {
+        return Number.parseInt(singleMatch[1])
+      } else {
+        // Default fallback
+        return 3
+      }
+    }
+  }
+}
 
 // Helper function to calculate pickup date range
 function calculatePickupRange(pickupDate: Date | undefined, timeframe: string): string {
@@ -82,49 +109,58 @@ function calculatePickupRange(pickupDate: Date | undefined, timeframe: string): 
   }
 }
 
-// Helper function to calculate delivery date range
-function calculateDeliveryRange(deliveryDate: Date | undefined, timeframe: string): string {
-  if (!deliveryDate) return "TBD"
-
-  // Parse timeframe (e.g., "3-5 days", "4-7 days", "same day")
+// Helper function to parse delivery timeframe coefficient
+function parseDeliveryTimeframe(timeframe: string): { minDays: number; maxDays: number } {
   const timeframeLower = timeframe.toLowerCase()
 
-  let minDays = 0
-  let maxDays = 0
-
   if (timeframeLower.includes("same day")) {
-    minDays = 0
-    maxDays = 0
+    return { minDays: 0, maxDays: 0 }
   } else if (timeframeLower.includes("next day")) {
-    minDays = 1
-    maxDays = 1
+    return { minDays: 1, maxDays: 1 }
   } else {
     // Extract numbers from timeframe like "3-5 days" or "4-7 days"
     const matches = timeframeLower.match(/(\d+)[-–](\d+)\s*days?/)
     if (matches) {
-      minDays = Number.parseInt(matches[1])
-      maxDays = Number.parseInt(matches[2])
+      return {
+        minDays: Number.parseInt(matches[1]),
+        maxDays: Number.parseInt(matches[2]),
+      }
     } else {
       // Try to extract single number like "5 days"
       const singleMatch = timeframeLower.match(/(\d+)\s*days?/)
       if (singleMatch) {
-        minDays = Number.parseInt(singleMatch[1])
-        maxDays = minDays
+        const days = Number.parseInt(singleMatch[1])
+        return { minDays: days, maxDays: days }
       } else {
         // Default fallback
-        minDays = 3
-        maxDays = 5
+        return { minDays: 3, maxDays: 5 }
       }
     }
   }
+}
 
-  const startDate = new Date(deliveryDate)
-  startDate.setDate(startDate.getDate() + minDays)
+// Helper function to calculate delivery date range using the formula:
+// Delivery Days = (Distance ÷ 600) + 1 + deliveryTimeframe coefficient
+function calculateDeliveryRange(pickupDate: Date | undefined, distance: number, deliveryTimeframe: string): string {
+  if (!pickupDate) return "TBD"
 
-  const endDate = new Date(deliveryDate)
-  endDate.setDate(endDate.getDate() + maxDays)
+  // Formula: Base delivery days = (Distance ÷ 600) + 1
+  const baseTravelDays = Math.round(distance / AVERAGE_TRUCK_MILES_PER_DAY) + 1
 
-  if (minDays === maxDays) {
+  // Parse the delivery timeframe coefficient from the carrier's table
+  const timeframeCoefficient = parseDeliveryTimeframe(deliveryTimeframe)
+
+  // Calculate final delivery dates by adding base travel days + timeframe coefficient
+  const minDeliveryDays = baseTravelDays + timeframeCoefficient.minDays
+  const maxDeliveryDays = baseTravelDays + timeframeCoefficient.maxDays
+
+  const startDate = new Date(pickupDate)
+  startDate.setDate(startDate.getDate() + minDeliveryDays)
+
+  const endDate = new Date(pickupDate)
+  endDate.setDate(endDate.getDate() + maxDeliveryDays)
+
+  if (minDeliveryDays === maxDeliveryDays) {
     return startDate.toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "2-digit" })
   } else {
     return `${startDate.toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "2-digit" })} - ${endDate.toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "2-digit" })}`
@@ -137,8 +173,8 @@ export function useCarrierData(
   distance: number,
   vehicleModel: string,
   vehicleCondition: string,
-  pickupDate?: Date,
-  deliveryDate?: Date,
+  pickupStartDate?: Date,
+  pickupEndDate?: Date,
   vehicleCategory?: string,
   fromCity?: string,
   toCity?: string,
@@ -151,7 +187,9 @@ export function useCarrierData(
   const isDataFresh = lastFetch ? Date.now() - lastFetch.getTime() < DATA_FRESHNESS_THRESHOLD : false
 
   const fetchCarrierData = useCallback(async () => {
-    if (!fromState || !toState || !distance || !vehicleModel || !vehicleCondition) {
+    // Don't fetch if required fields are missing OR if no pickup date is selected
+    if (!fromState || !toState || !distance || !vehicleModel || !vehicleCondition || !pickupStartDate) {
+      setQuotes([]) // Clear any existing quotes
       return
     }
 
@@ -160,30 +198,13 @@ export function useCarrierData(
 
     try {
       // Use the GoogleSheetsCarrierService to fetch data from your specific sheet
-      // const carrierService = new GoogleSheetsCarrierService({
-      //   spreadsheetId: process.env.NEXT_PUBLIC_CARRIER_SPREADSHEET_ID || "1LLjbVWiTawNgel1Ybpv3SsL9FRtSY3SM2tDUmq_dl98",
-      //   gid: process.env.NEXT_PUBLIC_CARRIER_SHEET_GID || "1327223389",
-      // })
-            const carrierService = new GoogleSheetsCarrierService({
-        spreadsheetId: process.env.NEXT_PUBLIC_CARRIER_SPREADSHEET_ID || "",
-        gid: process.env.NEXT_PUBLIC_CARRIER_SHEET_GID || "",
+      const carrierService = new GoogleSheetsCarrierService({
+        spreadsheetId: process.env.NEXT_PUBLIC_CARRIER_SPREADSHEET_ID || "1LLjbVWiTawNgel1Ybpv3SsL9FRtSY3SM2tDUmq_dl98",
+        gid: process.env.NEXT_PUBLIC_CARRIER_SHEET_GID || "1327223389",
       })
 
       const carrierData = await carrierService.fetchCarrierData()
       console.log("Fetched carrier data:", carrierData.length, "carriers")
-
-      // Add debug logging right after fetching carrier data
-      console.log(
-        "Sample carrier data for debugging:",
-        carrierData.slice(0, 2).map((c) => ({
-          company: c.companyName,
-          vehicleType: c.vehicleType,
-          forVehicles: c.forVehicles,
-          trailerType: c.trailerType,
-          pricePerMile: c.pricePerMile,
-          basePrice: c.basePrice,
-        })),
-      )
 
       // Filter out carriers with "On the way" status (В пути) or similar
       const availableCarriers = carrierData.filter((carrier) => {
@@ -192,11 +213,11 @@ export function useCarrierData(
         return !excludedStatuses.some((excluded) => status.includes(excluded))
       })
 
-      console.log("Available carriers after filtering:", availableCarriers.length)
+      console.log("Available carriers after status filtering:", availableCarriers.length)
 
       const processedQuotes: Quote[] = availableCarriers.map((carrier, index) => {
         // Calculate dynamic pricing based on the route and vehicle
-        const season = pickupDate ? VehicleTransportPricingCalculator.getSeason(pickupDate) : "normal"
+        const season = pickupStartDate ? VehicleTransportPricingCalculator.getSeason(pickupStartDate) : "normal"
 
         let vehicleType: "sedan" | "suv" | "truck" | "motorcycle" | "classic" = "sedan"
         const modelLower = vehicleModel.toLowerCase()
@@ -228,12 +249,6 @@ export function useCarrierData(
         const basePrice = carrier.basePrice || 0
         const finalPrice = Math.round(baseCalculatedPrice * pricePerMileCoefficient + basePrice)
 
-        console.log(`Carrier ${carrier.companyName} price calculation:`)
-        console.log(`- Base calculated price: $${baseCalculatedPrice}`)
-        console.log(`- Price per mile coefficient: ${pricePerMileCoefficient}`)
-        console.log(`- Base price: $${basePrice}`)
-        console.log(`- Final price: $${finalPrice}`)
-
         // Check if this carrier offers enclosed transport based on vehicleType field from table
         const isEnclosed =
           carrier.vehicleType.toLowerCase().includes("enclosed") ||
@@ -244,24 +259,32 @@ export function useCarrierData(
         const adjustedPrice = isEnclosed ? Math.round(finalPrice * 1.2) : finalPrice
 
         // Calculate pickup range using the timeframe from your table
-        const pickupRange = calculatePickupRange(pickupDate, carrier.pickupTimeframe)
+        const pickupRange = calculatePickupRange(pickupStartDate, carrier.pickupTimeframe)
 
-        // Calculate delivery range using the timeframe from your table
-        const deliveryRange = calculateDeliveryRange(deliveryDate, carrier.deliveryTimeframe)
+        // Calculate delivery range using the formula: (Distance ÷ 600) + 1 + deliveryTimeframe
+        const deliveryRange = calculateDeliveryRange(pickupStartDate, distance, carrier.deliveryTimeframe)
+
+        // Calculate base delivery date for display (middle of the range)
+        const timeframeCoefficient = parseDeliveryTimeframe(carrier.deliveryTimeframe)
+        const baseTravelDays = Math.round(distance / AVERAGE_TRUCK_MILES_PER_DAY) + 1
+        const avgDeliveryDays =
+          baseTravelDays + Math.round((timeframeCoefficient.minDays + timeframeCoefficient.maxDays) / 2)
+
+        const deliveryDate = pickupStartDate
+          ? new Date(pickupStartDate.getTime() + avgDeliveryDays * 24 * 60 * 60 * 1000)
+          : new Date()
 
         return {
           id: carrier.id,
           company: carrier.companyName,
-          price: Math.max(400, adjustedPrice), // Ensure minimum price of $400
+          price: Math.max(400, adjustedPrice),
           rating: carrier.rating,
           reviews: carrier.reviewCount,
-          pickup: pickupDate
-            ? pickupDate.toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "2-digit" })
+          pickup: pickupStartDate
+            ? pickupStartDate.toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "2-digit" })
             : "TBD",
           pickupRange,
-          delivery: deliveryDate
-            ? deliveryDate.toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "2-digit" })
-            : "TBD",
+          delivery: deliveryDate.toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "2-digit" }),
           deliveryRange,
           dotNumber: carrier.dotNumber,
           mcNumber: carrier.mcNumber,
@@ -269,30 +292,60 @@ export function useCarrierData(
           insuranceCoverage: carrier.insuranceCoverage,
           truck: carrier.truck,
           trailer: carrier.trailer,
-          vehicleType: carrier.vehicleType, // Now correctly shows the actual Vehicle Type from your table
-          forVehicles: carrier.forVehicles, // This shows what vehicles the carrier handles
+          vehicleType: carrier.vehicleType,
+          forVehicles: carrier.forVehicles,
           slots: carrier.slots,
           trailerType: carrier.trailerType,
           state: carrier.state,
           isLocal: carrier.state === fromState,
-          isEnclosed, // This is determined by the vehicleType field containing "enclosed"
+          isEnclosed,
           description: carrier.description,
-        }
+          // Store the original pickupTimeframe for filtering
+          pickupTimeframe: carrier.pickupTimeframe,
+        } as Quote & { pickupTimeframe: string }
       })
 
-      // Sort by price (lowest first)
-      processedQuotes.sort((a, b) => a.price - b.price)
+      // NEW FILTER: Filter out carriers whose pickup timeframe exceeds user's date range
+      let filteredQuotes = processedQuotes
+      if (pickupStartDate && pickupEndDate) {
+        // Calculate user's pickup date range in days
+        const userPickupRangeDays = Math.ceil(
+          (pickupEndDate.getTime() - pickupStartDate.getTime()) / (1000 * 60 * 60 * 24),
+        )
 
-      setQuotes(processedQuotes)
+        console.log(
+          `User's pickup range: ${userPickupRangeDays} days (${pickupStartDate.toLocaleDateString()} - ${pickupEndDate.toLocaleDateString()})`,
+        )
+
+        filteredQuotes = processedQuotes.filter((quote) => {
+          const quoteWithTimeframe = quote as Quote & { pickupTimeframe: string }
+          const carrierMaxPickupDays = parsePickupTimeframeMaxDays(quoteWithTimeframe.pickupTimeframe)
+
+          const included = carrierMaxPickupDays <= userPickupRangeDays
+
+          console.log(
+            `Carrier "${quote.company}": pickup timeframe "${quoteWithTimeframe.pickupTimeframe}" = ${carrierMaxPickupDays} days, user range = ${userPickupRangeDays} days → ${included ? "INCLUDED" : "EXCLUDED"}`,
+          )
+
+          return included
+        })
+
+        console.log(`After pickup timeframe filter: ${filteredQuotes.length} carriers remaining`)
+      }
+
+      // Sort by price (lowest first)
+      filteredQuotes.sort((a, b) => a.price - b.price)
+
+      setQuotes(filteredQuotes)
       setLastFetch(new Date())
-      console.log("Successfully processed quotes:", processedQuotes.length)
+      console.log("Successfully processed quotes:", filteredQuotes.length)
     } catch (err) {
       console.error("Error fetching carrier data:", err)
       setError(err instanceof Error ? err.message : "Failed to fetch carrier data")
 
-      // Generate fallback mock data with the new pricing structure
+      // Generate fallback mock data
       const mockQuotes: Quote[] = Array.from({ length: 8 }, (_, index) => {
-        const season = pickupDate ? VehicleTransportPricingCalculator.getSeason(pickupDate) : "normal"
+        const season = pickupStartDate ? VehicleTransportPricingCalculator.getSeason(pickupStartDate) : "normal"
 
         let vehicleType: "sedan" | "suv" | "truck" | "motorcycle" | "classic" = "sedan"
         const modelLower = vehicleModel.toLowerCase()
@@ -318,10 +371,9 @@ export function useCarrierData(
 
         const pricingResult = VehicleTransportPricingCalculator.calculatePrice(pricingFactors, fromState, toState)
 
-        // Apply mock pricing formula
         const basePrice = pricingResult.breakdown.total
-        const mockPricePerMile = 0.8 + Math.random() * 0.4 // Random coefficient between 0.8 and 1.2
-        const mockBasePrice = 100 + Math.random() * 200 // Random base price between 100 and 300
+        const mockPricePerMile = 0.8 + Math.random() * 0.4
+        const mockBasePrice = 100 + Math.random() * 200
         const finalPrice = Math.round(basePrice * mockPricePerMile + mockBasePrice)
 
         const isEnclosed = Math.random() > 0.7
@@ -360,8 +412,17 @@ export function useCarrierData(
         ]
         const timeframe = timeframes[index] || "1-3 days"
         const deliveryTimeframe = deliveryTimeframes[index] || "3-5 days"
-        const pickupRange = calculatePickupRange(pickupDate, timeframe)
-        const deliveryRange = calculateDeliveryRange(deliveryDate, deliveryTimeframe)
+        const pickupRange = calculatePickupRange(pickupStartDate, timeframe)
+        const deliveryRange = calculateDeliveryRange(pickupStartDate, distance, deliveryTimeframe)
+
+        const timeframeCoefficient = parseDeliveryTimeframe(deliveryTimeframe)
+        const baseTravelDays = Math.round(distance / AVERAGE_TRUCK_MILES_PER_DAY) + 1
+        const avgDeliveryDays =
+          baseTravelDays + Math.round((timeframeCoefficient.minDays + timeframeCoefficient.maxDays) / 2)
+
+        const deliveryDate = pickupStartDate
+          ? new Date(pickupStartDate.getTime() + avgDeliveryDays * 24 * 60 * 60 * 1000)
+          : new Date()
 
         return {
           id: `mock-quote-${index}`,
@@ -369,13 +430,11 @@ export function useCarrierData(
           price: Math.max(400, adjustedPrice),
           rating: 4.0,
           reviews: 33,
-          pickup: pickupDate
-            ? pickupDate.toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "2-digit" })
+          pickup: pickupStartDate
+            ? pickupStartDate.toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "2-digit" })
             : "TBD",
           pickupRange,
-          delivery: deliveryDate
-            ? deliveryDate.toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "2-digit" })
-            : "TBD",
+          delivery: deliveryDate.toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "2-digit" }),
           deliveryRange,
           dotNumber: `DOT23456${7 + index}`,
           mcNumber: `MC89012${3 + index}`,
@@ -391,16 +450,31 @@ export function useCarrierData(
           isLocal: Math.random() > 0.5,
           isEnclosed,
           description: "Nationwide car transport",
-        }
+          pickupTimeframe: timeframe,
+        } as Quote & { pickupTimeframe: string }
       })
 
-      mockQuotes.sort((a, b) => a.price - b.price)
-      setQuotes(mockQuotes)
+      // Apply same filter to mock data
+      let filteredMockQuotes = mockQuotes
+      if (pickupStartDate && pickupEndDate) {
+        const userPickupRangeDays = Math.ceil(
+          (pickupEndDate.getTime() - pickupStartDate.getTime()) / (1000 * 60 * 60 * 24),
+        )
+
+        filteredMockQuotes = mockQuotes.filter((quote) => {
+          const quoteWithTimeframe = quote as Quote & { pickupTimeframe: string }
+          const carrierMaxPickupDays = parsePickupTimeframeMaxDays(quoteWithTimeframe.pickupTimeframe)
+          return carrierMaxPickupDays <= userPickupRangeDays
+        })
+      }
+
+      filteredMockQuotes.sort((a, b) => a.price - b.price)
+      setQuotes(filteredMockQuotes)
       setLastFetch(new Date())
     } finally {
       setIsLoading(false)
     }
-  }, [fromState, toState, distance, vehicleModel, vehicleCondition, pickupDate, deliveryDate, vehicleCategory])
+  }, [fromState, toState, distance, vehicleModel, vehicleCondition, pickupStartDate, pickupEndDate, vehicleCategory])
 
   const refreshData = useCallback(() => {
     fetchCarrierData()
@@ -411,7 +485,7 @@ export function useCarrierData(
   }, [fetchCarrierData])
 
   useEffect(() => {
-    if (fromState && toState && distance && vehicleModel && vehicleCondition) {
+    if (fromState && toState && distance && vehicleModel && vehicleCondition && pickupStartDate) {
       fetchCarrierData()
     }
   }, [fetchCarrierData])

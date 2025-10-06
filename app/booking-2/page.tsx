@@ -37,6 +37,7 @@ import { useZipLookup } from "@/hooks/use-zip-lookup"
 import { useCarrierData } from "@/hooks/use-carrier-data"
 import { VehicleTransportPricingCalculator } from "@/lib/pricing-calculator"
 import { VehicleModelInput } from "@/components/vehicle-model-input"
+import type { DateRange } from "react-day-picker"
 
 const US_STATES = [
   { code: "AL", name: "Alabama" },
@@ -104,8 +105,8 @@ interface SearchFormData {
   toCity: string
   toState: string
   toZip: string
-  pickupDate: Date | undefined
-  deliveryDate: Date | undefined
+  pickupStartDate: Date | undefined
+  pickupEndDate: Date | undefined
   vehicleModel: string
   vehicleYear: string
   vehicleCondition: string
@@ -133,8 +134,8 @@ export default function QuotePage() {
     toCity: "",
     toState: "",
     toZip: "",
-    pickupDate: undefined,
-    deliveryDate: undefined,
+    pickupStartDate: undefined,
+    pickupEndDate: undefined,
     vehicleModel: "",
     vehicleYear: "",
     vehicleCondition: "Operable",
@@ -198,8 +199,8 @@ export default function QuotePage() {
     distance,
     searchForm.vehicleModel,
     searchForm.vehicleCondition,
-    searchForm.pickupDate,
-    searchForm.deliveryDate,
+    searchForm.pickupStartDate, // Use start date for calculations
+    searchForm.pickupEndDate, // Pass end date for filtering
     searchForm.vehicleCategory,
     searchForm.fromCity,
     searchForm.toCity,
@@ -282,8 +283,8 @@ export default function QuotePage() {
       vehicleYear: urlParams.get("vehicleYear") || "",
       vehicleCondition: urlParams.get("vehicleCondition") || "Operable",
       vehicleCategory: urlParams.get("vehicleCategory") || "",
-      pickupDate: urlParams.get("pickupDate") ? new Date(urlParams.get("pickupDate")!) : undefined,
-      deliveryDate: urlParams.get("deliveryDate") ? new Date(urlParams.get("deliveryDate")!) : undefined,
+      pickupStartDate: urlParams.get("pickupStartDate") ? new Date(urlParams.get("pickupStartDate")!) : undefined,
+      pickupEndDate: urlParams.get("pickupEndDate") ? new Date(urlParams.get("pickupEndDate")!) : undefined,
     }
 
     setSearchForm((prev) => ({
@@ -428,39 +429,22 @@ export default function QuotePage() {
     [formData.phone],
   )
 
-  const handleSearchFormChange = useCallback(
-    (field: string, value: string | Date) => {
-      setSearchForm((prev) => {
-        const updated = { ...prev, [field]: value }
-
-        if (field === "pickupDate" && value instanceof Date && prev.deliveryDate) {
-          // Calculate minimum delivery date based on pickup date + distance-based days
-          const minDeliveryDate = new Date(value)
-          minDeliveryDate.setDate(minDeliveryDate.getDate() + minimumDeliveryDays)
-
-          // If current delivery date is before the calculated minimum, update it
-          if (prev.deliveryDate < minDeliveryDate) {
-            updated.deliveryDate = minDeliveryDate
-          }
-        }
-
-        if (field === "deliveryDate" && value instanceof Date) {
-          // Ensure delivery date is not before the minimum calculated date
-          if (searchForm.pickupDate) {
-            const minDeliveryDate = new Date(searchForm.pickupDate)
-            minDeliveryDate.setDate(minDeliveryDate.getDate() + minimumDeliveryDays)
-
-            if (value < minDeliveryDate) {
-              updated.deliveryDate = minDeliveryDate
-            }
-          }
-        }
-
-        return updated
-      })
-    },
-    [minimumDeliveryDays, searchForm.pickupDate],
-  )
+  const handleDateRangeChange = useCallback((range: DateRange | undefined) => {
+    if (range?.from) {
+      // If no end date is selected, treat the start date as both start and end
+      setSearchForm((prev) => ({
+        ...prev,
+        pickupStartDate: range.from,
+        pickupEndDate: range.to || range.from, // Use start date as end date if no end date selected
+      }))
+    } else {
+      setSearchForm((prev) => ({
+        ...prev,
+        pickupStartDate: undefined,
+        pickupEndDate: undefined,
+      }))
+    }
+  }, [])
 
   const handleVehicleModelChange = useCallback((value: string) => {
     setSearchForm((prev) => ({ ...prev, vehicleModel: value }))
@@ -586,9 +570,12 @@ export default function QuotePage() {
         params.set("vehicleTransportType", selectedQuote.isEnclosed ? "enclosed" : "open")
 
         // Pass pickup and delivery dates from the selected quote instead of form
-        params.set("pickupDate", selectedQuote.pickupRange)
-        params.set("deliveryDate", selectedQuote.deliveryRange)
+        params.set("pickupStartDate", selectedQuote.pickupRange)
+        params.set("pickupEndDate", selectedQuote.deliveryRange)
       }
+
+      if (searchForm.pickupStartDate) params.set("pickupStartDate", searchForm.pickupStartDate.toISOString())
+      if (searchForm.pickupEndDate) params.set("pickupEndDate", searchForm.pickupEndDate.toISOString())
 
       params.set("customerName", formData.name)
       params.set("customerEmail", formData.email)
@@ -612,15 +599,14 @@ export default function QuotePage() {
       { field: "fromCity", name: "Pick up from city" },
       { field: "toStreet", name: "Deliver to street" },
       { field: "toCity", name: "Deliver to city" },
-      { field: "pickupDate", name: "Pickup date" },
-      { field: "deliveryDate", name: "Delivery date" },
+      { field: "pickupStartDate", name: "Pickup date" },
       { field: "vehicleModel", name: "Vehicle model" },
       { field: "vehicleYear", name: "Vehicle year" },
       { field: "vehicleCondition", name: "Vehicle condition" },
     ]
 
     const missingFields = requiredFields.filter(({ field }) => {
-      if (field === "pickupDate" || field === "deliveryDate") {
+      if (field === "pickupStartDate") {
         return !searchForm[field as keyof SearchFormData]
       }
       const value = searchForm[field as keyof SearchFormData]
@@ -665,6 +651,25 @@ export default function QuotePage() {
     if (parts.length === 0) return "Enter address"
     return parts.join(", ")
   }, [searchForm.toHouseNumber, searchForm.toStreet, searchForm.toCity, searchForm.toState, searchForm.toZip])
+
+  const getPickupDateDisplay = useMemo(() => {
+    if (!searchForm.pickupStartDate) return "../../.. - ../../.."
+
+    const startFormatted = format(searchForm.pickupStartDate, "MM.dd.yy")
+
+    // If both dates exist and they're the same, show only one date
+    if (searchForm.pickupEndDate && searchForm.pickupStartDate.getTime() === searchForm.pickupEndDate.getTime()) {
+      return startFormatted
+    }
+
+    // If both dates exist and they're different, show range
+    if (searchForm.pickupEndDate) {
+      return `${startFormatted} - ${format(searchForm.pickupEndDate, "MM.dd.yy")}`
+    }
+
+    // If only start date exists, show just that date (no dash)
+    return startFormatted
+  }, [searchForm.pickupStartDate, searchForm.pickupEndDate])
 
   const renderStars = useCallback((rating: number, totalStars = 5) => {
     const stars = []
@@ -730,7 +735,7 @@ export default function QuotePage() {
                 }`}
               >
                 <form className="space-y-4">
-                  <div className="grid grid-cols-2 md:grid-cols-7 gap-3 items-end">
+                  <div className="grid grid-cols-2 md:grid-cols-6 gap-3 items-end">
                     <div className="space-y-2 relative">
                       <Label
                         className={`text-sm font-medium ${showRequiredHints && (!searchForm.fromStreet || !searchForm.fromCity) ? "text-red-600" : "text-gray-700"}`}
@@ -761,7 +766,9 @@ export default function QuotePage() {
                                 id="fromHouseNumber"
                                 type="text"
                                 value={searchForm.fromHouseNumber || ""}
-                                onChange={(e) => handleSearchFormChange("fromHouseNumber", e.target.value)}
+                                onChange={(e) =>
+                                  setSearchForm((prev) => ({ ...prev, fromHouseNumber: e.target.value }))
+                                }
                                 placeholder="Enter house number"
                                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#6371BE] focus:border-[#6371BE]"
                               />
@@ -774,7 +781,7 @@ export default function QuotePage() {
                                 id="fromStreet"
                                 type="text"
                                 value={searchForm.fromStreet || ""}
-                                onChange={(e) => handleSearchFormChange("fromStreet", e.target.value)}
+                                onChange={(e) => setSearchForm((prev) => ({ ...prev, fromStreet: e.target.value }))}
                                 placeholder="Enter street name"
                                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#6371BE] focus:border-[#6371BE]"
                               />
@@ -806,7 +813,7 @@ export default function QuotePage() {
                                 id="fromCity"
                                 type="text"
                                 value={searchForm.fromCity || ""}
-                                onChange={(e) => handleSearchFormChange("fromCity", e.target.value)}
+                                onChange={(e) => setSearchForm((prev) => ({ ...prev, fromCity: e.target.value }))}
                                 placeholder="Auto-filled from ZIP"
                                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#6371BE] focus:border-[#6371BE] bg-gray-50"
                                 readOnly
@@ -819,7 +826,7 @@ export default function QuotePage() {
                               <select
                                 id="fromState"
                                 value={searchForm.fromState || ""}
-                                onChange={(e) => handleSearchFormChange("fromState", e.target.value)}
+                                onChange={(e) => setSearchForm((prev) => ({ ...prev, fromState: e.target.value }))}
                                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#6371BE] focus:border-[#6371BE] bg-gray-50"
                                 disabled
                               >
@@ -875,7 +882,7 @@ export default function QuotePage() {
                                 id="toHouseNumber"
                                 type="text"
                                 value={searchForm.toHouseNumber || ""}
-                                onChange={(e) => handleSearchFormChange("toHouseNumber", e.target.value)}
+                                onChange={(e) => setSearchForm((prev) => ({ ...prev, toHouseNumber: e.target.value }))}
                                 placeholder="Enter house number"
                                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#6371BE] focus:border-[#6371BE]"
                               />
@@ -888,7 +895,7 @@ export default function QuotePage() {
                                 id="toStreet"
                                 type="text"
                                 value={searchForm.toStreet || ""}
-                                onChange={(e) => handleSearchFormChange("toStreet", e.target.value)}
+                                onChange={(e) => setSearchForm((prev) => ({ ...prev, toStreet: e.target.value }))}
                                 placeholder="Enter street name"
                                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#6371BE] focus:border-[#6371BE]"
                               />
@@ -920,7 +927,7 @@ export default function QuotePage() {
                                 id="toCity"
                                 type="text"
                                 value={searchForm.toCity || ""}
-                                onChange={(e) => handleSearchFormChange("toCity", e.target.value)}
+                                onChange={(e) => setSearchForm((prev) => ({ ...prev, toCity: e.target.value }))}
                                 placeholder="Auto-filled from ZIP"
                                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#6371BE] focus:border-[#6371BE] bg-gray-50"
                                 readOnly
@@ -933,7 +940,7 @@ export default function QuotePage() {
                               <select
                                 id="toState"
                                 value={searchForm.toState || ""}
-                                onChange={(e) => handleSearchFormChange("toState", e.target.value)}
+                                onChange={(e) => setSearchForm((prev) => ({ ...prev, toState: e.target.value }))}
                                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#6371BE] focus:border-[#6371BE] bg-gray-50"
                                 disabled
                               >
@@ -961,7 +968,7 @@ export default function QuotePage() {
 
                     <div className="space-y-2">
                       <Label
-                        className={`text-sm font-medium ${showRequiredHints && !searchForm.pickupDate ? "text-red-600" : "text-gray-700"}`}
+                        className={`text-sm font-medium ${showRequiredHints && !searchForm.pickupStartDate ? "text-red-600" : "text-gray-700"}`}
                       >
                         Pickup date
                       </Label>
@@ -972,55 +979,19 @@ export default function QuotePage() {
                             className="w-full justify-start text-left font-normal bg-white focus:ring-2 focus:ring-[#6371BE] focus:border-[#6371BE] text-gray-700 text-sm"
                           >
                             <CalendarIcon className="mr-2 h-4 w-4 text-gray-500" />
-                            <span className={searchForm.pickupDate ? "text-gray-500" : "text-gray-500"}>
-                              {searchForm.pickupDate ? format(searchForm.pickupDate, "MM.dd.yy") : "../../.."}
-                            </span>
+                            <span className="text-gray-500">{getPickupDateDisplay}</span>
                           </Button>
                         </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0">
+                        <PopoverContent className="w-auto p-0" align="start">
                           <Calendar
-                            mode="single"
-                            selected={searchForm.pickupDate}
-                            onSelect={(date) => date && handleSearchFormChange("pickupDate", date)}
-                            disabled={(date) => date < tomorrow}
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label
-                        className={`text-sm font-medium ${showRequiredHints && !searchForm.deliveryDate ? "text-red-600" : "text-gray-700"}`}
-                      >
-                        Delivery date
-                      </Label>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            className="w-full justify-start text-left font-normal bg-white focus:ring-2 focus:ring-[#6371BE] focus:border-[#6371BE] text-gray-700 text-sm"
-                          >
-                            <CalendarIcon className="mr-2 h-4 w-4 text-gray-500" />
-                            <span className={searchForm.deliveryDate ? "text-gray-500" : "text-gray-500"}>
-                              {searchForm.deliveryDate ? format(searchForm.deliveryDate, "MM.dd.yy") : "../../.."}
-                            </span>
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0">
-                          <Calendar
-                            mode="single"
-                            selected={searchForm.deliveryDate}
-                            onSelect={(date) => date && handleSearchFormChange("deliveryDate", date)}
-                            disabled={(date) => {
-                              if (searchForm.pickupDate) {
-                                // Calculate minimum delivery date based on pickup date + distance-based days
-                                const minDeliveryDate = new Date(searchForm.pickupDate)
-                                minDeliveryDate.setDate(minDeliveryDate.getDate() + minimumDeliveryDays)
-                                return date < minDeliveryDate
-                              }
-                              return date < tomorrow
+                            mode="range"
+                            selected={{
+                              from: searchForm.pickupStartDate,
+                              to: searchForm.pickupEndDate,
                             }}
+                            onSelect={handleDateRangeChange}
+                            disabled={(date) => date < tomorrow}
+                            numberOfMonths={1}
                             initialFocus
                           />
                         </PopoverContent>
@@ -1063,7 +1034,7 @@ export default function QuotePage() {
                             <button
                               className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 focus:bg-gray-50 focus:outline-none"
                               onClick={() => {
-                                handleSearchFormChange("vehicleCondition", "Operable")
+                                setSearchForm((prev) => ({ ...prev, vehicleCondition: "Operable" }))
                                 setShowConditionDropdown(false)
                               }}
                             >
@@ -1072,7 +1043,7 @@ export default function QuotePage() {
                             <button
                               className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 focus:bg-gray-50 focus:outline-none"
                               onClick={() => {
-                                handleSearchFormChange("vehicleCondition", "Inoperable")
+                                setSearchForm((prev) => ({ ...prev, vehicleCondition: "Inoperable" }))
                                 setShowConditionDropdown(false)
                               }}
                             >
