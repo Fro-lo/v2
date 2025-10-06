@@ -239,7 +239,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ trac
           availableBookingIds: allAvailableIds.slice(0, 20),
           similarIds: similarIds.slice(0, 10),
           searchMethods: ["Exact match", "Case-insensitive match", "Partial match", "Multi-column search"],
-          sampleRows: rows.slice(0, 3).map((row) => ({ bookingId: row[0], customerName: row[1] })),
+          sampleRows: rows.slice(0, 3).map((row: string[]) => ({ bookingId: row[0], customerName: row[1] })),
         },
       })
     }
