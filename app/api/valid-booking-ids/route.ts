@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server"
 
+export const dynamic = "force-dynamic"
+
 // Include TEST123 as a valid booking ID
 const FALLBACK_BOOKING_IDS = ["TEST123"]
 
