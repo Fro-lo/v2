@@ -86,9 +86,9 @@ const mockBookingDetails: BookingDetails = {
   ],
 }
 
-export async function GET(request: Request, { params }: { params: { trackingId: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ trackingId: string }> }) {
   try {
-    const { trackingId } = params
+    const { trackingId } = await params
     const SHEET_ID = "1xd9wUqiLfJVjer9ocWC-ez8U1NNT8mK8TqZekeeKLLo"
     const API_KEY = process.env.GOOGLE_SHEETS_API_KEY
 
@@ -330,7 +330,7 @@ export async function GET(request: Request, { params }: { params: { trackingId: 
     console.error("Error fetching booking details:", error)
 
     return NextResponse.json({
-      booking: { ...mockBookingDetails, id: params.trackingId },
+      booking: { ...mockBookingDetails, id: "ERROR" },
       source: "mock",
       error: error instanceof Error ? error.message : "Unknown error",
     })
