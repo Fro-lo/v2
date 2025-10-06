@@ -20,7 +20,7 @@ export function usePricing(
   const [isCalculating, setIsCalculating] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const { zipDatabase } = useZipLookup()
+  const { database: zipDatabase } = useZipLookup()
 
   useEffect(() => {
     const calculatePricing = async () => {

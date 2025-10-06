@@ -112,5 +112,6 @@ export function useZipLookup() {
     getCacheInfo,
     isLoading,
     error,
+    database, // Expose the database instance
   }
 }
