@@ -454,7 +454,7 @@ export default function BookingPage() {
                             <Checkbox
                               id="from-residential"
                               checked={shipFromResidential}
-                              onCheckedChange={setShipFromResidential}
+                              onCheckedChange={(checked) => setShipFromResidential(checked === true)}
                             />
                             <Label htmlFor="from-residential" className="flex items-center">
                               <Home className="w-4 h-4 mr-2" />
@@ -465,7 +465,7 @@ export default function BookingPage() {
                             <Checkbox
                               id="from-business"
                               checked={!shipFromResidential}
-                              onCheckedChange={(checked) => setShipFromResidential(!checked)}
+                              onCheckedChange={(checked) => setShipFromResidential(checked !== true)}
                             />
                             <Label htmlFor="from-business" className="flex items-center">
                               <Building2 className="w-4 h-4 mr-2" />
@@ -546,7 +546,7 @@ export default function BookingPage() {
                             <Checkbox
                               id="to-residential"
                               checked={shipToResidential}
-                              onCheckedChange={setShipToResidential}
+                              onCheckedChange={(checked) => setShipToResidential(checked === true)}
                             />
                             <Label htmlFor="to-residential" className="flex items-center">
                               <Home className="w-4 h-4 mr-2" />
@@ -557,7 +557,7 @@ export default function BookingPage() {
                             <Checkbox
                               id="to-business"
                               checked={!shipToResidential}
-                              onCheckedChange={(checked) => setShipToResidential(!checked)}
+                              onCheckedChange={(checked) => setShipToResidential(checked !== true)}
                             />
                             <Label htmlFor="to-business" className="flex items-center">
                               <Building2 className="w-4 h-4 mr-2" />
