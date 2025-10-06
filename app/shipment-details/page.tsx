@@ -608,14 +608,15 @@ export default function BookingPage() {
                                 value={contactPhone}
                                 placeholder="+1 (555) 123-4567"
                                 onFocus={(e) => {
+                                  const target = e.target as HTMLInputElement
                                   if (!contactPhone || contactPhone === "") {
                                     setContactPhone("+1 ")
                                     setTimeout(() => {
-                                      e.target.setSelectionRange(3, 3)
+                                      target.setSelectionRange(3, 3)
                                     }, 0)
                                   } else if (contactPhone === "+1 ") {
                                     setTimeout(() => {
-                                      e.target.setSelectionRange(3, 3)
+                                      target.setSelectionRange(3, 3)
                                     }, 0)
                                   }
                                 }}
@@ -645,8 +646,8 @@ export default function BookingPage() {
                                   setContactPhone(formatted)
                                 }}
                                 onKeyDown={(e) => {
-                                  const cursorPosition = e.target.selectionStart
-
+                                  const target = e.target as HTMLInputElement
+                                  const cursorPosition = target.selectionStart
                                   // Prevent deletion of "+1 " prefix
                                   if ((e.key === "Backspace" || e.key === "Delete") && cursorPosition <= 3) {
                                     e.preventDefault()
