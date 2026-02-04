@@ -28,11 +28,17 @@ export class GoogleSheetsVehicleService {
 
   async fetchVehicleData(): Promise<GoogleSheetsVehicleModel[]> {
     try {
-      console.log("Attempting to fetch vehicle data from your Google Sheets...")
+      console.log("[Google Sheets] 🚗 Начало загрузки данных о транспортных средствах")
+      console.log("[Google Sheets] 📊 Конфигурация:", {
+        spreadsheetId: this.config.spreadsheetId,
+        gid: this.config.gid,
+        range: this.config.range,
+      })
 
       // Check if we have cached data that's still fresh
       if (this.lastFetch && Date.now() - this.lastFetch.getTime() < this.CACHE_DURATION && this.vehicleCache.size > 0) {
-        console.log("Using cached vehicle data")
+        const cacheAge = Math.round((Date.now() - this.lastFetch.getTime()) / 1000)
+        console.log("[Google Sheets] ✅ Используются кэшированные данные (возраст:", cacheAge, "сек, записей:", this.vehicleCache.size, ")")
         return Array.from(this.vehicleCache.values())
       }
 
@@ -43,18 +49,31 @@ export class GoogleSheetsVehicleService {
         `https://docs.google.com/spreadsheets/d/e/2PACX-1vS${this.config.spreadsheetId}/pub?gid=${this.config.gid}&single=true&output=csv`
       ]
 
-      for (const csvUrl of csvUrls) {
+      console.log("[Google Sheets] 🔗 Попытка загрузки из Google Sheets через CSV export")
+      console.log("[Google Sheets] 📋 Будет проверено", csvUrls.length, "варианта URL")
+
+      for (let i = 0; i < csvUrls.length; i++) {
+        const csvUrl = csvUrls[i]
         try {
-          console.log("Trying CSV export:", csvUrl)
+          console.log(`[Google Sheets] 🔄 Попытка ${i + 1}/${csvUrls.length}:`, csvUrl)
+          const fetchStartTime = Date.now()
+          
           const response = await fetch(csvUrl, {
             headers: {
               Accept: "text/csv,text/plain,*/*",
             },
           })
 
+          const fetchDuration = Date.now() - fetchStartTime
+          console.log(`[Google Sheets] ⏱️  Время запроса: ${fetchDuration}мс, статус: ${response.status}`)
+
           if (response.ok) {
             const csvText = await response.text()
-            console.log("Vehicle CSV data received, length:", csvText.length)
+            console.log("[Google Sheets] ✅ CSV данные получены:", {
+              размер: csvText.length,
+              "символов": csvText.length,
+              "строк (приблизительно)": csvText.split("\n").length,
+            })
 
             if (
               csvText.includes(",") &&
@@ -63,46 +82,69 @@ export class GoogleSheetsVehicleService {
               !csvText.includes("Sorry, the file") &&
               !csvText.includes("requested does not exist")
             ) {
+              console.log("[Google Sheets] ✅ CSV данные валидны, начинаю парсинг...")
+              const parseStartTime = Date.now()
               const parsedData = this.parseCSVData(csvText)
-              console.log("Parsed vehicle models from your sheet:", parsedData.length)
+              const parseDuration = Date.now() - parseStartTime
+              
+              console.log("[Google Sheets] ✅ Парсинг завершен:", {
+                "время парсинга": `${parseDuration}мс`,
+                "найдено моделей": parsedData.length,
+                "источник": `URL ${i + 1}`,
+              })
 
               if (parsedData.length > 0) {
                 // Update cache
+                console.log("[Google Sheets] 💾 Обновление кэша...")
                 this.vehicleCache.clear()
                 parsedData.forEach((vehicle, index) =>
                   this.vehicleCache.set(`${vehicle.make}-${vehicle.model}-${index}`, vehicle),
                 )
                 this.lastFetch = new Date()
+                console.log("[Google Sheets] ✅ Кэш обновлен, сохранено записей:", this.vehicleCache.size)
+                console.log("[Google Sheets] 📊 Примеры загруженных моделей:", parsedData.slice(0, 3).map(v => `${v.make} ${v.model}`))
                 return parsedData
+              } else {
+                console.warn("[Google Sheets] ⚠️  CSV валиден, но после парсинга данных не найдено")
               }
             } else {
-              console.warn("Received error page or invalid CSV data from:", csvUrl)
+              console.warn("[Google Sheets] ⚠️  Получена страница ошибки или невалидные CSV данные от:", csvUrl)
             }
           } else {
-            console.warn(`CSV fetch failed with status: ${response.status} for URL: ${csvUrl}`)
+            console.warn(`[Google Sheets] ❌ Запрос CSV не удался, статус: ${response.status} для URL: ${csvUrl}`)
           }
         } catch (csvError) {
-          console.warn("CSV fetch error for URL:", csvUrl, csvError)
+          console.error(`[Google Sheets] ❌ Ошибка при запросе CSV для URL ${i + 1}:`, csvError)
         }
       }
 
+      console.error("[Google Sheets] ❌ Не удалось получить доступ к данным Google Sheets. Убедитесь, что таблица опубликована как CSV.")
       throw new Error("Unable to access your Google Sheets data. Please ensure the sheet is published as CSV.")
     } catch (error) {
-      console.error("Error fetching vehicle data:", error)
+      console.error("[Google Sheets] ❌ Критическая ошибка при загрузке данных о транспортных средствах:", error)
       throw error
     }
   }
 
   private parseCSVData(csvText: string): GoogleSheetsVehicleModel[] {
+    console.log("[Google Sheets] 🔍 Начало парсинга CSV данных...")
     const lines = csvText.split("\n").filter((line) => line.trim())
-    if (lines.length < 2) return []
+    
+    if (lines.length < 2) {
+      console.warn("[Google Sheets] ⚠️  Недостаточно строк в CSV (минимум 2: заголовок + данные)")
+      return []
+    }
 
     const headers = this.parseCSVLine(lines[0]).map((h) => h.toLowerCase().trim())
     const rows = lines.slice(1).map((line) => this.parseCSVLine(line))
 
-    console.log("Headers found in your sheet:", headers)
-    console.log("Sample row from your sheet:", rows[0])
-    console.log(`Processing ${rows.length} vehicle records from your Google Sheets`)
+    console.log("[Google Sheets] 📋 Структура данных:", {
+      "всего строк": lines.length,
+      "заголовок": headers,
+      "строк данных": rows.length,
+      "пример первой строки": rows[0]?.slice(0, 5),
+    })
+    console.log(`[Google Sheets] 🔄 Обработка ${rows.length} записей о транспортных средствах из Google Sheets`)
 
     // Group vehicles by make and model to collect all available years
     const vehicleGroups = new Map<string, {
@@ -199,8 +241,13 @@ export class GoogleSheetsVehicleService {
         }
       })
 
+    console.log("[Google Sheets] 📊 Группировка завершена:", {
+      "уникальных групп": vehicleGroups.size,
+      "всего обработано строк": rows.length,
+    })
+
     // Convert grouped data to final format
-    return Array.from(vehicleGroups.values()).map((group) => {
+    const result = Array.from(vehicleGroups.values()).map((group) => {
       const categoryDefaults: Record<string, { icon: string; transport: "open" | "enclosed" }> = {
         luxury: { icon: "✨", transport: "enclosed" },
         sedan: { icon: "🚗", transport: "open" },
@@ -247,6 +294,13 @@ export class GoogleSheetsVehicleService {
         icon: defaults.icon,
       } as GoogleSheetsVehicleModel
     })
+
+    console.log("[Google Sheets] ✅ Парсинг завершен успешно:", {
+      "итоговых моделей": result.length,
+      "примеры": result.slice(0, 3).map(v => `${v.make} ${v.model} (${v.category})`),
+    })
+
+    return result
   }
 
   // Map categories from your sheet to our standard categories

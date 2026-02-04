@@ -25,31 +25,45 @@ export function useGoogleSheetsVehicles() {
     setError(null)
     
     try {
-      console.log("Fetching vehicles from your Google Sheets...")
+      console.log("[Google Sheets] 🚗 Hook: Начало загрузки транспортных средств")
+      console.log("[Google Sheets] 📊 Конфигурация hook:", VEHICLE_SHEETS_CONFIG)
+      
+      const fetchStartTime = Date.now()
       const vehicleData = await vehicleService.fetchVehicleData()
+      const fetchDuration = Date.now() - fetchStartTime
+      
+      console.log("[Google Sheets] ⏱️  Hook: Загрузка завершена за", `${fetchDuration}мс`)
       
       if (vehicleData && vehicleData.length > 0) {
         setVehicles(vehicleData)
         setLastFetch(new Date())
-        console.log(`Successfully loaded ${vehicleData.length} vehicles from your Google Sheets`)
+        console.log(`[Google Sheets] ✅ Hook: Успешно загружено ${vehicleData.length} транспортных средств`)
         
         // Log sample data for verification
-        console.log("Sample vehicles from your sheet:", vehicleData.slice(0, 5))
+        console.log("[Google Sheets] 📋 Hook: Примеры загруженных моделей:", vehicleData.slice(0, 5).map(v => ({
+          make: v.make,
+          model: v.model,
+          category: v.category,
+          years: v.years,
+        })))
       } else {
+        console.error("[Google Sheets] ❌ Hook: Данные не получены из Google Sheets")
         throw new Error("No vehicle data received from your Google Sheets")
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Unknown error occurred"
-      console.error("Failed to fetch vehicles from your Google Sheets:", errorMessage)
+      console.error("[Google Sheets] ❌ Hook: Ошибка при загрузке транспортных средств:", errorMessage)
       setError(`Google Sheets Connection Error: ${errorMessage}`)
       
       // Fall back to mock data
-      console.log("Using fallback mock data...")
+      console.log("[Google Sheets] 🔄 Hook: Использование mock данных...")
       const mockData = await vehicleService.getMockData()
       setVehicles(mockData)
       setLastFetch(new Date())
+      console.log("[Google Sheets] ✅ Hook: Загружено", mockData.length, "mock моделей")
     } finally {
       setIsLoading(false)
+      console.log("[Google Sheets] ✅ Hook: Загрузка завершена, isLoading = false")
     }
   }
 

@@ -89,6 +89,8 @@ const mockBookingDetails: BookingDetails = {
 export async function GET(request: Request, { params }: { params: Promise<{ trackingId: string }> }) {
   try {
     const { trackingId } = await params
+    console.log("[Google Sheets] 🔍 API: Поиск бронирования по ID:", trackingId)
+    
     const SHEET_ID = "1xd9wUqiLfJVjer9ocWC-ez8U1NNT8mK8TqZekeeKLLo"
     const API_KEY = process.env.GOOGLE_SHEETS_API_KEY
 
@@ -96,9 +98,16 @@ export async function GET(request: Request, { params }: { params: Promise<{ trac
     const POSSIBLE_SHEET_NAMES = ["Sheet1", "Sheet2", "Bookings", "Data", "Main"]
     const RANGE = "A:T" // Covers all your columns (A-T = 20 columns)
 
+    console.log("[Google Sheets] 📊 API: Конфигурация:", {
+      SHEET_ID,
+      "API_KEY (настроен)": !!API_KEY,
+      "возможные листы": POSSIBLE_SHEET_NAMES,
+      RANGE,
+    })
+
     // If no API key, return mock data
     if (!API_KEY) {
-      console.log("No Google Sheets API key provided, using mock data")
+      console.log("[Google Sheets] ⚠️  API: Google Sheets API key не настроен, используется mock данные")
       return NextResponse.json({
         booking: { ...mockBookingDetails, id: trackingId },
         source: "mock",
@@ -111,17 +120,25 @@ export async function GET(request: Request, { params }: { params: Promise<{ trac
     let usedSheetName = ""
     let allAvailableIds: string[] = []
 
-    for (const sheetName of POSSIBLE_SHEET_NAMES) {
+    console.log("[Google Sheets] 🔄 API: Попытка загрузки из", POSSIBLE_SHEET_NAMES.length, "возможных листов...")
+
+    for (let i = 0; i < POSSIBLE_SHEET_NAMES.length; i++) {
+      const sheetName = POSSIBLE_SHEET_NAMES[i]
       try {
         const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${sheetName}!${RANGE}?key=${API_KEY}`
-        console.log(`Trying to fetch from sheet: ${sheetName}`)
+        console.log(`[Google Sheets] 🔗 API: Попытка ${i + 1}/${POSSIBLE_SHEET_NAMES.length} - лист "${sheetName}"`)
+        console.log(`[Google Sheets] 🔗 API: URL:`, url.replace(API_KEY, "API_KEY_HIDDEN"))
 
+        const fetchStartTime = Date.now()
         const response = await fetch(url, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
           },
         })
+        const fetchDuration = Date.now() - fetchStartTime
+
+        console.log(`[Google Sheets] ⏱️  API: Время запроса: ${fetchDuration}мс, статус: ${response.status}`)
 
         if (response.ok) {
           const sheetData = await response.json()
@@ -136,21 +153,23 @@ export async function GET(request: Request, { params }: { params: Promise<{ trac
               .filter((id: string) => id && id.toString().trim() !== "")
               .map((id: string) => id.toString().trim())
 
-            console.log(`Successfully fetched from sheet: ${sheetName}`)
-            console.log(`Found ${allAvailableIds.length} booking IDs`)
+            console.log(`[Google Sheets] ✅ API: Успешно загружено из листа "${sheetName}"`)
+            console.log(`[Google Sheets] 📊 API: Найдено ${allAvailableIds.length} ID бронирований`)
             break
+          } else {
+            console.log(`[Google Sheets] ⚠️  API: Лист "${sheetName}" пуст или не содержит данных`)
           }
         } else {
-          console.log(`Failed to fetch from sheet ${sheetName}: ${response.status}`)
+          console.log(`[Google Sheets] ❌ API: Не удалось загрузить лист "${sheetName}", статус: ${response.status}`)
         }
       } catch (error) {
-        console.log(`Error fetching from sheet ${sheetName}:`, error)
+        console.error(`[Google Sheets] ❌ API: Ошибка при загрузке листа "${sheetName}":`, error)
         continue
       }
     }
 
     if (!data) {
-      console.error("Could not fetch from any sheet")
+      console.error("[Google Sheets] ❌ API: Не удалось загрузить данные ни из одного листа")
       return NextResponse.json({
         booking: { ...mockBookingDetails, id: trackingId },
         source: "mock",
@@ -160,6 +179,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ trac
 
     // Parse the spreadsheet data
     if (!data.values || data.values.length === 0) {
+      console.error("[Google Sheets] ❌ API: Лист не содержит данных")
       return NextResponse.json({
         booking: { ...mockBookingDetails, id: trackingId },
         source: "mock",
@@ -168,10 +188,13 @@ export async function GET(request: Request, { params }: { params: Promise<{ trac
       })
     }
 
-    console.log("Spreadsheet structure:")
-    console.log("Headers found:", data.values[0])
-    console.log(`Total rows: ${data.values.length - 1}`)
-    console.log(`Available booking IDs: ${allAvailableIds.slice(0, 10).join(", ")}...`)
+    console.log("[Google Sheets] 📊 API: Структура таблицы:", {
+      "используемый лист": usedSheetName,
+      "заголовки": data.values[0],
+      "всего строк": data.values.length - 1,
+      "доступные ID (первые 10)": allAvailableIds.slice(0, 10).join(", "),
+      "всего ID": allAvailableIds.length,
+    })
 
     const headers = data.values[0] || []
     const rows = data.values.slice(1)
@@ -180,10 +203,14 @@ export async function GET(request: Request, { params }: { params: Promise<{ trac
     let bookingRow = null
     let matchMethod = ""
 
+    console.log("[Google Sheets] 🔍 API: Поиск бронирования с ID:", trackingId)
+    console.log("[Google Sheets] 📋 API: Всего строк для поиска:", rows.length)
+
     // Method 1: Exact match (case-sensitive)
     bookingRow = rows.find((row: string[]) => row[0] && row[0].toString().trim() === trackingId)
     if (bookingRow) {
       matchMethod = "exact"
+      console.log("[Google Sheets] ✅ API: Найдено точное совпадение (case-sensitive)")
     }
 
     // Method 2: Case-insensitive match
@@ -193,6 +220,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ trac
       )
       if (bookingRow) {
         matchMethod = "case-insensitive"
+        console.log("[Google Sheets] ✅ API: Найдено совпадение (case-insensitive)")
       }
     }
 
@@ -203,6 +231,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ trac
       )
       if (bookingRow) {
         matchMethod = "partial"
+        console.log("[Google Sheets] ✅ API: Найдено частичное совпадение")
       }
     }
 
@@ -221,11 +250,14 @@ export async function GET(request: Request, { params }: { params: Promise<{ trac
     }
 
     if (!bookingRow) {
+      console.log("[Google Sheets] ❌ API: Бронирование не найдено")
       // Find similar booking IDs for suggestions
       const similarIds = allAvailableIds.filter(
         (id) =>
           id.toUpperCase().includes(trackingId.toUpperCase()) || trackingId.toUpperCase().includes(id.toUpperCase()),
       )
+
+      console.log("[Google Sheets] 💡 API: Похожие ID:", similarIds.slice(0, 10))
 
       return NextResponse.json({
         booking: null,
@@ -250,6 +282,9 @@ export async function GET(request: Request, { params }: { params: Promise<{ trac
         ? bookingRow[index].toString().trim()
         : defaultValue
     }
+
+    console.log("[Google Sheets] ✅ API: Бронирование найдено методом:", matchMethod)
+    console.log("[Google Sheets] 📋 API: Строка данных:", bookingRow.slice(0, 10))
 
     // Map the row data to booking details using exact column positions
     const bookingDetails: BookingDetails = {
@@ -312,7 +347,14 @@ export async function GET(request: Request, { params }: { params: Promise<{ trac
       ],
     }
 
-    console.log(`Successfully loaded booking details for ${trackingId} using ${matchMethod} match`)
+    console.log(`[Google Sheets] ✅ API: Успешно загружены детали бронирования для ${trackingId}, метод поиска: ${matchMethod}`)
+    console.log(`[Google Sheets] 📊 API: Детали бронирования:`, {
+      id: bookingDetails.id,
+      customerName: bookingDetails.customerName,
+      status: bookingDetails.status,
+      pickupDate: bookingDetails.pickupDate,
+      estimatedDelivery: bookingDetails.estimatedDelivery,
+    })
 
     return NextResponse.json({
       booking: bookingDetails,
@@ -327,7 +369,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ trac
       },
     })
   } catch (error) {
-    console.error("Error fetching booking details:", error)
+    console.error("[Google Sheets] ❌ API: Критическая ошибка при загрузке деталей бронирования:", error)
 
     return NextResponse.json({
       booking: { ...mockBookingDetails, id: "ERROR" },

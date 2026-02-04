@@ -34,6 +34,8 @@ export class GoogleSheetsCarrierService {
 
   async fetchCarrierData(): Promise<CarrierData[]> {
     try {
+      console.log("[Google Sheets] 🚚 Начало загрузки данных о перевозчиках")
+      
       // Use the hardcoded spreadsheet ID and GID that were working before
       const actualSpreadsheetId =
         this.spreadsheetId === "fallback" ? "1LLjbVWiTawNgel1Ybpv3SsL9FRtSY3SM2tDUmq_dl98" : this.spreadsheetId
@@ -41,34 +43,70 @@ export class GoogleSheetsCarrierService {
 
       const csvUrl = `https://docs.google.com/spreadsheets/d/${actualSpreadsheetId}/export?format=csv&gid=${actualGid}`
 
-      console.log("Fetching carrier data from:", csvUrl)
+      console.log("[Google Sheets] 📊 Конфигурация перевозчиков:", {
+        "spreadsheetId (исходный)": this.spreadsheetId,
+        "spreadsheetId (используемый)": actualSpreadsheetId,
+        "gid (исходный)": this.gid,
+        "gid (используемый)": actualGid,
+        "URL": csvUrl,
+      })
+
+      console.log("[Google Sheets] 🔗 Запрос данных перевозчиков из:", csvUrl)
+      const fetchStartTime = Date.now()
 
       const response = await fetch(csvUrl)
+      const fetchDuration = Date.now() - fetchStartTime
+      
+      console.log("[Google Sheets] ⏱️  Время запроса:", `${fetchDuration}мс, статус:`, response.status)
+      
       if (!response.ok) {
+        console.error("[Google Sheets] ❌ Ошибка при запросе данных перевозчиков, статус:", response.status)
         throw new Error(`Failed to fetch carrier data: ${response.status}`)
       }
 
       const csvText = await response.text()
+      console.log("[Google Sheets] ✅ CSV данные получены:", {
+        "размер": csvText.length,
+        "символов": csvText.length,
+      })
+      
+      const parseStartTime = Date.now()
       const rows = this.parseCSV(csvText)
+      const parseDuration = Date.now() - parseStartTime
+
+      console.log("[Google Sheets] ✅ CSV распарсен:", {
+        "время парсинга": `${parseDuration}мс`,
+        "всего строк": rows.length,
+      })
 
       if (rows.length === 0) {
+        console.error("[Google Sheets] ❌ В таблице не найдено данных")
         throw new Error("No data found in the spreadsheet")
       }
 
       // Get headers from first row
       const headers = rows[0].map((header) => header.trim().toLowerCase())
-      console.log("CSV Headers:", headers)
+      console.log("[Google Sheets] 📋 Заголовки CSV:", headers)
+      console.log("[Google Sheets] 📊 Структура данных:", {
+        "заголовков": headers.length,
+        "строк данных": rows.length - 1,
+      })
 
       // Process data rows
+      console.log("[Google Sheets] 🔄 Начало обработки строк данных перевозчиков...")
       const carrierData: CarrierData[] = []
+      let processedCount = 0
+      let skippedCount = 0
 
       for (let i = 1; i < rows.length; i++) {
         const row = rows[i]
         if (row.length === 0 || row.every((cell) => !cell.trim())) {
+          skippedCount++
           continue // Skip empty rows
         }
 
         try {
+          processedCount++
           const carrier: CarrierData = {
             id: this.getCellValue(row, headers, "id") || `carrier-${i}`,
             companyName:
@@ -153,21 +191,36 @@ export class GoogleSheetsCarrierService {
           }
 
           // Add debugging for price calculation fields
-          console.log(
-            `Carrier ${i} - Company: "${carrier.companyName}", Vehicle Type: "${carrier.vehicleType}", Price Per Mile: ${carrier.pricePerMile}, Base Price: ${carrier.basePrice}`,
-          )
+          if (processedCount <= 3 || i === rows.length - 1) {
+            console.log(
+              `[Google Sheets] 📝 Перевозчик ${i}:`,
+              {
+                "Компания": carrier.companyName,
+                "Тип транспорта": carrier.vehicleType,
+                "Цена за милю": carrier.pricePerMile,
+                "Базовая цена": carrier.basePrice,
+                "Цена": carrier.price,
+                "Рейтинг": carrier.rating,
+              }
+            )
+          }
 
           carrierData.push(carrier)
         } catch (error) {
-          console.warn(`Error processing row ${i}:`, error)
+          console.warn(`[Google Sheets] ⚠️  Ошибка обработки строки ${i}:`, error)
           continue
         }
       }
 
-      console.log(`Successfully processed ${carrierData.length} carriers`)
+      console.log("[Google Sheets] ✅ Обработка завершена:", {
+        "успешно обработано": carrierData.length,
+        "пропущено пустых": skippedCount,
+        "всего строк": rows.length - 1,
+      })
+      
       return carrierData
     } catch (error) {
-      console.error("Error fetching carrier data from Google Sheets:", error)
+      console.error("[Google Sheets] ❌ Критическая ошибка при загрузке данных перевозчиков:", error)
       throw error
     }
   }

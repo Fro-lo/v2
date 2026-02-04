@@ -197,23 +197,49 @@ export function useCarrierData(
     setError(null)
 
     try {
-      // Use the GoogleSheetsCarrierService to fetch data from your specific sheet
-      const carrierService = new GoogleSheetsCarrierService({
-        spreadsheetId: process.env.NEXT_PUBLIC_CARRIER_SPREADSHEET_ID || "1LLjbVWiTawNgel1Ybpv3SsL9FRtSY3SM2tDUmq_dl98",
-        gid: process.env.NEXT_PUBLIC_CARRIER_SHEET_GID || "1327223389",
+      console.log("[Google Sheets] 🚚 Hook: Начало загрузки данных перевозчиков")
+      console.log("[Google Sheets] 📊 Hook: Параметры запроса:", {
+        fromState,
+        toState,
+        distance,
+        vehicleModel,
+        vehicleCondition,
+        pickupStartDate: pickupStartDate?.toISOString(),
+        vehicleCategory,
       })
 
+      // Use the GoogleSheetsCarrierService to fetch data from your specific sheet
+      const carrierServiceConfig = {
+        spreadsheetId: process.env.NEXT_PUBLIC_CARRIER_SPREADSHEET_ID || "1LLjbVWiTawNgel1Ybpv3SsL9FRtSY3SM2tDUmq_dl98",
+        gid: process.env.NEXT_PUBLIC_CARRIER_SHEET_GID || "1327223389",
+      }
+      
+      console.log("[Google Sheets] 📊 Hook: Конфигурация сервиса перевозчиков:", carrierServiceConfig)
+      
+      const carrierService = new GoogleSheetsCarrierService(carrierServiceConfig)
+
+      const fetchStartTime = Date.now()
       const carrierData = await carrierService.fetchCarrierData()
-      console.log("Fetched carrier data:", carrierData.length, "carriers")
+      const fetchDuration = Date.now() - fetchStartTime
+      
+      console.log("[Google Sheets] ✅ Hook: Данные перевозчиков загружены:", {
+        "количество": carrierData.length,
+        "время загрузки": `${fetchDuration}мс`,
+      })
 
       // Filter out carriers with "On the way" status (В пути) or similar
+      console.log("[Google Sheets] 🔍 Hook: Фильтрация перевозчиков по статусу...")
       const availableCarriers = carrierData.filter((carrier) => {
         const status = carrier.status.toLowerCase().trim()
         const excludedStatuses = ["on the way", "on way", "в пути", "в дороге", "busy", "occupied", "unavailable"]
         return !excludedStatuses.some((excluded) => status.includes(excluded))
       })
 
-      console.log("Available carriers after status filtering:", availableCarriers.length)
+      console.log("[Google Sheets] ✅ Hook: После фильтрации по статусу:", {
+        "до фильтрации": carrierData.length,
+        "после фильтрации": availableCarriers.length,
+        "отфильтровано": carrierData.length - availableCarriers.length,
+      })
 
       const processedQuotes: Quote[] = availableCarriers.map((carrier, index) => {
         // Calculate dynamic pricing based on the route and vehicle
@@ -336,9 +362,14 @@ export function useCarrierData(
       // Sort by price (lowest first)
       filteredQuotes.sort((a, b) => a.price - b.price)
 
+      console.log("[Google Sheets] ✅ Hook: Обработка завершена:", {
+        "итоговых предложений": filteredQuotes.length,
+        "диапазон цен": filteredQuotes.length > 0 ? `$${Math.min(...filteredQuotes.map(q => q.price))} - $${Math.max(...filteredQuotes.map(q => q.price))}` : "нет данных",
+      })
+
       setQuotes(filteredQuotes)
       setLastFetch(new Date())
-      console.log("Successfully processed quotes:", filteredQuotes.length)
+      console.log("[Google Sheets] ✅ Hook: Предложения сохранены в state")
     } catch (err) {
       console.error("Error fetching carrier data:", err)
       setError(err instanceof Error ? err.message : "Failed to fetch carrier data")

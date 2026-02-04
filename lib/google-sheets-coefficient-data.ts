@@ -43,22 +43,48 @@ export class GoogleSheetsCoefficientsIntegration {
 
   async fetchCoefficients(): Promise<CoefficientData[]> {
     try {
-      const csvUrl = `https://docs.google.com/spreadsheets/d/${this.spreadsheetId}/export?format=csv&gid=0`
+      console.log("[Google Sheets] 📈 Начало загрузки коэффициентов")
+      console.log("[Google Sheets] 📊 Конфигурация:", {
+        spreadsheetId: this.spreadsheetId,
+        range: this.coefficientsRange,
+      })
 
+      const csvUrl = `https://docs.google.com/spreadsheets/d/${this.spreadsheetId}/export?format=csv&gid=0`
+      console.log("[Google Sheets] 🔗 Запрос коэффициентов из:", csvUrl)
+
+      const fetchStartTime = Date.now()
       const response = await fetch(csvUrl)
+      const fetchDuration = Date.now() - fetchStartTime
+      
+      console.log("[Google Sheets] ⏱️  Время запроса:", `${fetchDuration}мс, статус:`, response.status)
+
       if (!response.ok) {
+        console.error("[Google Sheets] ❌ Ошибка при запросе коэффициентов, статус:", response.status)
         throw new Error(`Failed to fetch coefficients: ${response.status}`)
       }
 
       const csvText = await response.text()
+      console.log("[Google Sheets] ✅ CSV данные получены, размер:", csvText.length, "символов")
+      
+      const parseStartTime = Date.now()
       const rows = this.parseCSV(csvText)
+      const parseDuration = Date.now() - parseStartTime
+
+      console.log("[Google Sheets] ✅ CSV распарсен:", {
+        "время парсинга": `${parseDuration}мс`,
+        "всего строк": rows.length,
+      })
 
       if (rows.length === 0) {
+        console.error("[Google Sheets] ❌ Данные коэффициентов не найдены")
         throw new Error("No coefficient data found")
       }
 
       const headers = rows[0].map((header) => header.trim().toLowerCase())
+      console.log("[Google Sheets] 📋 Заголовки:", headers)
+      
       const coefficients: CoefficientData[] = []
+      console.log("[Google Sheets] 🔄 Обработка", rows.length - 1, "строк коэффициентов...")
 
       for (let i = 1; i < rows.length; i++) {
         const row = rows[i]
@@ -77,36 +103,68 @@ export class GoogleSheetsCoefficientsIntegration {
 
           coefficients.push(coefficient)
         } catch (error) {
-          console.warn(`Error processing coefficient row ${i}:`, error)
+          console.warn(`[Google Sheets] ⚠️  Ошибка обработки строки коэффициента ${i}:`, error)
           continue
         }
       }
 
+      console.log("[Google Sheets] ✅ Коэффициенты загружены:", {
+        "найдено": coefficients.length,
+        "примеры": coefficients.slice(0, 3).map(c => `${c.category}/${c.subcategory}: ${c.coefficient}`),
+      })
+
       return coefficients
     } catch (error) {
-      console.error("Error fetching coefficient data:", error)
+      console.error("[Google Sheets] ❌ Ошибка при загрузке коэффициентов:", error)
+      console.log("[Google Sheets] 🔄 Использование коэффициентов по умолчанию")
       return this.getDefaultCoefficients()
     }
   }
 
   async fetchCalculatorData(): Promise<CalculatorData[]> {
     try {
-      const csvUrl = `https://docs.google.com/spreadsheets/d/${this.spreadsheetId}/export?format=csv&gid=1`
+      console.log("[Google Sheets] 🧮 Начало загрузки данных калькулятора")
+      console.log("[Google Sheets] 📊 Конфигурация:", {
+        spreadsheetId: this.spreadsheetId,
+        range: this.calculatorRange,
+      })
 
+      const csvUrl = `https://docs.google.com/spreadsheets/d/${this.spreadsheetId}/export?format=csv&gid=1`
+      console.log("[Google Sheets] 🔗 Запрос данных калькулятора из:", csvUrl)
+
+      const fetchStartTime = Date.now()
       const response = await fetch(csvUrl)
+      const fetchDuration = Date.now() - fetchStartTime
+      
+      console.log("[Google Sheets] ⏱️  Время запроса:", `${fetchDuration}мс, статус:`, response.status)
+
       if (!response.ok) {
+        console.error("[Google Sheets] ❌ Ошибка при запросе данных калькулятора, статус:", response.status)
         throw new Error(`Failed to fetch calculator data: ${response.status}`)
       }
 
       const csvText = await response.text()
+      console.log("[Google Sheets] ✅ CSV данные получены, размер:", csvText.length, "символов")
+      
+      const parseStartTime = Date.now()
       const rows = this.parseCSV(csvText)
+      const parseDuration = Date.now() - parseStartTime
+
+      console.log("[Google Sheets] ✅ CSV распарсен:", {
+        "время парсинга": `${parseDuration}мс`,
+        "всего строк": rows.length,
+      })
 
       if (rows.length === 0) {
+        console.error("[Google Sheets] ❌ Данные калькулятора не найдены")
         throw new Error("No calculator data found")
       }
 
       const headers = rows[0].map((header) => header.trim().toLowerCase())
+      console.log("[Google Sheets] 📋 Заголовки:", headers)
+      
       const calculatorData: CalculatorData[] = []
+      console.log("[Google Sheets] 🔄 Обработка", rows.length - 1, "строк данных калькулятора...")
 
       for (let i = 1; i < rows.length; i++) {
         const row = rows[i]
@@ -136,14 +194,20 @@ export class GoogleSheetsCoefficientsIntegration {
 
           calculatorData.push(data)
         } catch (error) {
-          console.warn(`Error processing calculator row ${i}:`, error)
+          console.warn(`[Google Sheets] ⚠️  Ошибка обработки строки калькулятора ${i}:`, error)
           continue
         }
       }
 
+      console.log("[Google Sheets] ✅ Данные калькулятора загружены:", {
+        "найдено": calculatorData.length,
+        "примеры": calculatorData.slice(0, 3).map(c => `${c.distanceRange}: база ${c.baseRate}, за милю ${c.perMileRate}`),
+      })
+
       return calculatorData
     } catch (error) {
-      console.error("Error fetching calculator data:", error)
+      console.error("[Google Sheets] ❌ Ошибка при загрузке данных калькулятора:", error)
+      console.log("[Google Sheets] 🔄 Использование данных калькулятора по умолчанию")
       return this.getDefaultCalculatorData()
     }
   }

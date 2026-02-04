@@ -4,8 +4,10 @@ import type React from "react"
 
 import Image from "next/image"
 import Link from "next/link"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
+import { loadStripe } from "@stripe/stripe-js"
+import { Elements } from "@stripe/react-stripe-js"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -13,6 +15,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
+import { StripePaymentForm } from "@/components/stripe-payment-form"
 
 import {
   CheckCircle,
@@ -33,10 +36,25 @@ import {
   Check,
 } from "lucide-react"
 
+// Инициализируем Stripe (ключ будет загружен из переменных окружения)
+let stripePromise: ReturnType<typeof loadStripe> | null = null
+
+const getStripe = () => {
+  if (!stripePromise) {
+    const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+    if (publishableKey) {
+      stripePromise = loadStripe(publishableKey)
+    }
+  }
+  return stripePromise
+}
+
 export default function BookingPage() {
   const [selectedPayment, setSelectedPayment] = useState("credit-card")
   const [selectedSplitOption, setSelectedSplitOption] = useState("")
   const [customSplit, setCustomSplit] = useState({ now: "", delivery: "" })
+  const [clientSecret, setClientSecret] = useState<string | null>(null)
+  const [paymentError, setPaymentError] = useState<string | null>(null)
 
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -82,10 +100,64 @@ export default function BookingPage() {
 
   // Price parameter - from /shipment-details page
   const totalPrice = searchParams.get("total") || "2200"
+  const priceAmount = parseFloat(totalPrice.replace("$", "").replace(",", "")) || 0
 
   // Construct full addresses
   const shipFrom = `${shipFromHouseNumber} ${shipFromStreetName}, ${shipFromCity}, ${shipFromState} ${shipFromPostalCode}`
   const shipTo = `${shipToHouseNumber} ${shipToStreetName}, ${shipToCity}, ${shipToState} ${shipToPostalCode}`
+
+  // Создаем Payment Intent при загрузке страницы для Credit Card
+  useEffect(() => {
+    if (selectedPayment === "credit-card" && !clientSecret) {
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 15000) // 15 секунд таймаут
+
+      fetch("/api/create-payment-intent", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          amount: 0, // $0 Due now
+          currency: "usd",
+          metadata: {
+            pickupDate,
+            deliveryDate,
+            vehicleModel,
+            totalPrice,
+          },
+        }),
+        signal: controller.signal,
+      })
+        .then((res) => {
+          clearTimeout(timeoutId)
+          if (!res.ok) {
+            return res.json().then((err) => {
+              throw new Error(err.error || `HTTP error! status: ${res.status}`)
+            })
+          }
+          return res.json()
+        })
+        .then((data) => {
+          console.log("Payment Intent created:", data)
+          if (data.clientSecret) {
+            setClientSecret(data.clientSecret)
+            setPaymentError(null)
+          } else {
+            throw new Error("No clientSecret in response")
+          }
+        })
+        .catch((error) => {
+          clearTimeout(timeoutId)
+          if (error.name === "AbortError") {
+            setPaymentError("Request timeout. Please try again.")
+          } else {
+            console.error("Error creating payment intent:", error)
+            setPaymentError(error.message || "Failed to initialize payment. Please try again.")
+          }
+        })
+    }
+  }, [selectedPayment, clientSecret, pickupDate, deliveryDate, vehicleModel, totalPrice])
 
   const splitOptions = [
     { id: "50-50", label: "50% now, 50% on delivery", popular: true },
@@ -150,6 +222,47 @@ const handleCustomSplitChange = (field: "now" | "delivery", value: string) => {
     })
 
     router.push(`/booking-confirmed?${bookingData.toString()}`)
+  }
+
+  const handleStripePaymentSuccess = (paymentIntentId: string) => {
+    // Construct URL with all booking data including payment intent ID
+    const bookingData = new URLSearchParams({
+      pickupDate,
+      deliveryDate,
+      vehicleModel,
+      fromHouseNumber: shipFromHouseNumber,
+      fromStreet: shipFromStreetName,
+      fromCity: shipFromCity,
+      fromState: shipFromState,
+      fromZip: shipFromPostalCode,
+      toHouseNumber: shipToHouseNumber,
+      toStreet: shipToStreetName,
+      toCity: shipToCity,
+      toState: shipToState,
+      toZip: shipToPostalCode,
+      finalPrice: totalPrice,
+      serviceType: "Door to Door",
+      transportType: vehicleTransportType === "open" ? "Open" : "Enclosed",
+      insurance: "Included",
+      paymentMethod: "Credit Card",
+      paymentIntentId,
+      fromAddressType: shipFromAddressType,
+      toAddressType: shipToAddressType,
+      customerName,
+      customerEmail,
+      customerPhone,
+      customerNotes,
+      contactName,
+      contactPhone,
+      specialInstructions,
+    })
+
+    router.push(`/booking-confirmed?${bookingData.toString()}`)
+  }
+
+  const handleStripePaymentError = (error: string) => {
+    setPaymentError(error)
+    console.error("Stripe payment error:", error)
   }
 
   // Input validation handlers
@@ -273,85 +386,55 @@ const handleCustomSplitChange = (field: "now" | "delivery", value: string) => {
 
                 {/* Credit-card tab */}
                 <TabsContent value="credit-card" className="space-y-6">
-                  <form onSubmit={handleBookingSubmit} className="space-y-6">
-                    <Card className="shadow-md">
-                      <CardContent className="p-6 space-y-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="card-number">Card Number *</Label>
-                          <Input
-                            id="card-number"
-                            placeholder="1234 5678 9012 3456"
-                            className="text-lg p-3 focus:ring-[#081C8B] focus:border-[#081C8B] focus-visible:ring-[#081C8B]"
-                            onChange={handleCardNumberChange}
-                            maxLength={19}
-                            required
-                            onBlur={(e) => handleInputValidation(e, "Card Number")}
-                            onInvalid={(e) => setEnglishValidationMessages(e.target as HTMLInputElement, "Card Number")}
-                          />
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label htmlFor="full-name">Full Name *</Label>
-                          <Input
-                            id="full-name"
-                            placeholder="JOHN DOE"
-                            className="p-3 focus:ring-[#081C8B] focus:border-[#081C8B] focus-visible:ring-[#081C8B]"
-                            onChange={handleFullNameChange}
-                            required
-                            onBlur={(e) => handleInputValidation(e, "Full Name")}
-                            onInvalid={(e) => setEnglishValidationMessages(e.target as HTMLInputElement, "Full Name")}
-                          />
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="expiry">Expiration Date *</Label>
-                            <Input
-                              id="expiry"
-                              placeholder="MM/YY"
-                              className="p-3 focus:ring-[#081C8B] focus:border-[#081C8B] focus-visible:ring-[#081C8B]"
-                              onChange={handleExpiryChange}
-                              maxLength={5}
-                              required
-                              onBlur={(e) => handleInputValidation(e, "Expiration Date")}
-                              onInvalid={(e) =>
-                                setEnglishValidationMessages(e.target as HTMLInputElement, "Expiration Date")
-                              }
-                            />
+                  {paymentError && (
+                    <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                      <p className="text-sm text-red-700">{paymentError}</p>
+                    </div>
+                  )}
+                  {clientSecret ? (
+                    (() => {
+                      const stripeInstance = getStripe()
+                      if (!stripeInstance) {
+                        return (
+                          <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-center">
+                            <p className="text-sm text-red-700">
+                              Stripe не инициализирован. Проверьте NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+                            </p>
                           </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="cvc">CVC *</Label>
-                            <Input
-                              id="cvc"
-                              placeholder="123"
-                              className="p-3 focus:ring-[#081C8B] focus:border-[#081C8B] focus-visible:ring-[#081C8B]"
-                              onChange={handleCvcChange}
-                              maxLength={3}
-                              required
-                              onBlur={(e) => handleInputValidation(e, "CVC")}
-                              onInvalid={(e) => setEnglishValidationMessages(e.target as HTMLInputElement, "CVC")}
-                            />
-                          </div>
-                        </div>
-
-                        <div className="flex items-center space-x-2 p-4 bg-green-50 rounded-lg border border-green-200">
-                          <Lock className="w-5 h-5 text-green-600" />
-                          <p className="text-sm text-green-700">
-                            <strong>$0 Due now</strong> — Your card won't be charged until the order is assigned to a
-                            carrier.
-                          </p>
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    <Button
-                      type="submit"
-                      className="w-full bg-[#044BD9] hover:bg-[#033ba8] text-white py-3 text-lg font-semibold"
-                      size="lg"
-                    >
-                      Book Shipment
-                    </Button>
-                  </form>
+                        )
+                      }
+                      return (
+                        <Elements
+                          stripe={stripeInstance}
+                          options={{
+                            clientSecret,
+                            appearance: {
+                              theme: "stripe",
+                              variables: {
+                                colorPrimary: "#044BD9",
+                                colorBackground: "#ffffff",
+                                colorText: "#262626",
+                                colorDanger: "#df1b41",
+                                fontFamily: "system-ui, sans-serif",
+                                spacingUnit: "4px",
+                                borderRadius: "8px",
+                              },
+                            },
+                          }}
+                        >
+                          <StripePaymentForm
+                            amount={0}
+                            onSuccess={handleStripePaymentSuccess}
+                            onError={handleStripePaymentError}
+                          />
+                        </Elements>
+                      )
+                    })()
+                  ) : (
+                    <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg text-center">
+                      <p className="text-sm text-gray-600">Loading payment form...</p>
+                    </div>
+                  )}
                 </TabsContent>
 
                 {/* PayPal tab */}
