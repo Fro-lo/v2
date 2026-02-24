@@ -2,10 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
   Star,
   Shield,
@@ -23,16 +21,13 @@ import {
 import Link from "next/link"
 import Image from "next/image"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { HeroSearchForm } from "@/components/hero-search-form"
+import { FitText } from "@/components/fit-text"
 
 export default function VehiclerLanding() {
-  const [isFormHighlighted, setIsFormHighlighted] = useState(false)
   const [currentReview, setCurrentReview] = useState(0)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isMobileServicesOpen, setIsMobileServicesOpen] = useState(false)
-  const [validZipCodes, setValidZipCodes] = useState<Set<string>>(new Set())
-  const [isLoadingZipCodes, setIsLoadingZipCodes] = useState(true)
-  const [fromZipError, setFromZipError] = useState("")
-  const [toZipError, setToZipError] = useState("")
 
   /* NEW — track if viewport is mobile (< 768 px) */
   const [isMobile, setIsMobile] = useState(typeof window !== "undefined" ? window.innerWidth < 768 : false)
@@ -43,74 +38,6 @@ export default function VehiclerLanding() {
     window.addEventListener("resize", handleResize)
     return () => window.removeEventListener("resize", handleResize)
   }, [])
-
-  // Fetch valid zip codes from Google Sheets CSV
-  useEffect(() => {
-    const fetchZipCodes = async () => {
-      try {
-        const response = await fetch(
-          "https://docs.google.com/spreadsheets/d/e/2PACX-1vSCnFQw84MIpe3D8sMUtAfwWC7zzIBy-KRs3LbgO7gosWbBi-UM_5s2P987gDLe5BC3PZAthS2SSbee/pub?output=csv",
-        )
-        const csvText = await response.text()
-
-        // Parse CSV and extract zip codes from the first column
-        const lines = csvText.split("\n")
-        const zipCodes = new Set<string>()
-
-        // Skip header row and process data
-        for (let i = 1; i < lines.length; i++) {
-          const line = lines[i].trim()
-          if (line) {
-            // Extract first column (zip code) - handle CSV parsing
-            const columns = line.split(",")
-            const zipCode = columns[0]?.replace(/"/g, "").trim()
-            if (zipCode && /^\d{5}$/.test(zipCode)) {
-              zipCodes.add(zipCode)
-            }
-          }
-        }
-
-        setValidZipCodes(zipCodes)
-        setIsLoadingZipCodes(false)
-      } catch (error) {
-        console.error("Error fetching zip codes:", error)
-        setIsLoadingZipCodes(false)
-        // Fallback: allow all zip codes if API fails
-        setValidZipCodes(new Set())
-      }
-    }
-
-    fetchZipCodes()
-  }, [])
-
-  // Handle select validation
-  useEffect(() => {
-    const handleFormInvalid = (e: Event) => {
-      const target = e.target as HTMLSelectElement
-      if (target.name === "vehicleType" && target.validity.valueMissing) {
-        target.setCustomValidity("Please select a vehicle type")
-      }
-    }
-
-    document.addEventListener("invalid", handleFormInvalid, true)
-    return () => document.removeEventListener("invalid", handleFormInvalid, true)
-  }, [])
-
-  const validateZipCode = (zipCode: string, fieldName: string) => {
-    if (!zipCode || zipCode.trim() === "") {
-      return "This field is required"
-    }
-
-    if (zipCode.length !== 5 || !/^\d{5}$/.test(zipCode)) {
-      return "Postal code must contain exactly 5 digits"
-    }
-
-    if (validZipCodes.size > 0 && !validZipCodes.has(zipCode)) {
-      return "Sorry, we don't currently service this zip code area"
-    }
-
-    return ""
-  }
 
   const reviews = [
     {
@@ -153,14 +80,6 @@ export default function VehiclerLanding() {
   const prevReview = () => {
     const maxIndex = isMobile ? reviews.length - 1 : reviews.length - 3
     setCurrentReview((prev) => (prev - 1 + (maxIndex + 1)) % (maxIndex + 1))
-  }
-
-  const handleGetQuoteClick = () => {
-    setIsFormHighlighted(true)
-    // Auto-hide the highlight after 5 seconds
-    setTimeout(() => {
-      setIsFormHighlighted(false)
-    }, 5000)
   }
 
   return (
@@ -209,6 +128,9 @@ export default function VehiclerLanding() {
             </Link>
             <Link href="#faq" className="text-vehicler-black hover:text-vehicler-blue transition-colors">
               FAQ
+            </Link>
+            <Link href="#" className="text-vehicler-black hover:text-vehicler-blue transition-colors">
+              For business
             </Link>
             {/* Temporarily hidden - Check My Order link */}
             {/* <Link
@@ -311,6 +233,14 @@ export default function VehiclerLanding() {
                 FAQ
               </Link>
 
+              <Link
+                href="#"
+                className="block text-vehicler-black hover:text-vehicler-blue transition-colors py-2 font-medium"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                For business
+              </Link>
+
               {/* Temporarily hidden - Check My Order link */}
               {/* <Link
                 href="/find-my-vehicle"
@@ -337,20 +267,17 @@ export default function VehiclerLanding() {
       </header>
 
       {/* Hero Section */}
-      <section id="quote" className="relative bg-vehicler-dark-blue text-white py-20 overflow-hidden">
-        {/* Concrete Background Image */}
+      <section id="quote" className="relative bg-vehicler-dark-blue text-white pb-10 pt-16 overflow-hidden">
+        {/* Background image */}
         <div className="absolute inset-0">
           <div
             className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-            style={{
-              backgroundImage: `url('/hero-background.jpg')`,
-            }}
-          ></div>
-          {/* Dark overlay for text readability */}
-          <div className="absolute inset-0 bg-gradient-to-r from-vehicler-dark-blue/80 to-vehicler-blue/70"></div>
+            style={{ backgroundImage: `url('/hero-background.jpg')` }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-vehicler-dark-blue/80 to-vehicler-blue/70" />
         </div>
 
-        {/* New Geometric Pattern Background */}
+        {/* Pattern overlay */}
         <div className="absolute inset-0 opacity-10">
           <div
             className="h-full w-full"
@@ -359,233 +286,30 @@ export default function VehiclerLanding() {
               backgroundSize: "400px 400px",
               backgroundRepeat: "repeat",
             }}
-          ></div>
+          />
         </div>
 
-        <div className="max-w-6xl mx-auto px-16 relative z-10">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h1 className="text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-                <div>Nationwide</div>
-                <div>Car Shipping</div>
-                <div>You Can Trust</div>
-              </h1>
-              <p className="text-xl mb-8 text-blue-100">
-                Safe, reliable, and affordable vehicle transport across all 50 states. Get your instant quote in seconds
-                and experience the Vehicler difference.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 mb-8">
-                <Button
-                  size="lg"
-                  className="bg-vehicler-bright-blue hover:bg-blue-600 text-white px-8 py-4 text-lg"
-                  onClick={handleGetQuoteClick}
-                >
-                  Get Instant Quote
-                </Button>
-                <a href="tel:+18554227872" className="w-full sm:w-auto">
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    className="w-full sm:w-auto border-white hover:bg-white hover:text-vehicler-blue px-4 sm:px-8 py-4 text-base sm:text-lg text-slate-300 bg-transparent"
-                  >
-                    <Phone className="w-4 h-4 mr-2 sm:hidden" />
-                    <span className="hidden sm:inline">Call (855) 422-7872</span>
-                    <span className="sm:hidden">Call Now</span>
-                  </Button>
-                </a>
-              </div>
-            </div>
-
-            {/* Quote Form */}
-            <div className="relative">
-              {isFormHighlighted && (
-                <div className="absolute -top-4 left-0 right-0 text-center z-20">
-                  <div className="bg-vehicler-bright-blue text-white px-4 py-2 rounded-lg shadow-lg animate-bounce">
-                    <p className="text-sm font-semibold">👇 Please fill out the form below to get your quote!</p>
-                  </div>
-                </div>
-              )}
-              <Card
-                className={`bg-white/95 backdrop-blur-sm shadow-2xl transition-all duration-500 ${
-                  isFormHighlighted
-                    ? "ring-4 ring-vehicler-bright-blue ring-opacity-75 shadow-vehicler-bright-blue/50 shadow-2xl scale-105"
-                    : ""
-                }`}
+        <div className="max-w-6xl mx-auto px-4 md:px-16 relative z-10">
+          <div className="max-w-5xl mx-auto">
+            {/* Heading + description */}
+            <div className="text-center mb-10">
+              <FitText
+                as="h1"
+                className="font-bold text-white mb-4"
+                minFontSize={20}
+                maxFontSize={120}
               >
-                <CardContent className="p-6">
-                  <h3 className="text-2xl font-bold text-vehicler-black mb-6">Get Your Free Quote</h3>
-                  {isLoadingZipCodes && (
-                    <div className="mb-4 text-center text-vehicler-gray text-sm">Loading service areas...</div>
-                  )}
-                  <form
-                    className="space-y-4"
-                    onSubmit={(e) => {
-                      e.preventDefault()
-                      const formData = new FormData(e.target as HTMLFormElement)
-                      const fromZip = formData.get("fromZip") as string
-                      const toZip = formData.get("toZip") as string
-                      const vehicleType = formData.get("vehicleType") as string
-
-                      // Validate zip codes before submission
-                      const fromError = validateZipCode(fromZip, "fromZip")
-                      const toError = validateZipCode(toZip, "toZip")
-
-                      setFromZipError(fromError)
-                      setToZipError(toError)
-
-                      // Only proceed if no errors
-                      if (!fromError && !toError) {
-                        const params = new URLSearchParams()
-                        if (fromZip) params.set("fromZip", fromZip)
-                        if (toZip) params.set("toZip", toZip)
-                        if (vehicleType) params.set("vehicleType", vehicleType)
-
-                        window.location.href = `/booking-2?${params.toString()}`
-                      }
-                    }}
-                  >
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-vehicler-black mb-2">
-                          Ship From <span className="text-vehicler-blue">*</span>
-                        </label>
-                        <Input
-                          name="fromZip"
-                          placeholder="12345"
-                          className={`border-vehicler-gray hover:border-vehicler-dark-blue focus:outline-none focus:ring-2 focus:ring-vehicler-dark-blue focus:border-vehicler-dark-blue transition-all ${
-                            fromZipError ? "border-red-500 focus:ring-red-500 focus:border-red-500" : ""
-                          }`}
-                          required
-                          maxLength={5}
-                          onInput={(e) => {
-                            const target = e.target as HTMLInputElement
-                            // Remove any non-digit characters
-                            target.value = target.value.replace(/[^0-9]/g, "")
-                            // Limit to 5 digits
-                            if (target.value.length > 5) {
-                              target.value = target.value.slice(0, 5)
-                            }
-                            // Clear error when user starts typing
-                            if (fromZipError) {
-                              setFromZipError("")
-                            }
-                          }}
-                          onBlur={(e) => {
-                            const zipCode = e.target.value
-                            if (zipCode.length === 5) {
-                              const error = validateZipCode(zipCode, "fromZip")
-                              setFromZipError(error)
-                            }
-                          }}
-                          onInvalid={(e) => {
-                            const target = e.target as HTMLInputElement
-                            if (target.validity.valueMissing) {
-                              target.setCustomValidity("Please enter a pickup zip code")
-                            } else if (target.value.length !== 5 || !/^[0-9]{5}$/.test(target.value)) {
-                              target.setCustomValidity("Postal code must contain exactly 5 digits")
-                            } else {
-                              target.setCustomValidity("")
-                            }
-                          }}
-                        />
-                        {fromZipError && <p className="text-red-500 text-xs mt-1">{fromZipError}</p>}
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-vehicler-black mb-2">
-                          Ship To <span className="text-vehicler-blue">*</span>
-                        </label>
-                        <Input
-                          name="toZip"
-                          placeholder="54321"
-                          className={`border-vehicler-gray hover:border-vehicler-dark-blue focus:outline-none focus:ring-2 focus:ring-vehicler-dark-blue focus:border-vehicler-dark-blue transition-all ${
-                            toZipError ? "border-red-500 focus:ring-red-500 focus:border-red-500" : ""
-                          }`}
-                          required
-                          maxLength={5}
-                          onInput={(e) => {
-                            const target = e.target as HTMLInputElement
-                            // Remove any non-digit characters
-                            target.value = target.value.replace(/[^0-9]/g, "")
-                            // Limit to 5 digits
-                            if (target.value.length > 5) {
-                              target.value = target.value.slice(0, 5)
-                            }
-                            // Clear error when user starts typing
-                            if (toZipError) {
-                              setToZipError("")
-                            }
-                          }}
-                          onBlur={(e) => {
-                            const zipCode = e.target.value
-                            if (zipCode.length === 5) {
-                              const error = validateZipCode(zipCode, "toZip")
-                              setToZipError(error)
-                            }
-                          }}
-                          onInvalid={(e) => {
-                            const target = e.target as HTMLInputElement
-                            if (target.validity.valueMissing) {
-                              target.setCustomValidity("Please enter a delivery zip code")
-                            } else if (target.value.length !== 5 || !/^[0-9]{5}$/.test(target.value)) {
-                              target.setCustomValidity("Postal code must contain exactly 5 digits")
-                            } else {
-                              target.setCustomValidity("")
-                            }
-                          }}
-                        />
-                        {toZipError && <p className="text-red-500 text-xs mt-1">{toZipError}</p>}
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-vehicler-black mb-2">
-                        Vehicle Type <span className="text-vehicler-blue">*</span>
-                      </label>
-                      <Select
-                        required
-                        name="vehicleType"
-                        onValueChange={(value) => {
-                          // Clear any custom validity when a value is selected
-                          const selectElement = document.querySelector(
-                            'select[name="vehicleType"]',
-                          ) as HTMLSelectElement
-                          if (selectElement) {
-                            selectElement.setCustomValidity("")
-                          }
-                        }}
-                      >
-                        <SelectTrigger
-                          className="border-vehicler-gray hover:border-vehicler-dark-blue focus:outline-none focus:ring-2 focus:ring-vehicler-dark-blue focus:border-vehicler-dark-blue transition-all"
-                          onInvalid={(e) => {
-                            const target = e.target as HTMLSelectElement
-                            if (target.validity.valueMissing) {
-                              target.setCustomValidity("Please select a vehicle type")
-                            } else {
-                              target.setCustomValidity("")
-                            }
-                          }}
-                        >
-                          <SelectValue placeholder="Select vehicle type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="sedan">Sedan</SelectItem>
-                          <SelectItem value="suv">SUV</SelectItem>
-                          <SelectItem value="truck">Pickup Truck</SelectItem>
-                          <SelectItem value="motorcycle">Motorcycle</SelectItem>
-                          <SelectItem value="other">Other</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <Button
-                      type="submit"
-                      className="w-full bg-vehicler-blue hover:bg-vehicler-dark-blue text-white py-3 text-lg"
-                      disabled={isLoadingZipCodes || !!fromZipError || !!toZipError}
-                    >
-                      {isLoadingZipCodes ? "Loading..." : "Find Carrier"}
-                    </Button>
-                  </form>
-                </CardContent>
-              </Card>
+                Nationwide Car Shipping You Can Trust
+              </FitText>
+              <p className="text-sm md:text-base text-blue-100 mt-4">
+                Safe, reliable, and affordable vehicle transport across all 50 states.{" "}
+                <span className="hidden md:inline"><br /></span>
+                Fill in the details below and get instant quotes from verified carriers.
+              </p>
             </div>
+
+            {/* Full-width search form */}
+            <HeroSearchForm />
           </div>
         </div>
       </section>
@@ -963,6 +687,7 @@ export default function VehiclerLanding() {
               links={[
                 { text: "Contact Us", href: "#" },
                 { text: "FAQ", href: "#faq" },
+                { text: "For business", href: "#" },
                 // { text: "Track Shipment", href: "/find-my-vehicle" }, // Temporarily hidden
                 { text: "Get Quote", href: "#quote" },
               ]}

@@ -292,8 +292,18 @@ export default function QuotePage() {
       ...initialFormData,
     }))
 
+    const hasFullData =
+      (initialFormData.fromCity || initialFormData.fromZip) &&
+      (initialFormData.toCity || initialFormData.toZip) &&
+      initialFormData.vehicleModel &&
+      initialFormData.vehicleYear
+
     if (Object.values(initialFormData).some((value) => value && value !== "Operable")) {
       setHasSearched(true)
+    }
+
+    if (hasFullData) {
+      setHasPerformedFirstSearch(true)
     }
 
     const performZipLookups = async () => {
@@ -599,7 +609,7 @@ export default function QuotePage() {
       { field: "fromCity", name: "Pick up from city" },
       { field: "toStreet", name: "Deliver to street" },
       { field: "toCity", name: "Deliver to city" },
-      { field: "pickupStartDate", name: "Pickup date" },
+      { field: "pickupStartDate", name: "Pickup dates" },
       { field: "vehicleModel", name: "Vehicle model" },
       { field: "vehicleYear", name: "Vehicle year" },
       { field: "vehicleCondition", name: "Vehicle condition" },
@@ -970,16 +980,16 @@ export default function QuotePage() {
                       <Label
                         className={`text-sm font-medium ${showRequiredHints && !searchForm.pickupStartDate ? "text-red-600" : "text-gray-700"}`}
                       >
-                        Pickup date
+                        Pickup dates
                       </Label>
                       <Popover>
                         <PopoverTrigger asChild>
                           <Button
                             variant="outline"
-                            className="w-full justify-start text-left font-normal bg-white focus:ring-2 focus:ring-[#6371BE] focus:border-[#6371BE] text-gray-700 text-sm"
+                            className="w-full justify-start text-left font-normal bg-white focus:ring-2 focus:ring-[#6371BE] focus:border-[#6371BE] text-gray-700 text-sm overflow-hidden"
                           >
-                            <CalendarIcon className="mr-2 h-4 w-4 text-gray-500" />
-                            <span className="text-gray-500">{getPickupDateDisplay}</span>
+                            <CalendarIcon className="mr-2 h-4 w-4 text-gray-500 shrink-0" />
+                            <span className="truncate text-gray-500">{getPickupDateDisplay}</span>
                           </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0" align="start">
@@ -1349,7 +1359,7 @@ export default function QuotePage() {
 
                             <div className="grid grid-cols-2 gap-4 text-sm mb-3">
                               <div>
-                                <div className="text-gray-600">Pickup date</div>
+                                <div className="text-gray-600">Pickup dates</div>
                                 <div className="font-medium flex items-center space-x-1">
                                   <Clock className="h-3 w-3 text-gray-500" />
                                   <span>{quote.pickupRange}</span>

@@ -2,6 +2,7 @@
 
 import type React from "react"
 import { useState, useEffect, useRef, useCallback } from "react"
+import { createPortal } from "react-dom"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent } from "@/components/ui/card"
 import { useGoogleSheetsVehicles } from "@/hooks/use-google-sheets-vehicles"
@@ -45,6 +46,40 @@ export function VehicleModelInput({
   const suggestionsRef = useRef<HTMLDivElement>(null)
   const tooltipRef = useRef<HTMLDivElement>(null)
   const hideTooltipTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const [dropdownRect, setDropdownRect] = useState<{ top: number; left: number; width: number } | null>(null)
+  const [tooltipRect, setTooltipRect] = useState<{ top: number; left: number } | null>(null)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const updateDropdownRect = useCallback(() => {
+    if (inputRef.current) {
+      const rect = inputRef.current.getBoundingClientRect()
+      setDropdownRect({
+        top: rect.bottom + window.scrollY + 4,
+        left: rect.left + window.scrollX,
+        width: rect.width,
+      })
+      setTooltipRect({
+        top: rect.top + window.scrollY,
+        left: rect.right + window.scrollX + 8,
+      })
+    }
+  }, [])
+
+  useEffect(() => {
+    if (showSuggestions || showYearSelection || showTooltip) {
+      updateDropdownRect()
+      window.addEventListener("scroll", updateDropdownRect, true)
+      window.addEventListener("resize", updateDropdownRect)
+      return () => {
+        window.removeEventListener("scroll", updateDropdownRect, true)
+        window.removeEventListener("resize", updateDropdownRect)
+      }
+    }
+  }, [showSuggestions, showYearSelection, showTooltip, updateDropdownRect])
 
   // Use Google Sheets vehicle data
   const { 
@@ -377,11 +412,18 @@ export function VehicleModelInput({
           {enableSearch && isLoading && <RefreshCw className="absolute right-3 top-2.5 h-4 w-4 animate-spin text-gray-400" />}
         </div>
 
-        {/* Vehicle Suggestions Dropdown */}
-        {enableSearch && showSuggestions && !showYearSelection && (
+        {/* Vehicle Suggestions Dropdown — rendered via portal to escape overflow clipping */}
+        {mounted && enableSearch && showSuggestions && !showYearSelection && dropdownRect && createPortal(
           <Card
             ref={suggestionsRef}
-            className="absolute top-full left-0 right-0 mt-1 z-[50000] shadow-lg border-2 border-[#6371BE]/20 max-h-80 overflow-y-auto"
+            style={{
+              position: "absolute",
+              top: dropdownRect.top,
+              left: dropdownRect.left,
+              width: dropdownRect.width,
+              zIndex: 99999,
+            }}
+            className="shadow-lg border-2 border-[#6371BE]/20 max-h-80 overflow-y-auto"
           >
             <CardContent className="p-0">
               {suggestions.map((vehicle, index) => (
@@ -410,7 +452,6 @@ export function VehicleModelInput({
                       <ChevronRight className="h-4 w-4 text-gray-400" />
                     </div>
                   </div>
-
                   {vehicle.aliases && vehicle.aliases.length > 0 && (
                     <div className="mt-1 text-xs text-gray-400">
                       Also: {vehicle.aliases.slice(0, 3).join(", ")}
@@ -419,8 +460,6 @@ export function VehicleModelInput({
                   )}
                 </div>
               ))}
-              
-              {/* Add "Other" option when user has typed something but no exact matches */}
               {value.length >= 2 && (
                 <div
                   className={`p-3 cursor-pointer border-b border-gray-100 last:border-b-0 hover:bg-gray-50 ${
@@ -431,29 +470,31 @@ export function VehicleModelInput({
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <div>
-                        <div className="font-medium text-gray-900 text-sm">
-                          Other: "{value}"
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          Use custom vehicle model
-                        </div>
+                        <div className="font-medium text-gray-900 text-sm">Other: &quot;{value}&quot;</div>
+                        <div className="text-xs text-gray-500">Use custom vehicle model</div>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <ChevronRight className="h-4 w-4 text-gray-400" />
-                    </div>
+                    <ChevronRight className="h-4 w-4 text-gray-400" />
                   </div>
                 </div>
               )}
             </CardContent>
-          </Card>
+          </Card>,
+          document.body
         )}
 
-        {/* Year Selection Dropdown - showing ONLY years from your table */}
-        {enableSearch && showYearSelection && yearOptions.length > 0 && (
+        {/* Year Selection Dropdown — portal */}
+        {mounted && enableSearch && showYearSelection && yearOptions.length > 0 && dropdownRect && createPortal(
           <Card
             ref={suggestionsRef}
-            className="absolute top-full left-0 right-0 mt-1 z-[50000] shadow-lg border-2 border-[#6371BE]/20 max-h-60 overflow-y-auto"
+            style={{
+              position: "absolute",
+              top: dropdownRect.top,
+              left: dropdownRect.left,
+              width: dropdownRect.width,
+              zIndex: 99999,
+            }}
+            className="shadow-lg border-2 border-[#6371BE]/20 max-h-60 overflow-y-auto"
           >
             <CardContent className="p-0">
               <div className="p-3 bg-gray-50 border-b border-gray-200">
@@ -474,18 +515,27 @@ export function VehicleModelInput({
                 >
                   <div className="flex items-center justify-between">
                     <span className="font-medium text-gray-900 text-sm">{yearOption}</span>
-                    {year === yearOption && <div className="w-2 h-2 bg-[#6371BE] rounded-full"></div>}
+                    {year === yearOption && <div className="w-2 h-2 bg-[#6371BE] rounded-full" />}
                   </div>
                 </div>
               ))}
             </CardContent>
-          </Card>
+          </Card>,
+          document.body
         )}
 
-        {/* Enhanced Tooltip with Year Selection - showing ONLY years from your table */}
-        {enableSearch && showTooltip && !showYearSelection && (
-          <div className="absolute left-full top-0 ml-2 z-[50000] w-80">
-            <Card 
+        {/* Vehicle Details tooltip — rendered via portal to escape overflow clipping */}
+        {mounted && enableSearch && showTooltip && !showYearSelection && tooltipRect && createPortal(
+          <div
+            style={{
+              position: "absolute",
+              top: tooltipRect.top,
+              left: tooltipRect.left,
+              width: 320,
+              zIndex: 99999,
+            }}
+          >
+            <Card
               ref={tooltipRef}
               className="shadow-lg border-2 border-[#6371BE]/20"
               onMouseEnter={handleTooltipMouseEnter}
@@ -499,7 +549,6 @@ export function VehicleModelInput({
 
                 <div className="text-sm text-gray-600 mb-3">{getTooltipContent(showTooltip)}</div>
 
-                {/* Year Selection in Tooltip - ONLY from your table */}
                 {tooltipYearOptions.length > 0 && (
                   <div className="mb-3">
                     <div className="grid grid-cols-4 gap-1 max-h-32 overflow-y-auto">
@@ -524,7 +573,6 @@ export function VehicleModelInput({
                           showTooltip.transportRecommendation === "enclosed" ? "text-purple-600" : "text-blue-600"
                         }
                       >
-                        {showTooltip.transportRecommendation === "enclosed" ? "🛡️" : "🚛"}
                         {showTooltip.transportRecommendation === "enclosed"
                           ? "Recommended for protection of high-value vehicle"
                           : "Standard open transport is suitable for this vehicle"}
@@ -534,7 +582,8 @@ export function VehicleModelInput({
                 </div>
               </CardContent>
             </Card>
-          </div>
+          </div>,
+          document.body
         )}
       </div>
     </div>
