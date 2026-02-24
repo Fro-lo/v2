@@ -1,0 +1,584 @@
+"use client"
+
+import type React from "react"
+import { useState, useCallback, useRef } from "react"
+import { useRouter } from "next/navigation"
+import { Button } from "@/components/ui/button"
+import { Label } from "@/components/ui/label"
+import { Calendar } from "@/components/ui/calendar"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { CalendarIcon, ChevronDown, Loader2 } from "lucide-react"
+import { format } from "date-fns"
+import { useZipLookup } from "@/hooks/use-zip-lookup"
+import { VehicleModelInput } from "@/components/vehicle-model-input"
+import type { DateRange } from "react-day-picker"
+
+const US_STATES = [
+  { code: "AL", name: "Alabama" },
+  { code: "AK", name: "Alaska" },
+  { code: "AZ", name: "Arizona" },
+  { code: "AR", name: "Arkansas" },
+  { code: "CA", name: "California" },
+  { code: "CO", name: "Colorado" },
+  { code: "CT", name: "Connecticut" },
+  { code: "DE", name: "Delaware" },
+  { code: "FL", name: "Florida" },
+  { code: "GA", name: "Georgia" },
+  { code: "HI", name: "Hawaii" },
+  { code: "ID", name: "Idaho" },
+  { code: "IL", name: "Illinois" },
+  { code: "IN", name: "Indiana" },
+  { code: "IA", name: "Iowa" },
+  { code: "KS", name: "Kansas" },
+  { code: "KY", name: "Kentucky" },
+  { code: "LA", name: "Louisiana" },
+  { code: "ME", name: "Maine" },
+  { code: "MD", name: "Maryland" },
+  { code: "MA", name: "Massachusetts" },
+  { code: "MI", name: "Michigan" },
+  { code: "MN", name: "Minnesota" },
+  { code: "MS", name: "Mississippi" },
+  { code: "MO", name: "Missouri" },
+  { code: "MT", name: "Montana" },
+  { code: "NE", name: "Nebraska" },
+  { code: "NV", name: "Nevada" },
+  { code: "NH", name: "New Hampshire" },
+  { code: "NJ", name: "New Jersey" },
+  { code: "NM", name: "New Mexico" },
+  { code: "NY", name: "New York" },
+  { code: "NC", name: "North Carolina" },
+  { code: "ND", name: "North Dakota" },
+  { code: "OH", name: "Ohio" },
+  { code: "OK", name: "Oklahoma" },
+  { code: "OR", name: "Oregon" },
+  { code: "PA", name: "Pennsylvania" },
+  { code: "RI", name: "Rhode Island" },
+  { code: "SC", name: "South Carolina" },
+  { code: "SD", name: "South Dakota" },
+  { code: "TN", name: "Tennessee" },
+  { code: "TX", name: "Texas" },
+  { code: "UT", name: "Utah" },
+  { code: "VT", name: "Vermont" },
+  { code: "VA", name: "Virginia" },
+  { code: "WA", name: "Washington" },
+  { code: "WV", name: "West Virginia" },
+  { code: "WI", name: "Wisconsin" },
+  { code: "WY", name: "Wyoming" },
+]
+
+interface SearchFormData {
+  fromStreet: string
+  fromHouseNumber: string
+  fromCity: string
+  fromState: string
+  fromZip: string
+  toStreet: string
+  toHouseNumber: string
+  toCity: string
+  toState: string
+  toZip: string
+  pickupStartDate: Date | undefined
+  pickupEndDate: Date | undefined
+  vehicleModel: string
+  vehicleYear: string
+  vehicleCondition: string
+  vehicleCategory: string
+}
+
+export function HeroSearchForm() {
+  const router = useRouter()
+  const { lookupZipCode, isLoading: isZipLoading } = useZipLookup()
+  const lookupZipCodeRef = useRef(lookupZipCode)
+  lookupZipCodeRef.current = lookupZipCode
+
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const tomorrow = new Date(today)
+  tomorrow.setDate(tomorrow.getDate() + 1)
+
+  const [searchForm, setSearchForm] = useState<SearchFormData>({
+    fromStreet: "",
+    fromHouseNumber: "",
+    fromCity: "",
+    fromState: "",
+    fromZip: "",
+    toStreet: "",
+    toHouseNumber: "",
+    toCity: "",
+    toState: "",
+    toZip: "",
+    pickupStartDate: undefined,
+    pickupEndDate: undefined,
+    vehicleModel: "",
+    vehicleYear: "",
+    vehicleCondition: "Operable",
+    vehicleCategory: "",
+  })
+
+  const [showAddressDropdown, setShowAddressDropdown] = useState(false)
+  const [showDeliveryDropdown, setShowDeliveryDropdown] = useState(false)
+  const [showConditionDropdown, setShowConditionDropdown] = useState(false)
+  const [showRequiredHints, setShowRequiredHints] = useState(false)
+
+  const handleFromZipChange = useCallback(async (zipCode: string) => {
+    setSearchForm((prev) => ({ ...prev, fromZip: zipCode }))
+    if (zipCode.length === 5 && /^\d{5}$/.test(zipCode)) {
+      try {
+        const result = await lookupZipCodeRef.current(zipCode)
+        if (result) {
+          setSearchForm((prev) => ({
+            ...prev,
+            fromCity: result.city,
+            fromState: result.stateCode,
+          }))
+        }
+      } catch {}
+    } else if (zipCode.length === 0) {
+      setSearchForm((prev) => ({ ...prev, fromCity: "", fromState: "" }))
+    }
+  }, [])
+
+  const handleToZipChange = useCallback(async (zipCode: string) => {
+    setSearchForm((prev) => ({ ...prev, toZip: zipCode }))
+    if (zipCode.length === 5 && /^\d{5}$/.test(zipCode)) {
+      try {
+        const result = await lookupZipCodeRef.current(zipCode)
+        if (result) {
+          setSearchForm((prev) => ({
+            ...prev,
+            toCity: result.city,
+            toState: result.stateCode,
+          }))
+        }
+      } catch {}
+    } else if (zipCode.length === 0) {
+      setSearchForm((prev) => ({ ...prev, toCity: "", toState: "" }))
+    }
+  }, [])
+
+  const handleDateRangeChange = useCallback((range: DateRange | undefined) => {
+    if (range?.from) {
+      setSearchForm((prev) => ({
+        ...prev,
+        pickupStartDate: range.from,
+        pickupEndDate: range.to || range.from,
+      }))
+    } else {
+      setSearchForm((prev) => ({ ...prev, pickupStartDate: undefined, pickupEndDate: undefined }))
+    }
+  }, [])
+
+  const handleVehicleModelChange = useCallback((value: string) => {
+    setSearchForm((prev) => ({ ...prev, vehicleModel: value }))
+  }, [])
+
+  const handleVehicleYearChange = useCallback((year: string) => {
+    setSearchForm((prev) => ({ ...prev, vehicleYear: year }))
+  }, [])
+
+  const handleVehicleSelect = useCallback((vehicle: any) => {
+    setSearchForm((prev) => ({
+      ...prev,
+      vehicleCategory: vehicle.category,
+      vehicleYear: vehicle.selectedYear || prev.vehicleYear,
+    }))
+  }, [])
+
+  const getPickupAddressDisplay = () => {
+    const stateName = searchForm.fromState ? US_STATES.find((s) => s.code === searchForm.fromState)?.name : ""
+    const parts = [
+      searchForm.fromHouseNumber,
+      searchForm.fromStreet,
+      searchForm.fromCity,
+      stateName,
+      searchForm.fromZip,
+    ].filter(Boolean)
+    if (parts.length === 0) return "Enter address"
+    return parts.join(", ")
+  }
+
+  const getDeliveryAddressDisplay = () => {
+    const stateName = searchForm.toState ? US_STATES.find((s) => s.code === searchForm.toState)?.name : ""
+    const parts = [
+      searchForm.toHouseNumber,
+      searchForm.toStreet,
+      searchForm.toCity,
+      stateName,
+      searchForm.toZip,
+    ].filter(Boolean)
+    if (parts.length === 0) return "Enter address"
+    return parts.join(", ")
+  }
+
+  const getPickupDateDisplay = () => {
+    if (!searchForm.pickupStartDate) return "Select date range"
+    const startFormatted = format(searchForm.pickupStartDate, "MM.dd.yy")
+    if (searchForm.pickupEndDate && searchForm.pickupStartDate.getTime() === searchForm.pickupEndDate.getTime()) {
+      return startFormatted
+    }
+    if (searchForm.pickupEndDate) {
+      return `${startFormatted} - ${format(searchForm.pickupEndDate, "MM.dd.yy")}`
+    }
+    return startFormatted
+  }
+
+  const handleSubmit = () => {
+    const requiredFields = [
+      { field: "fromStreet", name: "Pick up from street" },
+      { field: "fromCity", name: "Pick up from city" },
+      { field: "toStreet", name: "Deliver to street" },
+      { field: "toCity", name: "Deliver to city" },
+      { field: "pickupStartDate", name: "Pickup date" },
+      { field: "vehicleModel", name: "Vehicle model" },
+      { field: "vehicleYear", name: "Vehicle year" },
+    ]
+
+    const missingFields = requiredFields.filter(({ field }) => {
+      const value = searchForm[field as keyof SearchFormData]
+      return !value || (typeof value === "string" && value.trim() === "")
+    })
+
+    if (missingFields.length > 0) {
+      setShowRequiredHints(true)
+      setTimeout(() => setShowRequiredHints(false), 5000)
+      return
+    }
+
+    const params = new URLSearchParams()
+    if (searchForm.fromStreet) params.set("fromStreet", searchForm.fromStreet)
+    if (searchForm.fromHouseNumber) params.set("fromHouseNumber", searchForm.fromHouseNumber)
+    if (searchForm.fromCity) params.set("fromCity", searchForm.fromCity)
+    if (searchForm.fromState) params.set("fromState", searchForm.fromState)
+    if (searchForm.fromZip) params.set("fromZip", searchForm.fromZip)
+    if (searchForm.toStreet) params.set("toStreet", searchForm.toStreet)
+    if (searchForm.toHouseNumber) params.set("toHouseNumber", searchForm.toHouseNumber)
+    if (searchForm.toCity) params.set("toCity", searchForm.toCity)
+    if (searchForm.toState) params.set("toState", searchForm.toState)
+    if (searchForm.toZip) params.set("toZip", searchForm.toZip)
+    if (searchForm.vehicleModel) params.set("vehicleModel", searchForm.vehicleModel)
+    if (searchForm.vehicleYear) params.set("vehicleYear", searchForm.vehicleYear)
+    if (searchForm.vehicleCategory) params.set("vehicleCategory", searchForm.vehicleCategory)
+    if (searchForm.vehicleCondition) params.set("vehicleCondition", searchForm.vehicleCondition)
+    if (searchForm.pickupStartDate) params.set("pickupStartDate", searchForm.pickupStartDate.toISOString())
+    if (searchForm.pickupEndDate) params.set("pickupEndDate", searchForm.pickupEndDate.toISOString())
+
+    router.push(`/booking-2?${params.toString()}`)
+  }
+
+  const pickupDisplay = getPickupAddressDisplay()
+  const deliveryDisplay = getDeliveryAddressDisplay()
+
+  return (
+    <div className="relative">
+      {showRequiredHints && (
+        <div className="absolute -top-12 left-0 right-0 text-center z-20">
+          <div className="bg-red-600 text-white px-4 py-2 rounded-lg shadow-lg animate-bounce inline-block">
+            <p className="text-sm font-semibold">Please fill out all highlighted fields</p>
+          </div>
+        </div>
+      )}
+
+      <div
+        className={`bg-white rounded-xl p-5 shadow-2xl transition-all duration-300 ${
+          showRequiredHints ? "ring-4 ring-red-500 ring-opacity-75" : ""
+        }`}
+      >
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 items-end">
+          {/* Pick up from */}
+          <div className="space-y-1.5 relative">
+            <Label
+              className={`text-xs font-semibold uppercase tracking-wide ${
+                showRequiredHints && (!searchForm.fromStreet || !searchForm.fromCity)
+                  ? "text-red-600"
+                  : "text-gray-500"
+              }`}
+            >
+              Pick up from
+            </Label>
+            <Popover open={showAddressDropdown} onOpenChange={setShowAddressDropdown}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full justify-between text-left font-normal bg-white border-gray-200 hover:border-[#6371BE] focus:ring-2 focus:ring-[#6371BE] h-10 text-sm text-gray-700"
+                >
+                  <span className={`truncate ${pickupDisplay === "Enter address" ? "text-gray-400" : ""}`}>
+                    {pickupDisplay}
+                  </span>
+                  <ChevronDown className="ml-2 h-4 w-4 opacity-40 shrink-0" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 p-4" align="start">
+                <div className="space-y-3">
+                  <div>
+                    <Label htmlFor="fromHouseNumber" className="text-xs font-medium text-gray-700">House number</Label>
+                    <input
+                      id="fromHouseNumber"
+                      type="text"
+                      value={searchForm.fromHouseNumber}
+                      onChange={(e) => setSearchForm((prev) => ({ ...prev, fromHouseNumber: e.target.value }))}
+                      placeholder="Enter house number"
+                      className="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#6371BE] focus:border-[#6371BE]"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="fromStreet" className="text-xs font-medium text-gray-700">Street name</Label>
+                    <input
+                      id="fromStreet"
+                      type="text"
+                      value={searchForm.fromStreet}
+                      onChange={(e) => setSearchForm((prev) => ({ ...prev, fromStreet: e.target.value }))}
+                      placeholder="Enter street name"
+                      className="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#6371BE] focus:border-[#6371BE]"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="fromZip" className="text-xs font-medium text-gray-700">ZIP code</Label>
+                    <div className="relative mt-1">
+                      <input
+                        id="fromZip"
+                        type="text"
+                        value={searchForm.fromZip}
+                        onChange={(e) => handleFromZipChange(e.target.value)}
+                        placeholder="Enter ZIP code"
+                        maxLength={5}
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#6371BE] focus:border-[#6371BE] pr-8"
+                      />
+                      {isZipLoading && <Loader2 className="absolute right-2 top-2.5 h-4 w-4 animate-spin text-gray-400" />}
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="fromCity" className="text-xs font-medium text-gray-700">City</Label>
+                    <input
+                      id="fromCity"
+                      type="text"
+                      value={searchForm.fromCity}
+                      placeholder="Auto-filled from ZIP"
+                      readOnly
+                      className="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-md bg-gray-50 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="fromState" className="text-xs font-medium text-gray-700">State</Label>
+                    <select
+                      id="fromState"
+                      value={searchForm.fromState}
+                      disabled
+                      className="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-md bg-gray-50 focus:outline-none"
+                    >
+                      <option value="">Auto-filled from ZIP</option>
+                      {US_STATES.map((s) => (
+                        <option key={s.code} value={s.code}>{s.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <Button
+                    type="button"
+                    onClick={() => setShowAddressDropdown(false)}
+                    className="w-full bg-[#6371BE] hover:bg-[#081C8B] text-white"
+                  >
+                    Done
+                  </Button>
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          {/* Deliver to */}
+          <div className="space-y-1.5 relative">
+            <Label
+              className={`text-xs font-semibold uppercase tracking-wide ${
+                showRequiredHints && (!searchForm.toStreet || !searchForm.toCity)
+                  ? "text-red-600"
+                  : "text-gray-500"
+              }`}
+            >
+              Deliver to
+            </Label>
+            <Popover open={showDeliveryDropdown} onOpenChange={setShowDeliveryDropdown}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full justify-between text-left font-normal bg-white border-gray-200 hover:border-[#6371BE] focus:ring-2 focus:ring-[#6371BE] h-10 text-sm text-gray-700"
+                >
+                  <span className={`truncate ${deliveryDisplay === "Enter address" ? "text-gray-400" : ""}`}>
+                    {deliveryDisplay}
+                  </span>
+                  <ChevronDown className="ml-2 h-4 w-4 opacity-40 shrink-0" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 p-4" align="start">
+                <div className="space-y-3">
+                  <div>
+                    <Label htmlFor="toHouseNumber" className="text-xs font-medium text-gray-700">House number</Label>
+                    <input
+                      id="toHouseNumber"
+                      type="text"
+                      value={searchForm.toHouseNumber}
+                      onChange={(e) => setSearchForm((prev) => ({ ...prev, toHouseNumber: e.target.value }))}
+                      placeholder="Enter house number"
+                      className="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#6371BE] focus:border-[#6371BE]"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="toStreet" className="text-xs font-medium text-gray-700">Street name</Label>
+                    <input
+                      id="toStreet"
+                      type="text"
+                      value={searchForm.toStreet}
+                      onChange={(e) => setSearchForm((prev) => ({ ...prev, toStreet: e.target.value }))}
+                      placeholder="Enter street name"
+                      className="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#6371BE] focus:border-[#6371BE]"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="toZip" className="text-xs font-medium text-gray-700">ZIP code</Label>
+                    <div className="relative mt-1">
+                      <input
+                        id="toZip"
+                        type="text"
+                        value={searchForm.toZip}
+                        onChange={(e) => handleToZipChange(e.target.value)}
+                        placeholder="Enter ZIP code"
+                        maxLength={5}
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#6371BE] focus:border-[#6371BE] pr-8"
+                      />
+                      {isZipLoading && <Loader2 className="absolute right-2 top-2.5 h-4 w-4 animate-spin text-gray-400" />}
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="toCity" className="text-xs font-medium text-gray-700">City</Label>
+                    <input
+                      id="toCity"
+                      type="text"
+                      value={searchForm.toCity}
+                      placeholder="Auto-filled from ZIP"
+                      readOnly
+                      className="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-md bg-gray-50 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="toState" className="text-xs font-medium text-gray-700">State</Label>
+                    <select
+                      id="toState"
+                      value={searchForm.toState}
+                      disabled
+                      className="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-md bg-gray-50 focus:outline-none"
+                    >
+                      <option value="">Auto-filled from ZIP</option>
+                      {US_STATES.map((s) => (
+                        <option key={s.code} value={s.code}>{s.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <Button
+                    type="button"
+                    onClick={() => setShowDeliveryDropdown(false)}
+                    className="w-full bg-[#6371BE] hover:bg-[#081C8B] text-white"
+                  >
+                    Done
+                  </Button>
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          {/* Pickup date */}
+          <div className="space-y-1.5">
+            <Label
+              className={`text-xs font-semibold uppercase tracking-wide ${
+                showRequiredHints && !searchForm.pickupStartDate ? "text-red-600" : "text-gray-500"
+              }`}
+            >
+              Pickup date
+            </Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start text-left font-normal bg-white border-gray-200 hover:border-[#6371BE] focus:ring-2 focus:ring-[#6371BE] h-10 text-sm text-gray-700"
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4 text-gray-400" />
+                  <span className={searchForm.pickupStartDate ? "text-gray-700" : "text-gray-400"}>
+                    {getPickupDateDisplay()}
+                  </span>
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="range"
+                  selected={{ from: searchForm.pickupStartDate, to: searchForm.pickupEndDate }}
+                  onSelect={handleDateRangeChange}
+                  disabled={(date) => date < tomorrow}
+                  numberOfMonths={1}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          {/* Vehicle model */}
+          <div className="space-y-1.5 col-span-2 md:col-span-1">
+            <VehicleModelInput
+              value={searchForm.vehicleModel}
+              onChange={handleVehicleModelChange}
+              year={searchForm.vehicleYear}
+              onYearChange={handleVehicleYearChange}
+              onVehicleSelect={handleVehicleSelect}
+              showRequiredHint={showRequiredHints && (!searchForm.vehicleModel || !searchForm.vehicleYear)}
+              className="text-sm"
+              enableSearch={false}
+            />
+          </div>
+
+          {/* Vehicle condition */}
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+              Condition
+            </Label>
+            <Popover open={showConditionDropdown} onOpenChange={setShowConditionDropdown}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full justify-between text-left font-normal bg-white border-gray-200 hover:border-[#6371BE] h-10 text-sm text-gray-700"
+                >
+                  <span>{searchForm.vehicleCondition}</span>
+                  <ChevronDown className="ml-2 h-4 w-4 opacity-40 shrink-0" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-48 p-0">
+                <div className="py-1">
+                  {["Operable", "Inoperable"].map((cond) => (
+                    <button
+                      key={cond}
+                      className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 focus:outline-none"
+                      onClick={() => {
+                        setSearchForm((prev) => ({ ...prev, vehicleCondition: cond }))
+                        setShowConditionDropdown(false)
+                      }}
+                    >
+                      {cond}
+                    </button>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          {/* Submit */}
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold uppercase tracking-wide text-transparent select-none">
+              Action
+            </Label>
+            <Button
+              type="button"
+              className="w-full bg-[#044BD9] hover:bg-[#081C8B] text-white h-10 text-sm font-semibold"
+              onClick={handleSubmit}
+            >
+              Find Carriers
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

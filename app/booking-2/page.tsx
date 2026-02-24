@@ -292,8 +292,18 @@ export default function QuotePage() {
       ...initialFormData,
     }))
 
+    const hasFullData =
+      (initialFormData.fromCity || initialFormData.fromZip) &&
+      (initialFormData.toCity || initialFormData.toZip) &&
+      initialFormData.vehicleModel &&
+      initialFormData.vehicleYear
+
     if (Object.values(initialFormData).some((value) => value && value !== "Operable")) {
       setHasSearched(true)
+    }
+
+    if (hasFullData) {
+      setHasPerformedFirstSearch(true)
     }
 
     const performZipLookups = async () => {
