@@ -377,7 +377,7 @@ export function HeroSearchForm() {
           </div>
 
           {/* Pickup date */}
-          <div className="space-y-1.5">
+          <div className="space-y-1.5 col-span-2 md:col-span-1">
             <Label
               className={`text-xs font-semibold uppercase tracking-wide ${
                 showRequiredHints && !searchForm.pickupStartDate ? "text-red-600" : "text-gray-500"

@@ -47,6 +47,7 @@ export function VehicleModelInput({
   const tooltipRef = useRef<HTMLDivElement>(null)
   const hideTooltipTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const [dropdownRect, setDropdownRect] = useState<{ top: number; left: number; width: number } | null>(null)
+  const [tooltipRect, setTooltipRect] = useState<{ top: number; left: number } | null>(null)
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -61,11 +62,15 @@ export function VehicleModelInput({
         left: rect.left + window.scrollX,
         width: rect.width,
       })
+      setTooltipRect({
+        top: rect.top + window.scrollY,
+        left: rect.right + window.scrollX + 8,
+      })
     }
   }, [])
 
   useEffect(() => {
-    if (showSuggestions || showYearSelection) {
+    if (showSuggestions || showYearSelection || showTooltip) {
       updateDropdownRect()
       window.addEventListener("scroll", updateDropdownRect, true)
       window.addEventListener("resize", updateDropdownRect)
@@ -74,7 +79,7 @@ export function VehicleModelInput({
         window.removeEventListener("resize", updateDropdownRect)
       }
     }
-  }, [showSuggestions, showYearSelection, updateDropdownRect])
+  }, [showSuggestions, showYearSelection, showTooltip, updateDropdownRect])
 
   // Use Google Sheets vehicle data
   const { 
@@ -519,10 +524,18 @@ export function VehicleModelInput({
           document.body
         )}
 
-        {/* Enhanced Tooltip with Year Selection - showing ONLY years from your table */}
-        {enableSearch && showTooltip && !showYearSelection && (
-          <div className="absolute left-full top-0 ml-2 z-[50000] w-80">
-            <Card 
+        {/* Vehicle Details tooltip — rendered via portal to escape overflow clipping */}
+        {mounted && enableSearch && showTooltip && !showYearSelection && tooltipRect && createPortal(
+          <div
+            style={{
+              position: "absolute",
+              top: tooltipRect.top,
+              left: tooltipRect.left,
+              width: 320,
+              zIndex: 99999,
+            }}
+          >
+            <Card
               ref={tooltipRef}
               className="shadow-lg border-2 border-[#6371BE]/20"
               onMouseEnter={handleTooltipMouseEnter}
@@ -536,7 +549,6 @@ export function VehicleModelInput({
 
                 <div className="text-sm text-gray-600 mb-3">{getTooltipContent(showTooltip)}</div>
 
-                {/* Year Selection in Tooltip - ONLY from your table */}
                 {tooltipYearOptions.length > 0 && (
                   <div className="mb-3">
                     <div className="grid grid-cols-4 gap-1 max-h-32 overflow-y-auto">
@@ -561,7 +573,6 @@ export function VehicleModelInput({
                           showTooltip.transportRecommendation === "enclosed" ? "text-purple-600" : "text-blue-600"
                         }
                       >
-                        {showTooltip.transportRecommendation === "enclosed" ? "🛡️" : "🚛"}
                         {showTooltip.transportRecommendation === "enclosed"
                           ? "Recommended for protection of high-value vehicle"
                           : "Standard open transport is suitable for this vehicle"}
@@ -571,7 +582,8 @@ export function VehicleModelInput({
                 </div>
               </CardContent>
             </Card>
-          </div>
+          </div>,
+          document.body
         )}
       </div>
     </div>
