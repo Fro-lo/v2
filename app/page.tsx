@@ -129,6 +129,9 @@ export default function VehiclerLanding() {
             <Link href="#faq" className="text-vehicler-black hover:text-vehicler-blue transition-colors">
               FAQ
             </Link>
+            <Link href="#" className="text-vehicler-black hover:text-vehicler-blue transition-colors">
+              For business
+            </Link>
             {/* Temporarily hidden - Check My Order link */}
             {/* <Link
               href="/find-my-vehicle"
@@ -228,6 +231,14 @@ export default function VehiclerLanding() {
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 FAQ
+              </Link>
+
+              <Link
+                href="#"
+                className="block text-vehicler-black hover:text-vehicler-blue transition-colors py-2 font-medium"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                For business
               </Link>
 
               {/* Temporarily hidden - Check My Order link */}
@@ -676,6 +687,7 @@ export default function VehiclerLanding() {
               links={[
                 { text: "Contact Us", href: "#" },
                 { text: "FAQ", href: "#faq" },
+                { text: "For business", href: "#" },
                 // { text: "Track Shipment", href: "/find-my-vehicle" }, // Temporarily hidden
                 { text: "Get Quote", href: "#quote" },
               ]}
