@@ -13,58 +13,6 @@ import { useZipLookup } from "@/hooks/use-zip-lookup"
 import { VehicleModelInput } from "@/components/vehicle-model-input"
 import type { DateRange } from "react-day-picker"
 
-const US_STATES = [
-  { code: "AL", name: "Alabama" },
-  { code: "AK", name: "Alaska" },
-  { code: "AZ", name: "Arizona" },
-  { code: "AR", name: "Arkansas" },
-  { code: "CA", name: "California" },
-  { code: "CO", name: "Colorado" },
-  { code: "CT", name: "Connecticut" },
-  { code: "DE", name: "Delaware" },
-  { code: "FL", name: "Florida" },
-  { code: "GA", name: "Georgia" },
-  { code: "HI", name: "Hawaii" },
-  { code: "ID", name: "Idaho" },
-  { code: "IL", name: "Illinois" },
-  { code: "IN", name: "Indiana" },
-  { code: "IA", name: "Iowa" },
-  { code: "KS", name: "Kansas" },
-  { code: "KY", name: "Kentucky" },
-  { code: "LA", name: "Louisiana" },
-  { code: "ME", name: "Maine" },
-  { code: "MD", name: "Maryland" },
-  { code: "MA", name: "Massachusetts" },
-  { code: "MI", name: "Michigan" },
-  { code: "MN", name: "Minnesota" },
-  { code: "MS", name: "Mississippi" },
-  { code: "MO", name: "Missouri" },
-  { code: "MT", name: "Montana" },
-  { code: "NE", name: "Nebraska" },
-  { code: "NV", name: "Nevada" },
-  { code: "NH", name: "New Hampshire" },
-  { code: "NJ", name: "New Jersey" },
-  { code: "NM", name: "New Mexico" },
-  { code: "NY", name: "New York" },
-  { code: "NC", name: "North Carolina" },
-  { code: "ND", name: "North Dakota" },
-  { code: "OH", name: "Ohio" },
-  { code: "OK", name: "Oklahoma" },
-  { code: "OR", name: "Oregon" },
-  { code: "PA", name: "Pennsylvania" },
-  { code: "RI", name: "Rhode Island" },
-  { code: "SC", name: "South Carolina" },
-  { code: "SD", name: "South Dakota" },
-  { code: "TN", name: "Tennessee" },
-  { code: "TX", name: "Texas" },
-  { code: "UT", name: "Utah" },
-  { code: "VT", name: "Vermont" },
-  { code: "VA", name: "Virginia" },
-  { code: "WA", name: "Washington" },
-  { code: "WV", name: "West Virginia" },
-  { code: "WI", name: "Wisconsin" },
-  { code: "WY", name: "Wyoming" },
-]
 
 interface SearchFormData {
   fromStreet: string
@@ -185,12 +133,11 @@ export function HeroSearchForm() {
   }, [])
 
   const getPickupAddressDisplay = () => {
-    const stateName = searchForm.fromState ? US_STATES.find((s) => s.code === searchForm.fromState)?.name : ""
     const parts = [
       searchForm.fromHouseNumber,
       searchForm.fromStreet,
       searchForm.fromCity,
-      stateName,
+      searchForm.fromState,
       searchForm.fromZip,
     ].filter(Boolean)
     if (parts.length === 0) return "Enter address"
@@ -198,12 +145,11 @@ export function HeroSearchForm() {
   }
 
   const getDeliveryAddressDisplay = () => {
-    const stateName = searchForm.toState ? US_STATES.find((s) => s.code === searchForm.toState)?.name : ""
     const parts = [
       searchForm.toHouseNumber,
       searchForm.toStreet,
       searchForm.toCity,
-      stateName,
+      searchForm.toState,
       searchForm.toZip,
     ].filter(Boolean)
     if (parts.length === 0) return "Enter address"
@@ -224,10 +170,8 @@ export function HeroSearchForm() {
 
   const handleSubmit = () => {
     const requiredFields = [
-      { field: "fromStreet", name: "Pick up from street" },
-      { field: "fromCity", name: "Pick up from city" },
-      { field: "toStreet", name: "Deliver to street" },
-      { field: "toCity", name: "Deliver to city" },
+      { field: "fromZip", name: "Pick up ZIP code" },
+      { field: "toZip", name: "Deliver to ZIP code" },
       { field: "pickupStartDate", name: "Pickup date" },
       { field: "vehicleModel", name: "Vehicle model" },
       { field: "vehicleYear", name: "Vehicle year" },
@@ -279,7 +223,7 @@ export function HeroSearchForm() {
       )}
 
       <div
-        className={`bg-white rounded-xl p-5 shadow-2xl transition-all duration-300 ${
+        className={`bg-white rounded-xl p-5 shadow-2xl transition-all duration-300 overflow-visible ${
           showRequiredHints ? "ring-4 ring-red-500 ring-opacity-75" : ""
         }`}
       >
@@ -288,9 +232,7 @@ export function HeroSearchForm() {
           <div className="space-y-1.5 relative">
             <Label
               className={`text-xs font-semibold uppercase tracking-wide ${
-                showRequiredHints && (!searchForm.fromStreet || !searchForm.fromCity)
-                  ? "text-red-600"
-                  : "text-gray-500"
+                showRequiredHints && !searchForm.fromZip ? "text-red-600" : "text-gray-500"
               }`}
             >
               Pick up from
@@ -307,7 +249,7 @@ export function HeroSearchForm() {
                   <ChevronDown className="ml-2 h-4 w-4 opacity-40 shrink-0" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-80 p-4" align="start">
+              <PopoverContent className="w-72 p-4" align="start">
                 <div className="space-y-3">
                   <div>
                     <Label htmlFor="fromHouseNumber" className="text-xs font-medium text-gray-700">House number</Label>
@@ -332,7 +274,9 @@ export function HeroSearchForm() {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="fromZip" className="text-xs font-medium text-gray-700">ZIP code</Label>
+                    <Label htmlFor="fromZip" className="text-xs font-medium text-gray-700">
+                      ZIP code <span className="text-red-500">*</span>
+                    </Label>
                     <div className="relative mt-1">
                       <input
                         id="fromZip"
@@ -345,31 +289,6 @@ export function HeroSearchForm() {
                       />
                       {isZipLoading && <Loader2 className="absolute right-2 top-2.5 h-4 w-4 animate-spin text-gray-400" />}
                     </div>
-                  </div>
-                  <div>
-                    <Label htmlFor="fromCity" className="text-xs font-medium text-gray-700">City</Label>
-                    <input
-                      id="fromCity"
-                      type="text"
-                      value={searchForm.fromCity}
-                      placeholder="Auto-filled from ZIP"
-                      readOnly
-                      className="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-md bg-gray-50 focus:outline-none"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="fromState" className="text-xs font-medium text-gray-700">State</Label>
-                    <select
-                      id="fromState"
-                      value={searchForm.fromState}
-                      disabled
-                      className="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-md bg-gray-50 focus:outline-none"
-                    >
-                      <option value="">Auto-filled from ZIP</option>
-                      {US_STATES.map((s) => (
-                        <option key={s.code} value={s.code}>{s.name}</option>
-                      ))}
-                    </select>
                   </div>
                   <Button
                     type="button"
@@ -387,9 +306,7 @@ export function HeroSearchForm() {
           <div className="space-y-1.5 relative">
             <Label
               className={`text-xs font-semibold uppercase tracking-wide ${
-                showRequiredHints && (!searchForm.toStreet || !searchForm.toCity)
-                  ? "text-red-600"
-                  : "text-gray-500"
+                showRequiredHints && !searchForm.toZip ? "text-red-600" : "text-gray-500"
               }`}
             >
               Deliver to
@@ -406,7 +323,7 @@ export function HeroSearchForm() {
                   <ChevronDown className="ml-2 h-4 w-4 opacity-40 shrink-0" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-80 p-4" align="start">
+              <PopoverContent className="w-72 p-4" align="start">
                 <div className="space-y-3">
                   <div>
                     <Label htmlFor="toHouseNumber" className="text-xs font-medium text-gray-700">House number</Label>
@@ -431,7 +348,9 @@ export function HeroSearchForm() {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="toZip" className="text-xs font-medium text-gray-700">ZIP code</Label>
+                    <Label htmlFor="toZip" className="text-xs font-medium text-gray-700">
+                      ZIP code <span className="text-red-500">*</span>
+                    </Label>
                     <div className="relative mt-1">
                       <input
                         id="toZip"
@@ -444,31 +363,6 @@ export function HeroSearchForm() {
                       />
                       {isZipLoading && <Loader2 className="absolute right-2 top-2.5 h-4 w-4 animate-spin text-gray-400" />}
                     </div>
-                  </div>
-                  <div>
-                    <Label htmlFor="toCity" className="text-xs font-medium text-gray-700">City</Label>
-                    <input
-                      id="toCity"
-                      type="text"
-                      value={searchForm.toCity}
-                      placeholder="Auto-filled from ZIP"
-                      readOnly
-                      className="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-md bg-gray-50 focus:outline-none"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="toState" className="text-xs font-medium text-gray-700">State</Label>
-                    <select
-                      id="toState"
-                      value={searchForm.toState}
-                      disabled
-                      className="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-md bg-gray-50 focus:outline-none"
-                    >
-                      <option value="">Auto-filled from ZIP</option>
-                      {US_STATES.map((s) => (
-                        <option key={s.code} value={s.code}>{s.name}</option>
-                      ))}
-                    </select>
                   </div>
                   <Button
                     type="button"
