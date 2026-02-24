@@ -290,8 +290,10 @@ export default function VehiclerLanding() {
               >
                 Nationwide Car Shipping You Can Trust
               </FitText>
-              <p className="text-lg md:text-xl text-blue-100 text-pretty mt-4">
-                Safe, reliable, and affordable vehicle transport across all 50 states. Fill in the details below and get instant quotes from verified carriers.
+              <p className="text-sm md:text-base text-blue-100 mt-4">
+                Safe, reliable, and affordable vehicle transport across all 50 states.{" "}
+                <span className="hidden md:inline"><br /></span>
+                Fill in the details below and get instant quotes from verified carriers.
               </p>
             </div>
 
