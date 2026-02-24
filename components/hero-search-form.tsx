@@ -5,7 +5,7 @@ import { useState, useCallback, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-import { Calendar } from "@/components/ui/calendar"
+import { Calendar as CalendarUI } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { CalendarIcon, ChevronDown, Loader2 } from "lucide-react"
 import { format } from "date-fns"
@@ -504,7 +504,7 @@ export function HeroSearchForm() {
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
+                <CalendarUI
                   mode="range"
                   selected={{ from: searchForm.pickupStartDate, to: searchForm.pickupEndDate }}
                   onSelect={handleDateRangeChange}
@@ -526,7 +526,7 @@ export function HeroSearchForm() {
               onVehicleSelect={handleVehicleSelect}
               showRequiredHint={showRequiredHints && (!searchForm.vehicleModel || !searchForm.vehicleYear)}
               className="text-sm"
-              enableSearch={false}
+              enableSearch={true}
             />
           </div>
 
