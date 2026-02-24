@@ -66,6 +66,7 @@ export function HeroSearchForm() {
   const [showAddressDropdown, setShowAddressDropdown] = useState(false)
   const [showDeliveryDropdown, setShowDeliveryDropdown] = useState(false)
   const [showConditionDropdown, setShowConditionDropdown] = useState(false)
+  const [showDatePicker, setShowDatePicker] = useState(false)
   const [showRequiredHints, setShowRequiredHints] = useState(false)
 
   const handleFromZipChange = useCallback(async (zipCode: string) => {
@@ -106,10 +107,14 @@ export function HeroSearchForm() {
 
   const handleDateRangeChange = useCallback((range: DateRange | undefined) => {
     if (range?.from) {
+      // Auto-set a 3-day window when user picks a single date
+      const autoEnd = range.to && range.to.getTime() !== range.from.getTime()
+        ? range.to
+        : new Date(range.from.getTime() + 2 * 24 * 60 * 60 * 1000)
       setSearchForm((prev) => ({
         ...prev,
         pickupStartDate: range.from,
-        pickupEndDate: range.to || range.from,
+        pickupEndDate: autoEnd,
       }))
     } else {
       setSearchForm((prev) => ({ ...prev, pickupStartDate: undefined, pickupEndDate: undefined }))
@@ -376,16 +381,16 @@ export function HeroSearchForm() {
             </Popover>
           </div>
 
-          {/* Pickup date */}
+          {/* Pickup dates */}
           <div className="space-y-1.5 col-span-2 md:col-span-1">
             <Label
               className={`text-xs font-semibold uppercase tracking-wide ${
                 showRequiredHints && !searchForm.pickupStartDate ? "text-red-600" : "text-gray-500"
               }`}
             >
-              Pickup date
+              Pickup dates
             </Label>
-            <Popover>
+            <Popover open={showDatePicker} onOpenChange={setShowDatePicker}>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
@@ -405,7 +410,23 @@ export function HeroSearchForm() {
                   disabled={(date) => date < tomorrow}
                   numberOfMonths={1}
                   initialFocus
+                  classNames={{
+                    day_selected: "bg-[#6371BE] text-white hover:bg-[#081C8B] focus:bg-[#6371BE]",
+                    day_range_middle: "bg-[#6371BE]/15 text-[#081C8B] rounded-none",
+                    day_range_start: "bg-[#6371BE] text-white rounded-l-md",
+                    day_range_end: "bg-[#6371BE] text-white rounded-r-md",
+                    day_today: "font-bold",
+                  }}
                 />
+                <div className="p-3 border-t border-gray-100 flex justify-end">
+                  <Button
+                    size="sm"
+                    className="bg-[#6371BE] hover:bg-[#081C8B] text-white"
+                    onClick={() => setShowDatePicker(false)}
+                  >
+                    Done
+                  </Button>
+                </div>
               </PopoverContent>
             </Popover>
           </div>
