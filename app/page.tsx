@@ -278,18 +278,20 @@ export default function VehiclerLanding() {
         </div>
 
         <div className="max-w-6xl mx-auto px-4 md:px-16 relative z-10">
-          {/* Heading + description */}
-          <div className="text-center mb-10">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight text-balance">
-              Nationwide Car Shipping You Can Trust
-            </h1>
-            <p className="text-lg md:text-xl text-blue-100 max-w-2xl mx-auto text-pretty">
-              Safe, reliable, and affordable vehicle transport across all 50 states. Fill in the details below and get instant quotes from verified carriers.
-            </p>
-          </div>
+          <div className="max-w-5xl mx-auto">
+            {/* Heading + description */}
+            <div className="text-center mb-10">
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 leading-tight whitespace-nowrap">
+                Nationwide Car Shipping You Can Trust
+              </h1>
+              <p className="text-lg md:text-xl text-blue-100 text-pretty">
+                Safe, reliable, and affordable vehicle transport across all 50 states. Fill in the details below and get instant quotes from verified carriers.
+              </p>
+            </div>
 
-          {/* Full-width search form */}
-          <HeroSearchForm />
+            {/* Full-width search form */}
+            <HeroSearchForm />
+          </div>
         </div>
       </section>
 
