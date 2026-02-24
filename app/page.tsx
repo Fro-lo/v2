@@ -22,6 +22,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { HeroSearchForm } from "@/components/hero-search-form"
+import { FitText } from "@/components/fit-text"
 
 export default function VehiclerLanding() {
   const [currentReview, setCurrentReview] = useState(0)
@@ -281,10 +282,15 @@ export default function VehiclerLanding() {
           <div className="max-w-5xl mx-auto">
             {/* Heading + description */}
             <div className="text-center mb-10">
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 leading-tight whitespace-nowrap">
+              <FitText
+                as="h1"
+                className="font-bold text-white mb-4"
+                minFontSize={20}
+                maxFontSize={120}
+              >
                 Nationwide Car Shipping You Can Trust
-              </h1>
-              <p className="text-lg md:text-xl text-blue-100 text-pretty">
+              </FitText>
+              <p className="text-lg md:text-xl text-blue-100 text-pretty mt-4">
                 Safe, reliable, and affordable vehicle transport across all 50 states. Fill in the details below and get instant quotes from verified carriers.
               </p>
             </div>
