@@ -109,6 +109,31 @@ export async function POST(request: Request) {
       } else {
         console.log("[submit-booking] Saved to Supabase, bookingId:", bookingId)
       }
+
+      // --- Save to b2c-clients (deduplicated) ---
+      if (body.customerName || body.customerEmail || body.customerPhone) {
+        const nameParts = (body.customerName || "").trim().split(/\s+/)
+        const firstName = nameParts[0] || null
+        const lastName = nameParts.slice(1).join(" ") || null
+
+        const { error: clientError } = await supabase
+          .from("b2c-clients")
+          .upsert(
+            {
+              first_name: firstName,
+              last_name: lastName,
+              email: body.customerEmail || null,
+              phone: body.customerPhone || null,
+            },
+            { onConflict: "first_name,last_name,email,phone", ignoreDuplicates: true }
+          )
+
+        if (clientError) {
+          console.error("[submit-booking] b2c-clients insert error:", clientError)
+        } else {
+          console.log("[submit-booking] Client saved/skipped (duplicate) in b2c-clients")
+        }
+      }
     } else {
       console.warn("[submit-booking] Supabase not configured, skipping")
     }
