@@ -232,6 +232,9 @@ export function HeroSearchForm() {
           showRequiredHints ? "ring-4 ring-red-500 ring-opacity-75" : ""
         }`}
       >
+        <p className="text-sm text-gray-500 mb-4">
+          Fill in the details and get instant quotes from verified carriers.
+        </p>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 items-end">
           {/* Pick up from */}
           <div className="space-y-1.5 relative">

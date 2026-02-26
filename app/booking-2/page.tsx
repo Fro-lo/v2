@@ -1003,6 +1003,12 @@ export default function QuotePage() {
                             disabled={(date) => date < tomorrow}
                             numberOfMonths={1}
                             initialFocus
+                            classNames={{
+                              day_selected: "bg-[#6371BE] text-white hover:bg-[#081C8B] focus:bg-[#6371BE]",
+                              day_range_middle: "bg-[#6371BE]/15 text-[#081C8B] rounded-none",
+                              day_range_start: "bg-[#6371BE] text-white rounded-l-md",
+                              day_range_end: "bg-[#6371BE] text-white rounded-r-md",
+                            }}
                           />
                         </PopoverContent>
                       </Popover>
