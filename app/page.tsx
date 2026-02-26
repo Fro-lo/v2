@@ -292,7 +292,7 @@ export default function VehiclerLanding() {
         <div className="max-w-6xl mx-auto px-4 md:px-16 relative z-10">
           <div className="max-w-5xl mx-auto">
             {/* Heading + description */}
-            <div className="text-center mb-10">
+            <div className="text-center mb-6">
               <FitText
                 as="h1"
                 className="font-bold text-white mb-4"
@@ -302,11 +302,14 @@ export default function VehiclerLanding() {
                 Nationwide Car Shipping You Can Trust
               </FitText>
               <p className="text-sm md:text-base text-blue-100 mt-4">
-                Safe, reliable, and affordable vehicle transport across all 50 states.{" "}
-                <span className="hidden md:inline"><br /></span>
-                Fill in the details below and get instant quotes from verified carriers.
+                Safe, reliable, and affordable vehicle transport across all 50 states.
               </p>
             </div>
+
+            {/* Call to action tied to the form */}
+            <p className="text-sm md:text-base text-blue-200 text-center mb-4">
+              Fill in the details below and get instant quotes from verified carriers.
+            </p>
 
             {/* Full-width search form */}
             <HeroSearchForm />
