@@ -8,7 +8,7 @@ function getStripe() {
     throw new Error("STRIPE_SECRET_KEY is not set")
   }
   return new Stripe(secretKey, {
-    apiVersion: "2025-11-17.clover",
+    apiVersion: "2025-03-31.basil",
   })
 }
 
