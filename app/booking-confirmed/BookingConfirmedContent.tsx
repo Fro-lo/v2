@@ -4,10 +4,10 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Truck, Calendar, MapPin, Car, DollarSign, Shield, Home, User, Mail, Phone, FileText, CheckCircle } from "lucide-react"
 import Link from "next/link"
-import Image from "next/image"
-import { Facebook, Twitter, Instagram, Linkedin } from "lucide-react"
 import { useSearchParams } from "next/navigation"
 import { useEffect, useState, useRef } from "react"
+import { SiteHeader } from "@/components/site-header"
+import { SiteFooter } from "@/components/site-footer"
 
 // ──────────────── Types ────────────────
 interface BookingData {
@@ -234,22 +234,7 @@ export default function BookingConfirmedContent() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center">
-              <Image
-                src="/images/vehicler-logo.png"
-                alt="Vehicler"
-                width={150}
-                height={50}
-                className="h-10 w-auto"
-              />
-            </Link>
-          </div>
-        </div>
-      </header>
+      <SiteHeader />
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-12">
@@ -460,135 +445,7 @@ export default function BookingConfirmedContent() {
         </div>
       </div>
 
-      {/* Footer */}
-      <footer className="bg-[#262626] text-white mt-16">
-        <div className="px-4 sm:px-6 lg:px-8 py-12">
-          <div className="grid md:grid-cols-4 gap-8">
-            {/* Logo and Description */}
-            <div>
-              <img src="/images/vehicler-footer-logo.png" alt="Vehicler" className="h-12 w-auto mb-4" />
-              <p className="text-gray-300 text-sm mb-6 leading-relaxed">
-                America's trusted vehicle transport company, delivering safe and reliable car shipping nationwide.
-              </p>
-
-              {/* Social Media Icons */}
-              <div className="flex space-x-4">
-                <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                  <Facebook className="h-5 w-5" />
-                </a>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                  <Twitter className="h-5 w-5" />
-                </a>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                  <Instagram className="h-5 w-5" />
-                </a>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                  <Linkedin className="h-5 w-5" />
-                </a>
-              </div>
-            </div>
-
-            {/* Services */}
-            <div>
-              <h3 className="font-semibold mb-6 text-white">Services</h3>
-              <ul className="space-y-3 text-sm text-gray-300">
-                <li>
-                  <a href="#" className="hover:text-white transition-colors">
-                    Open Car Transport
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white transition-colors">
-                    Enclosed Car Transport
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white transition-colors">
-                    Motorcycle Shipping
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white transition-colors">
-                    Classic Car Transport
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            {/* Company */}
-            <div>
-              <h3 className="font-semibold mb-6 text-white">Company</h3>
-              <ul className="space-y-3 text-sm text-gray-300">
-                <li>
-                  <a href="#" className="hover:text-white transition-colors">
-                    About Us
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white transition-colors">
-                    How It Works
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white transition-colors">
-                    Reviews
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white transition-colors">
-                    Careers
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            {/* Support */}
-            <div>
-              <h3 className="font-semibold mb-6 text-white">Support</h3>
-              <ul className="space-y-3 text-sm text-gray-300">
-                <li>
-                  <a href="#" className="hover:text-white transition-colors">
-                    Contact Us
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white transition-colors">
-                    FAQ
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white transition-colors">
-                    Track Shipment
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white transition-colors">
-                    Get Quote
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          {/* Bottom Section */}
-          <div className="mt-12 pt-8">
-            <div className="flex flex-col md:flex-row justify-between items-center text-sm text-gray-400">
-              <p>&copy; 2025 Vehicler. All rights reserved.</p>
-              <div className="flex space-x-8 mt-4 md:mt-0">
-                <a href="#" className="hover:text-white transition-colors">
-                  Privacy Policy
-                </a>
-                <a href="#" className="hover:text-white transition-colors">
-                  Terms of Service
-                </a>
-                <a href="#" className="hover:text-white transition-colors">
-                  Cookie Policy
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   )
 }

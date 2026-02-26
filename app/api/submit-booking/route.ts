@@ -3,6 +3,7 @@ import { existsSync } from "fs"
 import { join } from "path"
 import { GoogleAuth } from "google-auth-library"
 import { google } from "googleapis"
+import { createClient as createSupabaseClient } from "@supabase/supabase-js"
 
 export const dynamic = "force-dynamic"
 
@@ -21,7 +22,13 @@ function getCredentialsPath(): string | null {
   return null
 }
 
-// Функция для получения аутентифицированного клиента Google Sheets
+function getSupabaseClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  if (!url || !key) return null
+  return createSupabaseClient(url, key)
+}
+
 async function getAuthenticatedSheetsClient() {
   const { readFileSync } = await import("fs")
   const credentialsDir = join(process.cwd(), "credentials")
@@ -30,10 +37,7 @@ async function getAuthenticatedSheetsClient() {
     const credentialsPath = join(credentialsDir, filename)
     if (!existsSync(credentialsPath)) continue
     try {
-      console.log("[Google Sheets] 📁 Чтение credentials из файла:", credentialsPath)
       const credentials = JSON.parse(readFileSync(credentialsPath, "utf8"))
-      console.log("[Google Sheets] ✅ Credentials успешно загружены из файла")
-
       const auth = new GoogleAuth({
         credentials,
         scopes: ["https://www.googleapis.com/auth/spreadsheets"],
@@ -41,7 +45,7 @@ async function getAuthenticatedSheetsClient() {
       const authClient = await auth.getClient()
       return google.sheets({ version: "v4", auth: authClient as any })
     } catch (error) {
-      console.error(`[Google Sheets] ❌ Ошибка при чтении ${filename}:`, error)
+      console.error(`[submit-booking] Error reading ${filename}:`, error)
     }
   }
   throw new Error("No valid credentials file found in credentials/")
@@ -49,202 +53,152 @@ async function getAuthenticatedSheetsClient() {
 
 export async function POST(request: Request) {
   try {
-    console.log("[Google Sheets] 💾 API: Получен запрос на сохранение бронирования")
     const body = await request.json()
 
-    console.log("[Google Sheets] 📝 API: Данные бронирования:", {
-      "размер данных": JSON.stringify(body).length,
-      "поля": Object.keys(body),
-      "примеры значений": {
-        customerName: body.customerName,
-        customerEmail: body.customerEmail,
-        vehicleModel: body.vehicleModel,
-        totalPrice: body.totalPrice,
-      },
-    })
-
-    const SHEET_ID = "1xd9wUqiLfJVjer9ocWC-ez8U1NNT8mK8TqZekeeKLLo"
-    const SHEET_GID = "1494336667" // GID из URL пользователя
-
-    const hasServiceAccount = !!getCredentialsPath()
-
-    // Генерируем Booking ID
+    // Generate Booking ID
     const timestamp = Date.now().toString(36).toUpperCase()
     const randomPart = Math.random().toString(36).substring(2, 6).toUpperCase()
     const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     const randomLetters = Array.from({ length: 2 }, () => letters[Math.floor(Math.random() * letters.length)]).join("")
     const bookingId = `#${randomLetters}${timestamp.slice(-3)}${randomPart}`
 
-    console.log("[Google Sheets] 📊 API: Конфигурация:", {
-      SHEET_ID,
-      SHEET_GID,
-      "Service Account (настроен)": hasServiceAccount,
-      bookingId,
-    })
-
-    // Формируем адреса
     const pickupAddress = `${body.fromHouseNumber || ""} ${body.fromStreet || ""}, ${body.fromCity || ""}, ${body.fromState || ""} ${body.fromZip || ""}`.trim()
     const deliveryAddress = `${body.toHouseNumber || ""} ${body.toStreet || ""}, ${body.toCity || ""}, ${body.toState || ""} ${body.toZip || ""}`.trim()
 
-    // Форматируем дату и время отправки
+    // --- Save to Supabase ---
+    const supabase = getSupabaseClient()
+    if (supabase) {
+      const { error: supabaseError } = await supabase
+        .from("b2c-bookings")
+        .insert({
+          booking_id: bookingId,
+          customer_name: body.customerName || null,
+          customer_email: body.customerEmail || null,
+          customer_phone: body.customerPhone || null,
+          customer_notes: body.customerNotes || null,
+          pickup_house_number: body.fromHouseNumber || null,
+          pickup_street: body.fromStreet || null,
+          pickup_city: body.fromCity || null,
+          pickup_state: body.fromState || null,
+          pickup_zip: body.fromZip || null,
+          pickup_address_type: body.fromAddressType || "Residential",
+          pickup_address: pickupAddress,
+          delivery_house_number: body.toHouseNumber || null,
+          delivery_street: body.toStreet || null,
+          delivery_city: body.toCity || null,
+          delivery_state: body.toState || null,
+          delivery_zip: body.toZip || null,
+          delivery_address_type: body.toAddressType || "Residential",
+          delivery_address: deliveryAddress,
+          vehicle_model: body.vehicleModel || null,
+          transport_type: body.transportType || "Open",
+          service_type: body.serviceType || "Door to Door",
+          vehicle_condition: body.vehicleCondition || "Operable",
+          pickup_date: body.pickupDate || null,
+          delivery_date: body.deliveryDate || null,
+          total_price: body.finalPrice || body.totalPrice || null,
+          contact_name: body.contactName || body.customerName || null,
+          contact_phone: body.contactPhone || body.customerPhone || null,
+          special_instructions: body.specialInstructions || null,
+          payment_intent_id: body.paymentIntentId || null,
+          status: "Pending",
+        })
+
+      if (supabaseError) {
+        console.error("[submit-booking] Supabase insert error:", supabaseError)
+      } else {
+        console.log("[submit-booking] Saved to Supabase, bookingId:", bookingId)
+      }
+
+      // --- Save to b2c-clients (deduplicated) ---
+      if (body.customerName || body.customerEmail || body.customerPhone) {
+        const nameParts = (body.customerName || "").trim().split(/\s+/)
+        const firstName = nameParts[0] || null
+        const lastName = nameParts.slice(1).join(" ") || null
+
+        const { error: clientError } = await supabase
+          .from("b2c-clients")
+          .upsert(
+            {
+              first_name: firstName,
+              last_name: lastName,
+              email: body.customerEmail || null,
+              phone: body.customerPhone || null,
+            },
+            { onConflict: "first_name,last_name,email,phone", ignoreDuplicates: true }
+          )
+
+        if (clientError) {
+          console.error("[submit-booking] b2c-clients insert error:", clientError)
+        } else {
+          console.log("[submit-booking] Client saved/skipped (duplicate) in b2c-clients")
+        }
+      }
+    } else {
+      console.warn("[submit-booking] Supabase not configured, skipping")
+    }
+
+    // --- Save to Google Sheets (fallback) ---
     const now = new Date()
     const submissionTime = `${now.toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "2-digit" })} ${now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true })}`
-
-    // Формируем строку для добавления в таблицу
-    // Структура колонок: A Booking ID, B Customer Name, C Customer Email, D Customer Phone, E Customer Notes,
-    // F Pickup Address, G Pickup Address Type, H Delivery Address, I Delivery Address Type, J Vehicle,
-    // K Pickup Date, L Estimated Delivery, M Transport Type, N Total Price, O Contact Name, P Contact Phone,
-    // Q Special Instructions, R Submission Time, S Status
     const row = [
-      bookingId, // 0: Booking ID (A)
-      body.customerName || "", // 1: Customer Name (B)
-      body.customerEmail || "", // 2: Customer Email (C)
-      body.customerPhone || "", // 3: Customer Phone (D)
-      body.customerNotes || "", // 4: Customer Notes (E)
-      pickupAddress, // 5: Pickup Address (F)
-      body.fromAddressType || "Residential", // 6: Pickup Address Type (G)
-      deliveryAddress, // 7: Delivery Address (H)
-      body.toAddressType || "Residential", // 8: Delivery Address Type (I)
-      body.vehicleModel || "", // 9: Vehicle (J)
-      body.pickupDate || "", // 10: Pickup Date (K)
-      body.deliveryDate || "", // 11: Estimated Delivery (L)
-      body.transportType || "Open", // 12: Transport Type (M)
-      body.finalPrice || body.totalPrice || "", // 13: Total Price (N)
-      body.contactName || body.customerName || "", // 14: Contact Name (O)
-      body.contactPhone || body.customerPhone || "", // 15: Contact Phone (P)
-      body.specialInstructions || "", // 16: Special Instructions (Q)
-      submissionTime, // 17: Submission Time (R)
-      "Pending", // 18: Status (S)
+      bookingId,
+      body.customerName || "",
+      body.customerEmail || "",
+      body.customerPhone || "",
+      body.customerNotes || "",
+      pickupAddress,
+      body.fromAddressType || "Residential",
+      deliveryAddress,
+      body.toAddressType || "Residential",
+      body.vehicleModel || "",
+      body.pickupDate || "",
+      body.deliveryDate || "",
+      body.transportType || "Open",
+      body.finalPrice || body.totalPrice || "",
+      body.contactName || body.customerName || "",
+      body.contactPhone || body.customerPhone || "",
+      body.specialInstructions || "",
+      submissionTime,
+      "Pending",
     ]
 
-    console.log("[Google Sheets] 📋 API: Строка для добавления:", row)
-
-    if (!hasServiceAccount) {
-      console.warn("[Google Sheets] ⚠️  API: Google Service Account не настроен, данные не будут сохранены")
-      console.warn("[Google Sheets] ⚠️  API: Положите в credentials/ один из: google-service-account.json, key.json")
-      return NextResponse.json({
-        success: true,
-        message: "Booking submitted successfully (not saved to Google Sheets - Service Account missing)",
-        bookingId,
-        data: body,
-        warning: "Service Account credentials file in credentials/ required for writing to Google Sheets",
-      })
-    }
-
-    const POSSIBLE_SHEET_NAMES = ["Orders", "Orders - Orders", "Sheet1", "Bookings", "Data", "Main", "Sheet2"]
-    let saved = false
-    let lastError: string | null = null
-    let lastErrorDetails: unknown = null
-
-    try {
-      console.log("[Google Sheets] 🔐 API: Использование Service Account для аутентификации")
-      const sheets = await getAuthenticatedSheetsClient()
-
-      for (const sheetName of POSSIBLE_SHEET_NAMES) {
-        try {
-          console.log(`[Google Sheets] 🔗 API: Попытка сохранения в лист "${sheetName}"`)
-          const fetchStartTime = Date.now()
-          const response = await sheets.spreadsheets.values.append({
-            spreadsheetId: SHEET_ID,
-            range: `${sheetName}!A1`,
-            valueInputOption: "RAW",
-            requestBody: { values: [row] },
-          })
-          const fetchDuration = Date.now() - fetchStartTime
-          console.log(`[Google Sheets] ⏱️  API: Время сохранения: ${fetchDuration}мс, статус: ${response.status}`)
-
-          if (response.status === 200 && response.data) {
-            console.log(`[Google Sheets] ✅ API: Данные успешно сохранены в лист "${sheetName}":`, {
-              "обновленный диапазон": response.data.updates?.updatedRange,
-              "обновлено ячеек": response.data.updates?.updatedCells,
+    const hasServiceAccount = !!getCredentialsPath()
+    if (hasServiceAccount) {
+      const SHEET_ID = "1xd9wUqiLfJVjer9ocWC-ez8U1NNT8mK8TqZekeeKLLo"
+      const POSSIBLE_SHEET_NAMES = ["Orders", "Orders - Orders", "Sheet1", "Bookings", "Data", "Main"]
+      try {
+        const sheets = await getAuthenticatedSheetsClient()
+        for (const sheetName of POSSIBLE_SHEET_NAMES) {
+          try {
+            const response = await sheets.spreadsheets.values.append({
+              spreadsheetId: SHEET_ID,
+              range: `${sheetName}!A1`,
+              valueInputOption: "RAW",
+              requestBody: { values: [row] },
             })
-            saved = true
-            break
-          } else {
-            console.warn(`[Google Sheets] ⚠️  API: Неожиданный ответ от листа "${sheetName}", статус: ${response.status}`)
-          }
-        } catch (error: unknown) {
-          const err = error as { response?: { data?: unknown }; message?: string }
-          console.error(`[Google Sheets] ❌ API: Ошибка при сохранении в лист "${sheetName}":`, error)
-          if (err.response?.data) {
-            lastErrorDetails = err.response.data
-            lastError = JSON.stringify(err.response.data)
-          } else {
-            lastError = err instanceof Error ? err.message : String(error)
-          }
+            if (response.status === 200) break
+          } catch {}
         }
+      } catch (err) {
+        console.error("[submit-booking] Google Sheets error:", err)
       }
-
-      if (!saved) {
-        try {
-          console.log(`[Google Sheets] 🔗 API: Попытка сохранения без указания листа`)
-          const fetchStartTime = Date.now()
-          const response = await sheets.spreadsheets.values.append({
-            spreadsheetId: SHEET_ID,
-            range: "A1",
-            valueInputOption: "RAW",
-            requestBody: { values: [row] },
-          })
-          const fetchDuration = Date.now() - fetchStartTime
-          console.log(`[Google Sheets] ⏱️  API: Время сохранения: ${fetchDuration}мс, статус: ${response.status}`)
-          if (response.status === 200 && response.data) {
-            console.log(`[Google Sheets] ✅ API: Данные успешно сохранены (без указания листа)`)
-            saved = true
-          }
-        } catch (error: unknown) {
-          const err = error as { response?: { data?: unknown }; message?: string }
-          console.error("[Google Sheets] ❌ API: Ошибка при сохранении без указания листа:", error)
-          if (err.response?.data) {
-            lastErrorDetails = err.response.data
-            lastError = JSON.stringify(err.response.data)
-          } else {
-            lastError = err instanceof Error ? err.message : String(error)
-          }
-        }
-      }
-    } catch (error: unknown) {
-      const err = error as { response?: { data?: unknown }; message?: string }
-      console.error("[Google Sheets] ❌ API: Критическая ошибка при создании клиента Google Sheets:", error)
-      lastError = err instanceof Error ? err.message : String(error)
-      if (err.response?.data) lastErrorDetails = err.response.data
     }
 
-    if (!saved) {
-      console.error("[Google Sheets] ❌ API: Не удалось сохранить данные ни в один лист")
-      console.error("[Google Sheets] ❌ API: Последняя ошибка:", lastError)
-      console.error("[Google Sheets] ❌ API: Детали ошибки:", lastErrorDetails)
-      return NextResponse.json({
-        success: true,
-        message: "Booking submitted successfully (failed to save to Google Sheets)",
-        bookingId,
-        data: body,
-        warning: "Could not save to Google Sheets",
-        error: lastError ?? undefined,
-        errorDetails: lastErrorDetails ?? undefined,
-      })
-    }
-
-    console.log("[Google Sheets] ✅ API: Бронирование успешно сохранено, ID:", bookingId)
     return NextResponse.json({
       success: true,
       message: "Booking submitted successfully",
       bookingId,
-      data: body,
     })
   } catch (error) {
-    console.error("[Google Sheets] ❌ API: Критическая ошибка при сохранении бронирования:", error)
+    console.error("[submit-booking] Critical error:", error)
     return NextResponse.json(
-      {
-        success: false,
-        error: error instanceof Error ? error.message : "Failed to submit booking",
-      },
+      { success: false, error: error instanceof Error ? error.message : "Failed to submit booking" },
       { status: 500 }
     )
   }
 }
 
 export async function GET() {
-  return NextResponse.json({
-    message: "Submit booking endpoint - use POST method",
-  })
+  return NextResponse.json({ message: "Submit booking endpoint - use POST method" })
 }
