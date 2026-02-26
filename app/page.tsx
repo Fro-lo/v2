@@ -27,7 +27,6 @@ import { FitText } from "@/components/fit-text"
 export default function VehiclerLanding() {
   const [currentReview, setCurrentReview] = useState(0)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [isMobileServicesOpen, setIsMobileServicesOpen] = useState(false)
 
   /* NEW — track if viewport is mobile (< 768 px) */
   const [isMobile, setIsMobile] = useState(typeof window !== "undefined" ? window.innerWidth < 768 : false)
@@ -86,43 +85,13 @@ export default function VehiclerLanding() {
     <div className="min-h-screen bg-white">
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-gray-100">
-        <div className="max-w-6xl mx-auto px-4 md:px-16 py-4 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-4 md:px-16 h-20 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <img src="/vehicler-logo.png" alt="Vehicler Logo" className="h-6 md:h-8 w-auto" />
           </div>
 
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center space-x-8">
-            <DropdownMenu>
-              <DropdownMenuTrigger className="text-vehicler-black hover:text-vehicler-blue transition-colors flex items-center space-x-1">
-                <span>Services</span>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56">
-                <DropdownMenuItem>
-                  <a href="#" className="w-full text-vehicler-black hover:text-vehicler-blue">
-                    Open Car Transport
-                  </a>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <a href="#" className="w-full text-vehicler-black hover:text-vehicler-blue">
-                    Enclosed Car Transport
-                  </a>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <a href="#" className="w-full text-vehicler-black hover:text-vehicler-blue">
-                    Motorcycle Shipping
-                  </a>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <a href="#" className="w-full text-vehicler-black hover:text-vehicler-blue">
-                    Classic Car Transport
-                  </a>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
             <Link href="#how-it-works" className="text-vehicler-black hover:text-vehicler-blue transition-colors">
               How It Works
             </Link>
@@ -132,13 +101,6 @@ export default function VehiclerLanding() {
             <Link href="https://business.vehicler.org/" target="_blank" rel="noopener noreferrer" className="text-vehicler-black hover:text-vehicler-blue transition-colors">
               For business
             </Link>
-            {/* Temporarily hidden - Check My Order link */}
-            {/* <Link
-              href="/find-my-vehicle"
-              className="hover:text-vehicler-blue transition-colors text-[rgba(8,28,139,1)]"
-            >
-              Check My Order
-            </Link> */}
           </nav>
 
           {/* Desktop Phone */}
@@ -183,40 +145,6 @@ export default function VehiclerLanding() {
         {isMobileMenuOpen && (
           <div className="lg:hidden bg-white border-t border-gray-100 shadow-lg">
             <div className="px-4 py-4 space-y-4">
-              {/* Services Dropdown for Mobile */}
-              <div>
-                <button
-                  onClick={() => setIsMobileServicesOpen(!isMobileServicesOpen)}
-                  className="flex items-center justify-between w-full text-left text-vehicler-black hover:text-vehicler-blue transition-colors py-2"
-                >
-                  <span className="font-medium">Services</span>
-                  <svg
-                    className={`w-4 h-4 transition-transform ${isMobileServicesOpen ? "rotate-180" : ""}`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-                {isMobileServicesOpen && (
-                  <div className="pl-4 mt-2 space-y-2">
-                    <a href="#" className="block text-vehicler-gray hover:text-vehicler-blue transition-colors py-1">
-                      Open Car Transport
-                    </a>
-                    <a href="#" className="block text-vehicler-gray hover:text-vehicler-blue transition-colors py-1">
-                      Enclosed Car Transport
-                    </a>
-                    <a href="#" className="block text-vehicler-gray hover:text-vehicler-blue transition-colors py-1">
-                      Motorcycle Shipping
-                    </a>
-                    <a href="#" className="block text-vehicler-gray hover:text-vehicler-blue transition-colors py-1">
-                      Classic Car Transport
-                    </a>
-                  </div>
-                )}
-              </div>
-
               <Link
                 href="#how-it-works"
                 className="block text-vehicler-black hover:text-vehicler-blue transition-colors py-2 font-medium"
@@ -242,15 +170,6 @@ export default function VehiclerLanding() {
               >
                 For business
               </Link>
-
-              {/* Temporarily hidden - Check My Order link */}
-              {/* <Link
-                href="/find-my-vehicle"
-                className="block text-vehicler-dark-blue hover:text-vehicler-blue transition-colors py-2 font-medium"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Check My Order
-              </Link> */}
 
               {/* Mobile CTA Button */}
               <div className="pt-4 border-t border-gray-100">
