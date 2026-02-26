@@ -20,7 +20,8 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"import { HeroSearchForm } from "@/components/hero-search-form"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { HeroSearchForm } from "@/components/hero-search-form"
 import { FitText } from "@/components/fit-text"
 
 export default function VehiclerLanding() {
