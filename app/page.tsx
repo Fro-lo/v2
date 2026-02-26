@@ -129,7 +129,7 @@ export default function VehiclerLanding() {
             <Link href="#faq" className="text-vehicler-black hover:text-vehicler-blue transition-colors">
               FAQ
             </Link>
-            <Link href="#" className="text-vehicler-black hover:text-vehicler-blue transition-colors">
+            <Link href="https://business.vehicler.org/" target="_blank" rel="noopener noreferrer" className="text-vehicler-black hover:text-vehicler-blue transition-colors">
               For business
             </Link>
             {/* Temporarily hidden - Check My Order link */}
@@ -234,7 +234,9 @@ export default function VehiclerLanding() {
               </Link>
 
               <Link
-                href="#"
+                href="https://business.vehicler.org/"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="block text-vehicler-black hover:text-vehicler-blue transition-colors py-2 font-medium"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
@@ -305,11 +307,6 @@ export default function VehiclerLanding() {
                 Safe, reliable, and affordable vehicle transport across all 50 states.
               </p>
             </div>
-
-            {/* Call to action tied to the form */}
-            <p className="text-sm md:text-base text-blue-200 text-center mb-4">
-              Fill in the details below and get instant quotes from verified carriers.
-            </p>
 
             {/* Full-width search form */}
             <HeroSearchForm />
@@ -690,7 +687,7 @@ export default function VehiclerLanding() {
               links={[
                 { text: "Contact Us", href: "#" },
                 { text: "FAQ", href: "#faq" },
-                { text: "For business", href: "#" },
+                { text: "For business", href: "https://business.vehicler.org/", external: true },
                 // { text: "Track Shipment", href: "/find-my-vehicle" }, // Temporarily hidden
                 { text: "Get Quote", href: "#quote" },
               ]}
@@ -716,7 +713,7 @@ export default function VehiclerLanding() {
 /* ─────────────────── Reusable footer column component ─────────────────── */
 interface FooterColumnProps {
   title: string
-  links: Array<{ text: string; href: string }>
+  links: Array<{ text: string; href: string; external?: boolean }>
 }
 
 function FooterColumn({ title, links }: FooterColumnProps) {
@@ -726,7 +723,11 @@ function FooterColumn({ title, links }: FooterColumnProps) {
       <ul className="space-y-3 text-sm">
         {links.map((link) => (
           <li key={link.text}>
-            <a href={link.href} className="text-gray-300 hover:text-white transition-colors">
+            <a
+              href={link.href}
+              className="text-gray-300 hover:text-white transition-colors"
+              {...(link.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+            >
               {link.text}
             </a>
           </li>
