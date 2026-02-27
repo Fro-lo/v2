@@ -3,8 +3,20 @@ import type { Metadata } from "next"
 import "./globals.css"
 
 export const metadata: Metadata = {
-  title: "Vehicler - Vehicle Tracking",
-  description: "Track your vehicle shipment with Vehicler",
+  title: "Vehicler - Vehicle Shipping",
+  description: "Safe, reliable, and affordable vehicle transport across all 50 states.",
+  openGraph: {
+    title: "Vehicler - Vehicle Shipping",
+    description: "Safe, reliable, and affordable vehicle transport across all 50 states.",
+    url: "https://vehicler.org",
+    siteName: "Vehicler",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Vehicler - Vehicle Shipping",
+    description: "Safe, reliable, and affordable vehicle transport across all 50 states.",
+  },
 }
 
 export default function RootLayout({
