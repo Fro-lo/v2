@@ -4,6 +4,9 @@ import Stripe from "stripe"
 // Ленивая инициализация Stripe только когда нужен
 function getStripe() {
   const secretKey = process.env.STRIPE_SECRET_KEY
+  console.log("[v0] STRIPE_SECRET_KEY present:", !!secretKey)
+  console.log("[v0] STRIPE_SECRET_KEY prefix:", secretKey ? secretKey.substring(0, 7) : "undefined")
+  console.log("[v0] All env keys with STRIPE:", Object.keys(process.env).filter(k => k.includes("STRIPE")))
   if (!secretKey) {
     throw new Error("STRIPE_SECRET_KEY is not set")
   }
