@@ -521,10 +521,9 @@ export default function VehiclerLanding() {
         </div>
       </section>
 
-      {/* ─────────────────── Footer ─────────────────── */}
       <footer className="bg-[#262626] text-white py-12">
         <div className="max-w-6xl mx-auto px-4 md:px-16">
-          <div className="grid md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             {/* Logo + description */}
             <div className="space-y-6">
               <Link href="#quote">
@@ -541,48 +540,64 @@ export default function VehiclerLanding() {
                 America's trusted vehicle transport company, delivering safe and reliable car shipping nationwide.
               </p>
               <div className="flex space-x-4">
-                {[Facebook, Twitter, Instagram, Linkedin].map((Icon) => (
-                  <a key={Icon.displayName} href="#" aria-label={`${Icon.displayName} link`}>
+                {[
+                  { Icon: Facebook, label: "Facebook" },
+                  { Icon: Twitter, label: "Twitter" },
+                  { Icon: Instagram, label: "Instagram" },
+                  { Icon: Linkedin, label: "LinkedIn" },
+                ].map(({ Icon, label }) => (
+                  <a key={label} href="#" aria-label={`${label} link`}>
                     <Icon className="w-5 h-5 text-gray-400 hover:text-white transition-colors" />
                   </a>
                 ))}
               </div>
             </div>
+
             {/* Services */}
-            <FooterColumn
-              title="Services"
-              links={[
-                { text: "Open Car Transport", href: "#" },
-                { text: "Enclosed Car Transport", href: "#" },
-                { text: "Motorcycle Shipping", href: "#" },
-                { text: "Classic Car Transport", href: "#" },
-              ]}
-            />
+            <div>
+              <h3 className="font-semibold text-white mb-4">Services</h3>
+              <ul className="space-y-3 text-sm">
+                {[
+                  { text: "Open Car Transport", href: "#" },
+                  { text: "Enclosed Car Transport", href: "#" },
+                  { text: "Motorcycle Shipping", href: "#" },
+                  { text: "Classic Car Transport", href: "#" },
+                ].map((link) => (
+                  <li key={link.text}><a href={link.href} className="text-gray-300 hover:text-white transition-colors">{link.text}</a></li>
+                ))}
+              </ul>
+            </div>
+
             {/* Company */}
-            <FooterColumn
-              title="Company"
-              links={[
-                { text: "About Us", href: "#" },
-                { text: "How It Works", href: "#how-it-works" },
-                { text: "Reviews", href: "#reviews" },
-                { text: "Careers", href: "#" },
-              ]}
-            />
+            <div>
+              <h3 className="font-semibold text-white mb-4">Company</h3>
+              <ul className="space-y-3 text-sm">
+                {[
+                  { text: "About Us", href: "#" },
+                  { text: "How It Works", href: "#how-it-works" },
+                  { text: "Reviews", href: "#reviews" },
+                  { text: "Careers", href: "#" },
+                ].map((link) => (
+                  <li key={link.text}><a href={link.href} className="text-gray-300 hover:text-white transition-colors">{link.text}</a></li>
+                ))}
+              </ul>
+            </div>
+
             {/* Support */}
-            <FooterColumn
-              title="Support"
-              links={[
-                { text: "Contact Us", href: "#" },
-                { text: "FAQ", href: "#faq" },
-                { text: "For business", href: "https://business.vehicler.org/", external: true },
-                // { text: "Track Shipment", href: "/find-my-vehicle" }, // Temporarily hidden
-                { text: "Get Quote", href: "#quote" },
-              ]}
-            />
+            <div>
+              <h3 className="font-semibold text-white mb-4">Support</h3>
+              <ul className="space-y-3 text-sm">
+                <li><a href="#" className="text-gray-300 hover:text-white transition-colors">Contact Us</a></li>
+                <li><a href="#faq" className="text-gray-300 hover:text-white transition-colors">FAQ</a></li>
+                <li><a href="https://business.vehicler.org/" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white transition-colors">For business</a></li>
+                <li><a href="#quote" className="text-gray-300 hover:text-white transition-colors">Get Quote</a></li>
+              </ul>
+            </div>
           </div>
+
           {/* bottom row */}
           <div className="border-t border-gray-600 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-400 text-sm">© 2025 Vehicler. All rights reserved.</p>
+            <p className="text-gray-400 text-sm">© {new Date().getFullYear()} Vehicler. All rights reserved.</p>
             <div className="flex space-x-6 mt-4 md:mt-0 text-sm">
               {["Privacy Policy", "Terms of Service", "Cookie Policy"].map((item) => (
                 <a key={item} href="#" className="text-gray-400 hover:text-white transition-colors">
