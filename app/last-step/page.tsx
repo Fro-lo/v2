@@ -11,10 +11,7 @@ import { Elements } from "@stripe/react-stripe-js"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Badge } from "@/components/ui/badge"
 import { StripePaymentForm } from "@/components/stripe-payment-form"
 
 import {
@@ -33,7 +30,6 @@ import {
   Twitter,
   Instagram,
   Linkedin,
-  Check,
 } from "lucide-react"
 
 // Инициализируем Stripe (ключ будет загружен из переменных окружения)
@@ -50,9 +46,7 @@ const getStripe = () => {
 }
 
 export default function BookingPage() {
-  const [selectedPayment, setSelectedPayment] = useState("credit-card")
-  const [selectedSplitOption, setSelectedSplitOption] = useState("")
-  const [customSplit, setCustomSplit] = useState({ now: "", delivery: "" })
+  const [selectedPayment] = useState("credit-card")
   const [clientSecret, setClientSecret] = useState<string | null>(null)
   const [paymentError, setPaymentError] = useState<string | null>(null)
 
@@ -108,7 +102,7 @@ export default function BookingPage() {
 
   // Создаем Payment Intent при загрузке страницы для Credit Card
   useEffect(() => {
-    if (selectedPayment === "credit-card" && !clientSecret) {
+    if (!clientSecret) {
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), 15000) // 15 секунд таймаут
 
@@ -157,72 +151,7 @@ export default function BookingPage() {
           }
         })
     }
-  }, [selectedPayment, clientSecret, pickupDate, deliveryDate, vehicleModel, totalPrice])
-
-  const splitOptions = [
-    { id: "50-50", label: "50% now, 50% on delivery", popular: true },
-    { id: "25-75", label: "25% now, 75% on delivery", popular: false },
-    { id: "custom", label: "Custom split", popular: false },
-  ]
-
-const handleSplitOptionSelect = (optionId: string) => {
-  setSelectedSplitOption(optionId)
-  if (optionId !== "custom") {
-    setCustomSplit({ now: "", delivery: "" })
-  }
-}
-
-const handleCustomSplitChange = (field: "now" | "delivery", value: string) => {
-  const numValue = Number.parseInt(value) || 0
-  if (numValue >= 0 && numValue <= 100) {
-    const otherField = field === "now" ? "delivery" : "now"
-    const otherValue = 100 - numValue
-
-    // Исправленный вариант с prev
-    setCustomSplit(prev => ({
-      ...prev, // сохраняем остальные поля
-      [field]: value,
-      [otherField]: otherValue.toString(),
-    }))
-  }
-}
-
-  const handleBookingSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-
-    // Construct URL with all booking data
-    const bookingData = new URLSearchParams({
-      pickupDate,
-      deliveryDate,
-      vehicleModel,
-      fromHouseNumber: shipFromHouseNumber,
-      fromStreet: shipFromStreetName,
-      fromCity: shipFromCity,
-      fromState: shipFromState,
-      fromZip: shipFromPostalCode,
-      toHouseNumber: shipToHouseNumber,
-      toStreet: shipToStreetName,
-      toCity: shipToCity,
-      toState: shipToState,
-      toZip: shipToPostalCode,
-      finalPrice: totalPrice,
-      serviceType: "Door to Door",
-      transportType: vehicleTransportType === "open" ? "Open" : "Enclosed",
-      insurance: "Included",
-      paymentMethod: "Credit Card",
-      fromAddressType: shipFromAddressType,
-      toAddressType: shipToAddressType,
-      customerName,
-      customerEmail,
-      customerPhone,
-      customerNotes,
-      contactName,
-      contactPhone,
-      specialInstructions,
-    })
-
-    router.push(`/booking-confirmed?${bookingData.toString()}`)
-  }
+  }, [clientSecret, pickupDate, deliveryDate, vehicleModel, totalPrice])
 
   const handleStripePaymentSuccess = (paymentIntentId: string) => {
     // Construct URL with all booking data including payment intent ID
@@ -374,14 +303,12 @@ const handleCustomSplitChange = (field: "now" | "delivery", value: string) => {
                 Last step!
               </h2>
 
-              <Tabs value={selectedPayment} onValueChange={setSelectedPayment} className="w-full">
-                <TabsList className="grid w-full grid-cols-3 mb-8">
+              <Tabs value={selectedPayment} className="w-full">
+                <TabsList className="grid w-full grid-cols-1 mb-8">
                   <TabsTrigger value="credit-card" className="flex items-center space-x-2">
                     <CreditCard className="w-4 h-4" />
                     <span>Credit Card</span>
                   </TabsTrigger>
-                  <TabsTrigger value="paypal">PayPal</TabsTrigger>
-                  <TabsTrigger value="split">Split Payment</TabsTrigger>
                 </TabsList>
 
                 {/* Credit-card tab */}
@@ -435,181 +362,6 @@ const handleCustomSplitChange = (field: "now" | "delivery", value: string) => {
                       <p className="text-sm text-gray-600">Loading payment form...</p>
                     </div>
                   )}
-                </TabsContent>
-
-                {/* PayPal tab */}
-                <TabsContent value="paypal">
-                  <Card>
-                    <CardContent className="p-6 text-center space-y-6">
-                      <div className="flex justify-center">
-                        <Image
-                          src="/images/paypal-logo.png"
-                          alt="PayPal Logo"
-                          width={120}
-                          height={40}
-                          className="object-contain"
-                        />
-                      </div>
-                      <p className="text-gray-600">You'll be redirected to PayPal to complete your payment securely.</p>
-                      <Button
-                        className="w-full bg-[#003087] hover:bg-[#012169] text-white"
-                        onClick={() => {
-                          const bookingData = new URLSearchParams({
-                            pickupDate,
-                            deliveryDate,
-                            vehicleModel,
-                            fromHouseNumber: shipFromHouseNumber,
-                            fromStreet: shipFromStreetName,
-                            fromCity: shipFromCity,
-                            fromState: shipFromState,
-                            fromZip: shipFromPostalCode,
-                            toHouseNumber: shipToHouseNumber,
-                            toStreet: shipToStreetName,
-                            toCity: shipToCity,
-                            toState: shipToState,
-                            toZip: shipToPostalCode,
-                            finalPrice: totalPrice,
-                            serviceType: "Door to Door",
-                            transportType: vehicleTransportType === "open" ? "Open" : "Enclosed",
-                            insurance: "Included",
-                            paymentMethod: "PayPal",
-                            fromAddressType: shipFromAddressType,
-                            toAddressType: shipToAddressType,
-                            customerName,
-                            customerEmail,
-                            customerPhone,
-                            customerNotes,
-                            contactName,
-                            contactPhone,
-                            specialInstructions,
-                          })
-                          router.push(`/booking-confirmed?${bookingData.toString()}`)
-                        }}
-                      >
-                        Continue with PayPal
-                      </Button>
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-
-                {/* Split-payment tab */}
-                <TabsContent value="split">
-                  <Card>
-                    <CardContent className="p-6 space-y-6">
-                      <div>
-                        <h3 className="font-semibold text-lg mb-2">Split Payment Options</h3>
-                        <p className="text-gray-600 mb-4">
-                          Choose how you'd like to split the payment for your shipment.
-                        </p>
-                      </div>
-
-                      <div className="space-y-3">
-                        {splitOptions.map((option) => (
-                          <div
-                            key={option.id}
-                            className={`p-4 border rounded-lg cursor-pointer transition-all ${
-                              selectedSplitOption === option.id
-                                ? "border-[#6371BE] bg-[#6371BE]/5 ring-2 ring-[#6371BE]/20"
-                                : "border-gray-200 hover:border-gray-300"
-                            }`}
-                            onClick={() => handleSplitOptionSelect(option.id)}
-                          >
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center space-x-3">
-                                <div
-                                  className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                                    selectedSplitOption === option.id
-                                      ? "border-[#6371BE] bg-[#6371BE]"
-                                      : "border-gray-300"
-                                  }`}
-                                >
-                                  {selectedSplitOption === option.id && <Check className="w-3 h-3 text-white" />}
-                                </div>
-                                <span className="font-medium">{option.label}</span>
-                              </div>
-                              {option.popular && <Badge variant="secondary">Popular</Badge>}
-                            </div>
-
-                            {/* Custom split inputs */}
-                            {option.id === "custom" && selectedSplitOption === "custom" && (
-                              <div className="mt-4 grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                  <Label htmlFor="split-now">Pay Now (%)</Label>
-                                  <Input
-                                    id="split-now"
-                                    type="number"
-                                    min="0"
-                                    max="100"
-                                    value={customSplit.now}
-                                    onChange={(e) => handleCustomSplitChange("now", e.target.value)}
-                                    placeholder="50"
-                                    className="p-3 focus:ring-[#081C8B] focus:border-[#081C8B] focus-visible:ring-[#081C8B]"
-                                  />
-                                </div>
-                                <div className="space-y-2">
-                                  <Label htmlFor="split-delivery">On Delivery (%)</Label>
-                                  <Input
-                                    id="split-delivery"
-                                    type="number"
-                                    min="0"
-                                    max="100"
-                                    value={customSplit.delivery}
-                                    onChange={(e) => handleCustomSplitChange("delivery", e.target.value)}
-                                    placeholder="50"
-                                    className="p-3 focus:ring-[#081C8B] focus:border-[#081C8B] focus-visible:ring-[#081C8B]"
-                                  />
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-
-                      {selectedSplitOption && (
-                        <div className="pt-4">
-                          <Button
-                            className="w-full bg-[#044BD9] hover:bg-[#033ba8] text-white py-3 text-lg font-semibold"
-                            size="lg"
-                            onClick={() => {
-                              const bookingData = new URLSearchParams({
-                                pickupDate,
-                                deliveryDate,
-                                vehicleModel,
-                                fromHouseNumber: shipFromHouseNumber,
-                                fromStreet: shipFromStreetName,
-                                fromCity: shipFromCity,
-                                fromState: shipFromState,
-                                fromZip: shipFromPostalCode,
-                                toHouseNumber: shipToHouseNumber,
-                                toStreet: shipToStreetName,
-                                toCity: shipToCity,
-                                toState: shipToState,
-                                toZip: shipToPostalCode,
-                                finalPrice: totalPrice,
-                                serviceType: "Door to Door",
-                                transportType: vehicleTransportType === "open" ? "Open" : "Enclosed",
-                                insurance: "Included",
-                                paymentMethod: "Split Payment",
-                                splitOption: selectedSplitOption,
-                                fromAddressType: shipFromAddressType,
-                                toAddressType: shipToAddressType,
-                                customerName,
-                                customerEmail,
-                                customerPhone,
-                                customerNotes,
-                                contactName,
-                                contactPhone,
-                                specialInstructions,
-                              })
-                              router.push(`/booking-confirmed?${bookingData.toString()}`)
-                            }}
-                          >
-                            Confirm Split Payment
-                          </Button>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
                 </TabsContent>
               </Tabs>
             </div>
