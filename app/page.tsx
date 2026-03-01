@@ -206,7 +206,7 @@ export default function VehiclerLanding() {
           />
         </div>
 
-        <div className="max-w-6xl mx-auto px-4 md:px-4 md:px-16 relative z-10">
+        <div className="max-w-6xl mx-auto px-4 md:px-16 relative z-10">
           <div className="max-w-5xl mx-auto">
             {/* Heading + description */}
             <div className="text-center mb-6">
@@ -326,7 +326,7 @@ export default function VehiclerLanding() {
       {/* How It Works */}
       <section id="how-it-works" className="py-12 bg-white">
         <div className="container mx-auto px-4">
-          <div className="max-w-6xl mx-auto md:px-4 md:px-16">
+          <div className="max-w-6xl mx-auto px-4 md:px-16">
             <div className="text-center mb-16">
               <h2 className="text-4xl font-bold text-vehicler-black mb-4">How It Works</h2>
               <p className="text-base md:text-xl text-vehicler-gray max-w-3xl mx-auto px-2 md:px-0">
@@ -351,6 +351,7 @@ export default function VehiclerLanding() {
                   <p className="text-vehicler-gray text-sm md:text-base">{desc}</p>
                 </div>
               ))}
+            </div>
           </div>
         </div>
       </section>
