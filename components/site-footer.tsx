@@ -2,106 +2,86 @@ import Link from "next/link"
 import Image from "next/image"
 import { Facebook, Twitter, Instagram, Linkedin } from "lucide-react"
 
-interface FooterColumnProps {
-  title: string
-  links: Array<{ text: string; href: string; external?: boolean }>
-}
-
-function FooterColumn({ title, links }: FooterColumnProps) {
-  return (
-    <div>
-      <h3 className="font-semibold text-white mb-4">{title}</h3>
-      <ul className="space-y-3 text-sm">
-        {links.map((link) => (
-          <li key={link.text}>
-            <a
-              href={link.href}
-              className="text-gray-300 hover:text-white transition-colors"
-              {...(link.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-            >
-              {link.text}
-            </a>
-          </li>
-        ))}
-      </ul>
-    </div>
-  )
-}
-
 export function SiteFooter() {
   return (
-    <footer className="bg-[#262626] text-white py-12">
-      <div className="max-w-6xl mx-auto px-4 md:px-16">
-        <div className="grid md:grid-cols-4 gap-8">
+    <footer className="bg-[#262626] text-white py-12 px-6">
+      <div className="max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-[1.5fr_1fr_1fr_1fr] gap-8 md:gap-x-16 md:gap-y-8">
+
           {/* Logo + description */}
           <div className="space-y-6">
-            <Link href="/">
+            <Link href="/" className="hover:opacity-80 transition-opacity block">
               <Image
                 src="/vehicler-footer-logo.png"
                 alt="Vehicler logo mark"
                 width={160}
                 height={40}
                 priority
-                className="cursor-pointer hover:opacity-80 transition-opacity"
               />
             </Link>
             <p className="text-gray-300 text-sm leading-relaxed">
               America's trusted vehicle transport company, delivering safe and reliable car shipping nationwide.
             </p>
             <div className="flex space-x-4">
-              {[Facebook, Twitter, Instagram, Linkedin].map((Icon) => (
-                <a key={Icon.displayName} href="#" aria-label={`${Icon.displayName} link`}>
+              {[
+                { Icon: Facebook, label: "Facebook" },
+                { Icon: Twitter, label: "Twitter" },
+                { Icon: Instagram, label: "Instagram" },
+                { Icon: Linkedin, label: "LinkedIn" },
+              ].map(({ Icon, label }) => (
+                <a key={label} href="#" aria-label={`${label} link`}>
                   <Icon className="w-5 h-5 text-gray-400 hover:text-white transition-colors" />
                 </a>
               ))}
             </div>
           </div>
 
-          {/* Services */}
-          <FooterColumn
-            title="Services"
-            links={[
-              { text: "Open Car Transport", href: "#" },
-              { text: "Enclosed Car Transport", href: "#" },
-              { text: "Motorcycle Shipping", href: "#" },
-              { text: "Classic Car Transport", href: "#" },
-            ]}
-          />
+          {/* Three columns: compact grid on mobile, normal on desktop */}
+          <div className="grid grid-cols-3 md:grid-cols-1 col-span-1 md:col-span-3 gap-4 md:gap-0 md:contents">
 
-          {/* Company */}
-          <FooterColumn
-            title="Company"
-            links={[
-              { text: "About Us", href: "#" },
-              { text: "How It Works", href: "/#how-it-works" },
-              { text: "Reviews", href: "/#reviews" },
-              { text: "Careers", href: "#" },
-            ]}
-          />
+            {/* Services */}
+            <div>
+              <h3 className="font-semibold text-white mb-2 md:mb-4 text-xs md:text-base">Services</h3>
+              <ul className="space-y-1 md:space-y-3 text-xs md:text-sm">
+                <li><Link href="#" className="text-gray-300 hover:text-white transition-colors">Open Car Transport</Link></li>
+                <li><Link href="#" className="text-gray-300 hover:text-white transition-colors">Enclosed Car Transport</Link></li>
+                <li><Link href="#" className="text-gray-300 hover:text-white transition-colors">Motorcycle Shipping</Link></li>
+                <li><Link href="#" className="text-gray-300 hover:text-white transition-colors">Classic Car Transport</Link></li>
+              </ul>
+            </div>
 
-          {/* Support */}
-          <FooterColumn
-            title="Support"
-            links={[
-              { text: "Contact Us", href: "#" },
-              { text: "FAQ", href: "/#faq" },
-              { text: "For business", href: "https://business.vehicler.org/", external: true },
-              { text: "Tracking", href: "#" },
-            ]}
-          />
+            {/* Company */}
+            <div>
+              <h3 className="font-semibold text-white mb-2 md:mb-4 text-xs md:text-base">Company</h3>
+              <ul className="space-y-1 md:space-y-3 text-xs md:text-sm">
+                <li><Link href="#" className="text-gray-300 hover:text-white transition-colors">About Us</Link></li>
+                <li><Link href="/#how-it-works" className="text-gray-300 hover:text-white transition-colors">How It Works</Link></li>
+                <li><Link href="/#reviews" className="text-gray-300 hover:text-white transition-colors">Reviews</Link></li>
+                <li><Link href="#" className="text-gray-300 hover:text-white transition-colors">Careers</Link></li>
+              </ul>
+            </div>
+
+            {/* Support */}
+            <div>
+              <h3 className="font-semibold text-white mb-2 md:mb-4 text-xs md:text-base">Support</h3>
+              <ul className="space-y-1 md:space-y-3 text-xs md:text-sm">
+                <li><Link href="#" className="text-gray-300 hover:text-white transition-colors">Contact Us</Link></li>
+                <li><Link href="/#faq" className="text-gray-300 hover:text-white transition-colors">FAQ</Link></li>
+                <li><a href="https://business.vehicler.org/" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white transition-colors">For business</a></li>
+                <li><Link href="/find-my-vehicle" className="text-gray-300 hover:text-white transition-colors">Track Shipment</Link></li>
+              </ul>
+            </div>
+
+          </div>
         </div>
 
         {/* Bottom bar */}
-        <div className="border-t border-gray-700 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-          <p className="text-gray-400 text-sm">
-            © {new Date().getFullYear()} Vehicler. All rights reserved.
-          </p>
-          <div className="flex space-x-6">
-            {["Privacy Policy", "Terms of Service", "Cookie Policy"].map((item) => (
-              <a key={item} href="#" className="text-gray-400 hover:text-white transition-colors text-sm">
-                {item}
-              </a>
-            ))}
+        <div className="border-t border-gray-600 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
+          <p className="text-gray-400 text-xs md:text-sm">© {new Date().getFullYear()} Vehicler. All rights reserved.</p>
+          <div className="flex space-x-3 md:space-x-6 mt-4 md:mt-0 text-xs md:text-sm">
+            <a href="#" className="text-gray-400 hover:text-white transition-colors">Privacy Policy</a>
+            <a href="#" className="text-gray-400 hover:text-white transition-colors">Terms of Service</a>
+            <a href="#" className="text-gray-400 hover:text-white transition-colors">Cookie Policy</a>
           </div>
         </div>
       </div>
