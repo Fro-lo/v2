@@ -338,47 +338,23 @@ export default function VehiclerLanding() {
               </p>
             </div>
 
-            <div className="grid md:grid-cols-4 gap-8">
-              <div className="text-center">
-                <div className="w-20 h-20 bg-vehicler-blue rounded-full flex items-center justify-center mx-auto mb-6 text-white text-2xl font-bold">
-                  1
+            <div className="grid md:grid-cols-4 gap-6 md:gap-8">
+              {[
+                { num: 1, title: "Get Quote", desc: "Enter your pickup and delivery locations to get an instant, transparent quote." },
+                { num: 2, title: "Book Service", desc: "Secure your shipment with a small deposit and choose your preferred dates." },
+                { num: 3, title: "Vehicle Pickup", desc: "Our carrier picks up your vehicle and provides real-time tracking updates." },
+                { num: 4, title: "Safe Delivery", desc: "Your vehicle arrives safely at the destination, inspected and ready to drive." },
+              ].map(({ num, title, desc }) => (
+                <div key={num} className="md:text-center">
+                  <div className="flex items-center gap-3 md:justify-center mb-3 md:mb-6 md:flex-col">
+                    <div className="w-10 h-10 md:w-16 md:h-16 bg-vehicler-blue rounded-full flex items-center justify-center flex-shrink-0 text-white text-base md:text-xl font-bold">
+                      {num}
+                    </div>
+                    <h3 className="text-lg md:text-xl font-bold text-vehicler-black">{title}</h3>
+                  </div>
+                  <p className="text-vehicler-gray text-sm md:text-base">{desc}</p>
                 </div>
-                <h3 className="text-xl font-bold text-vehicler-black mb-4">Get Quote</h3>
-                <p className="text-vehicler-gray">
-                  Enter your pickup and delivery locations to get an instant, transparent quote.
-                </p>
-              </div>
-
-              <div className="text-center">
-                <div className="w-20 h-20 bg-vehicler-blue rounded-full flex items-center justify-center mx-auto mb-6 text-white text-2xl font-bold">
-                  2
-                </div>
-                <h3 className="text-xl font-bold text-vehicler-black mb-4">Book Service</h3>
-                <p className="text-vehicler-gray">
-                  Secure your shipment with a small deposit and choose your preferred dates.
-                </p>
-              </div>
-
-              <div className="text-center">
-                <div className="w-20 h-20 bg-vehicler-blue rounded-full flex items-center justify-center mx-auto mb-6 text-white text-2xl font-bold">
-                  3
-                </div>
-                <h3 className="text-xl font-bold text-vehicler-black mb-4">Vehicle Pickup</h3>
-                <p className="text-vehicler-gray">
-                  Our carrier picks up your vehicle and provides real-time tracking updates.
-                </p>
-              </div>
-
-              <div className="text-center">
-                <div className="w-20 h-20 bg-vehicler-blue rounded-full flex items-center justify-center mx-auto mb-6 text-white text-2xl font-bold">
-                  4
-                </div>
-                <h3 className="text-xl font-bold text-vehicler-black mb-4">Safe Delivery</h3>
-                <p className="text-vehicler-gray">
-                  Your vehicle arrives safely at the destination, inspected and ready to drive.
-                </p>
-              </div>
-            </div>
+              ))}
           </div>
         </div>
       </section>
@@ -387,9 +363,9 @@ export default function VehiclerLanding() {
       <section className="py-12 bg-vehicler-light-gray">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto px-4 md:px-16">
-            <div className="text-center mb-16">
+            <div className="text-center mb-8 md:mb-16">
               <h2 className="text-4xl font-bold text-vehicler-black mb-4">Why Choose Vehicler?</h2>
-              <p className="text-xl text-vehicler-gray max-w-3xl mx-auto">
+              <p className="text-sm md:text-xl text-vehicler-gray max-w-3xl mx-auto px-2 md:px-0">
                 We've transported over 100,000 vehicles nationwide with industry-leading service and customer
                 satisfaction.
               </p>
@@ -440,9 +416,9 @@ export default function VehiclerLanding() {
       <section id="faq" className="py-12 bg-white">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto px-4 md:px-16">
-            <div className="text-center mb-16">
+            <div className="text-center mb-8 md:mb-16">
               <h2 className="text-4xl font-bold text-vehicler-black mb-4">Frequently Asked Questions</h2>
-              <p className="text-xl text-vehicler-gray max-w-3xl mx-auto">
+              <p className="text-sm md:text-xl text-vehicler-gray max-w-3xl mx-auto px-2 md:px-0">
                 Get answers to the most common questions about our vehicle transport services.
               </p>
             </div>
@@ -525,7 +501,7 @@ export default function VehiclerLanding() {
         <div className="container mx-auto px-4 text-center">
           <div className="max-w-6xl mx-auto px-4 md:px-16">
             <h2 className="text-4xl font-bold mb-6">Ready to Ship Your Vehicle?</h2>
-            <p className="text-xl mb-8 max-w-3xl mx-auto">
+            <p className="text-sm md:text-xl mb-8 max-w-3xl mx-auto px-2 md:px-0">
               Join thousands of satisfied customers who trust Vehicler for safe, reliable vehicle transport nationwide.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">

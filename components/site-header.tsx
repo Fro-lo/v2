@@ -13,13 +13,11 @@ export function SiteHeader() {
       {/* Mobile: two rows. Desktop: single row */}
       <div className="max-w-6xl mx-auto px-4 md:px-16">
 
-        {/* Row 1 (mobile) / single row (desktop) */}
+        {/* Row 1: logo only on mobile, full nav on desktop */}
         <div className="h-14 md:h-20 flex items-center justify-between">
-          <div className="flex items-center">
-            <Link href="/">
-              <img src="/vehicler-logo.png" alt="Vehicler Logo" className="h-6 md:h-8 w-auto" />
-            </Link>
-          </div>
+          <Link href="/" className="block">
+            <img src="/vehicler-logo.png" alt="Vehicler Logo" className="h-7 md:h-8 w-auto" />
+          </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center space-x-8">
