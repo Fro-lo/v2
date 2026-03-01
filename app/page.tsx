@@ -595,30 +595,3 @@ export default function VehiclerLanding() {
     </div>
   )
 }
-
-/* ─────────────────── Reusable footer column component ─────────────────── */
-interface FooterColumnProps {
-  title: string
-  links: Array<{ text: string; href: string; external?: boolean }>
-}
-
-function FooterColumn({ title, links }: FooterColumnProps) {
-  return (
-    <div>
-      <h3 className="font-semibold text-white mb-4">{title}</h3>
-      <ul className="space-y-3 text-sm">
-        {links.map((link) => (
-          <li key={link.text}>
-            <a
-              href={link.href}
-              className="text-gray-300 hover:text-white transition-colors"
-              {...(link.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-            >
-              {link.text}
-            </a>
-          </li>
-        ))}
-      </ul>
-    </div>
-  )
-}
