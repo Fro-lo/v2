@@ -12,10 +12,11 @@ export function SiteFooter() {
           <div className="space-y-6">
             <Link href="/" className="hover:opacity-80 transition-opacity block">
               <Image
-                src="/vehicler-footer-logo.png"
-                alt="Vehicler logo mark"
-                width={160}
-                height={40}
+                src="/images/logo-cmyk-mark-8.png"
+                alt="Vehicler"
+                width={200}
+                height={200}
+                className="w-full h-auto"
                 priority
               />
             </Link>
@@ -67,8 +68,8 @@ export function SiteFooter() {
               <ul className="space-y-1 md:space-y-3 text-xs md:text-sm">
                 <li><Link href="#" className="text-gray-300 hover:text-white transition-colors">Contact Us</Link></li>
                 <li><Link href="/#faq" className="text-gray-300 hover:text-white transition-colors">FAQ</Link></li>
-                <li><a href="https://business.vehicler.org/" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white transition-colors">For business</a></li>
                 <li><Link href="/find-my-vehicle" className="text-gray-300 hover:text-white transition-colors">Track Shipment</Link></li>
+                <li><Link href="/#quote" className="text-gray-300 hover:text-white transition-colors">Get Quote</Link></li>
               </ul>
             </div>
 
