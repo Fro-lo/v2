@@ -10,8 +10,6 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  // Включаем standalone режим для Docker
-  output: 'standalone',
 }
 
 export default nextConfig

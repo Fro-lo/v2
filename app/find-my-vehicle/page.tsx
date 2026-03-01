@@ -75,7 +75,7 @@ function StatusTimeline({ status }: { status: OrderStatus }) {
           return (
             <div key={step.key} className="flex flex-col items-center gap-2">
               <div
-          <div className="w-10 h-10 rounded-full flex items-center justify-center z-10 transition-all
+                className={`w-10 h-10 rounded-full flex items-center justify-center z-10 transition-all
                   ${isCompleted ? "bg-[#081C8B] text-white" : ""}
                   ${isCurrent ? "bg-[#081C8B] text-white ring-4 ring-blue-100" : ""}
                   ${!isCompleted && !isCurrent ? "bg-white border-2 border-gray-200 text-gray-400" : ""}

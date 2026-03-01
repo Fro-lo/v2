@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
@@ -22,7 +22,6 @@ import Link from "next/link"
 import Image from "next/image"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { HeroSearchForm } from "@/components/hero-search-form"
-import { FitText } from "@/components/fit-text"
 
 export default function VehiclerLanding() {
   const [currentReview, setCurrentReview] = useState(0)
@@ -85,46 +84,43 @@ export default function VehiclerLanding() {
     <div className="min-h-screen bg-white">
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-gray-100">
-        <div className="max-w-6xl mx-auto px-4 md:px-16 h-20 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <img src="/vehicler-logo.png" alt="Vehicler Logo" className="h-6 md:h-8 w-auto" />
+        {/* Single row on desktop, two rows on mobile */}
+        <div className="max-w-6xl mx-auto px-4 md:px-16">
+
+          {/* Row 1: logo (mobile) / full nav (desktop) */}
+          <div className="h-14 md:h-20 flex items-center justify-between">
+            <div className="flex items-center">
+              <img src="/vehicler-logo.png" alt="Vehicler Logo" className="h-7 md:h-8 w-auto" />
+            </div>
+
+            {/* Desktop Navigation */}
+            <nav className="hidden lg:flex items-center space-x-8">
+              <Link href="#how-it-works" className="text-vehicler-black hover:text-vehicler-blue transition-colors">
+                How It Works
+              </Link>
+              <Link href="#faq" className="text-vehicler-black hover:text-vehicler-blue transition-colors">
+                FAQ
+              </Link>
+              <Link href="https://business.vehicler.org/" target="_blank" rel="noopener noreferrer" className="text-vehicler-black hover:text-vehicler-blue transition-colors">
+                For business
+              </Link>
+            </nav>
+
+            {/* Desktop Phone */}
+            <div className="hidden lg:flex items-center space-x-4">
+              <a href="tel:+18554227872" className="flex items-center space-x-2 text-vehicler-blue hover:text-vehicler-dark-blue transition-colors cursor-pointer">
+                <Phone className="w-4 h-4" />
+                <span className="font-semibold">(855) 422-7872</span>
+              </a>
+            </div>
           </div>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center space-x-8">
-            <Link href="#how-it-works" className="text-vehicler-black hover:text-vehicler-blue transition-colors">
-              How It Works
-            </Link>
-            <Link href="#faq" className="text-vehicler-black hover:text-vehicler-blue transition-colors">
-              FAQ
-            </Link>
-            <Link href="https://business.vehicler.org/" target="_blank" rel="noopener noreferrer" className="text-vehicler-black hover:text-vehicler-blue transition-colors">
-              For business
-            </Link>
-          </nav>
-
-          {/* Desktop Phone */}
-          <div className="hidden lg:flex items-center space-x-4">
-            <a
-              href="tel:+18554227872"
-              className="flex items-center space-x-2 text-vehicler-blue hover:text-vehicler-dark-blue transition-colors cursor-pointer"
-            >
+          {/* Row 2: phone + hamburger — mobile only */}
+          <div className="flex items-center justify-between pb-3 lg:hidden border-t border-gray-100 pt-2">
+            <a href="tel:+18554227872" className="flex items-center space-x-2 text-vehicler-blue hover:text-vehicler-dark-blue transition-colors">
               <Phone className="w-4 h-4" />
-              <span className="font-semibold">(855) 422-7872</span>
+              <span className="font-semibold text-sm">(855) 422-7872</span>
             </a>
-          </div>
-
-          {/* Mobile Phone & Menu */}
-          <div className="flex items-center space-x-3 lg:hidden">
-            <a
-              href="tel:+18554227872"
-              className="flex items-center space-x-1 text-vehicler-blue hover:text-vehicler-dark-blue transition-colors cursor-pointer"
-            >
-              <Phone className="w-4 h-4" />
-              <span className="font-semibold text-sm">Call</span>
-            </a>
-
-            {/* Mobile Menu Button */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="p-2 rounded-md text-vehicler-black hover:text-vehicler-blue hover:bg-gray-50 transition-colors"
@@ -132,7 +128,7 @@ export default function VehiclerLanding() {
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 {isMobileMenuOpen ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12M6 12h12" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 ) : (
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                 )}
@@ -214,14 +210,9 @@ export default function VehiclerLanding() {
           <div className="max-w-5xl mx-auto">
             {/* Heading + description */}
             <div className="text-center mb-6">
-              <FitText
-                as="h1"
-                className="font-bold text-white mb-4"
-                minFontSize={20}
-                maxFontSize={120}
-              >
-                Nationwide Car Shipping You Can Trust
-              </FitText>
+              <h1 className="font-bold text-white mb-4 text-4xl md:text-6xl lg:text-7xl leading-tight">
+                Nationwide Car Shipping<br />You Can Trust
+              </h1>
               <p className="text-sm md:text-base text-blue-100 mt-4">
                 Safe, reliable, and affordable vehicle transport across all 50 states.
               </p>
@@ -335,54 +326,31 @@ export default function VehiclerLanding() {
       {/* How It Works */}
       <section id="how-it-works" className="py-12 bg-white">
         <div className="container mx-auto px-4">
-          <div className="max-w-6xl mx-auto px-16">
+          <div className="max-w-6xl mx-auto px-4 md:px-16">
             <div className="text-center mb-16">
               <h2 className="text-4xl font-bold text-vehicler-black mb-4">How It Works</h2>
-              <p className="text-xl text-vehicler-gray max-w-3xl mx-auto">
+              <p className="text-base md:text-xl text-vehicler-gray max-w-3xl mx-auto px-2 md:px-0">
                 Simple, transparent process from quote to delivery in just 4 easy steps.
               </p>
             </div>
 
-            <div className="grid md:grid-cols-4 gap-8">
-              <div className="text-center">
-                <div className="w-20 h-20 bg-vehicler-blue rounded-full flex items-center justify-center mx-auto mb-6 text-white text-2xl font-bold">
-                  1
+            <div className="grid md:grid-cols-4 gap-6 md:gap-8">
+              {[
+                { num: 1, title: "Get Quote", desc: "Enter your pickup and delivery locations to get an instant, transparent quote." },
+                { num: 2, title: "Book Service", desc: "Secure your shipment with a small deposit and choose your preferred dates." },
+                { num: 3, title: "Vehicle Pickup", desc: "Our carrier picks up your vehicle and provides real-time tracking updates." },
+                { num: 4, title: "Safe Delivery", desc: "Your vehicle arrives safely at the destination, inspected and ready to drive." },
+              ].map(({ num, title, desc }) => (
+                <div key={num} className="md:text-center">
+                  <div className="flex items-center gap-3 md:justify-center mb-3 md:mb-6 md:flex-col">
+                    <div className="w-10 h-10 md:w-16 md:h-16 bg-vehicler-blue rounded-full flex items-center justify-center flex-shrink-0 text-white text-base md:text-xl font-bold">
+                      {num}
+                    </div>
+                    <h3 className="text-lg md:text-xl font-bold text-vehicler-black">{title}</h3>
+                  </div>
+                  <p className="text-vehicler-gray text-sm md:text-base">{desc}</p>
                 </div>
-                <h3 className="text-xl font-bold text-vehicler-black mb-4">Get Quote</h3>
-                <p className="text-vehicler-gray">
-                  Enter your pickup and delivery locations to get an instant, transparent quote.
-                </p>
-              </div>
-
-              <div className="text-center">
-                <div className="w-20 h-20 bg-vehicler-blue rounded-full flex items-center justify-center mx-auto mb-6 text-white text-2xl font-bold">
-                  2
-                </div>
-                <h3 className="text-xl font-bold text-vehicler-black mb-4">Book Service</h3>
-                <p className="text-vehicler-gray">
-                  Secure your shipment with a small deposit and choose your preferred dates.
-                </p>
-              </div>
-
-              <div className="text-center">
-                <div className="w-20 h-20 bg-vehicler-blue rounded-full flex items-center justify-center mx-auto mb-6 text-white text-2xl font-bold">
-                  3
-                </div>
-                <h3 className="text-xl font-bold text-vehicler-black mb-4">Vehicle Pickup</h3>
-                <p className="text-vehicler-gray">
-                  Our carrier picks up your vehicle and provides real-time tracking updates.
-                </p>
-              </div>
-
-              <div className="text-center">
-                <div className="w-20 h-20 bg-vehicler-blue rounded-full flex items-center justify-center mx-auto mb-6 text-white text-2xl font-bold">
-                  4
-                </div>
-                <h3 className="text-xl font-bold text-vehicler-black mb-4">Safe Delivery</h3>
-                <p className="text-vehicler-gray">
-                  Your vehicle arrives safely at the destination, inspected and ready to drive.
-                </p>
-              </div>
+              ))}
             </div>
           </div>
         </div>
@@ -391,10 +359,10 @@ export default function VehiclerLanding() {
       {/* Why Choose Vehicler */}
       <section className="py-12 bg-vehicler-light-gray">
         <div className="container mx-auto px-4">
-          <div className="max-w-6xl mx-auto px-16">
-            <div className="text-center mb-16">
+          <div className="max-w-6xl mx-auto px-4 md:px-16">
+            <div className="text-center mb-8 md:mb-16">
               <h2 className="text-4xl font-bold text-vehicler-black mb-4">Why Choose Vehicler?</h2>
-              <p className="text-xl text-vehicler-gray max-w-3xl mx-auto">
+              <p className="text-sm md:text-xl text-vehicler-gray max-w-3xl mx-auto px-2 md:px-0">
                 We've transported over 100,000 vehicles nationwide with industry-leading service and customer
                 satisfaction.
               </p>
@@ -444,10 +412,10 @@ export default function VehiclerLanding() {
       {/* FAQ Section */}
       <section id="faq" className="py-12 bg-white">
         <div className="container mx-auto px-4">
-          <div className="max-w-6xl mx-auto px-16">
-            <div className="text-center mb-16">
+          <div className="max-w-6xl mx-auto px-4 md:px-16">
+            <div className="text-center mb-8 md:mb-16">
               <h2 className="text-4xl font-bold text-vehicler-black mb-4">Frequently Asked Questions</h2>
-              <p className="text-xl text-vehicler-gray max-w-3xl mx-auto">
+              <p className="text-sm md:text-xl text-vehicler-gray max-w-3xl mx-auto px-2 md:px-0">
                 Get answers to the most common questions about our vehicle transport services.
               </p>
             </div>
@@ -528,9 +496,9 @@ export default function VehiclerLanding() {
       {/* Final CTA */}
       <section className="py-12 bg-gradient-to-r from-vehicler-blue to-vehicler-bright-blue text-white">
         <div className="container mx-auto px-4 text-center">
-          <div className="max-w-6xl mx-auto px-16">
+          <div className="max-w-6xl mx-auto px-4 md:px-16">
             <h2 className="text-4xl font-bold mb-6">Ready to Ship Your Vehicle?</h2>
-            <p className="text-xl mb-8 max-w-3xl mx-auto">
+            <p className="text-sm md:text-xl mb-8 max-w-3xl mx-auto px-2 md:px-0">
               Join thousands of satisfied customers who trust Vehicler for safe, reliable vehicle transport nationwide.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -555,7 +523,7 @@ export default function VehiclerLanding() {
 
       {/* ─────────────────── Footer ─────────────────── */}
       <footer className="bg-[#262626] text-white py-12">
-        <div className="max-w-6xl mx-auto px-16">
+        <div className="max-w-6xl mx-auto px-4 md:px-16">
           <div className="grid md:grid-cols-4 gap-8">
             {/* Logo + description */}
             <div className="space-y-6">
@@ -625,33 +593,6 @@ export default function VehiclerLanding() {
           </div>
         </div>
       </footer>
-    </div>
-  )
-}
-
-/* ─────────────────── Reusable footer column component ─────────────────── */
-interface FooterColumnProps {
-  title: string
-  links: Array<{ text: string; href: string; external?: boolean }>
-}
-
-function FooterColumn({ title, links }: FooterColumnProps) {
-  return (
-    <div>
-      <h3 className="font-semibold text-white mb-4">{title}</h3>
-      <ul className="space-y-3 text-sm">
-        {links.map((link) => (
-          <li key={link.text}>
-            <a
-              href={link.href}
-              className="text-gray-300 hover:text-white transition-colors"
-              {...(link.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-            >
-              {link.text}
-            </a>
-          </li>
-        ))}
-      </ul>
     </div>
   )
 }

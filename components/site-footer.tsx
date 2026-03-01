@@ -4,18 +4,19 @@ import { Facebook, Twitter, Instagram, Linkedin } from "lucide-react"
 
 export function SiteFooter() {
   return (
-    <footer className="bg-[#262626] text-white py-12 px-6">
-      <div className="max-w-7xl mx-auto">
+    <footer className="bg-[#262626] text-white py-12">
+      <div className="max-w-6xl mx-auto px-4 md:px-16">
         <div className="grid grid-cols-1 md:grid-cols-[1.5fr_1fr_1fr_1fr] gap-8 md:gap-x-16 md:gap-y-8">
 
-          {/* Logo + description */}
+          {/* Logo + description + socials */}
           <div className="space-y-6">
             <Link href="/" className="hover:opacity-80 transition-opacity block">
               <Image
-                src="/vehicler-footer-logo.png"
-                alt="Vehicler logo mark"
-                width={160}
-                height={40}
+                src="/images/logo-cmyk-mark-8.png"
+                alt="Vehicler"
+                width={200}
+                height={200}
+                className="w-full h-auto"
                 priority
               />
             </Link>
@@ -36,7 +37,7 @@ export function SiteFooter() {
             </div>
           </div>
 
-          {/* Three columns: compact grid on mobile, normal on desktop */}
+          {/* Three columns: grid-cols-3 on mobile, individual columns on desktop */}
           <div className="grid grid-cols-3 md:grid-cols-1 col-span-1 md:col-span-3 gap-4 md:gap-0 md:contents">
 
             {/* Services */}
@@ -67,8 +68,8 @@ export function SiteFooter() {
               <ul className="space-y-1 md:space-y-3 text-xs md:text-sm">
                 <li><Link href="#" className="text-gray-300 hover:text-white transition-colors">Contact Us</Link></li>
                 <li><Link href="/#faq" className="text-gray-300 hover:text-white transition-colors">FAQ</Link></li>
-                <li><a href="https://business.vehicler.org/" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white transition-colors">For business</a></li>
                 <li><Link href="/find-my-vehicle" className="text-gray-300 hover:text-white transition-colors">Track Shipment</Link></li>
+                <li><Link href="/#quote" className="text-gray-300 hover:text-white transition-colors">Get Quote</Link></li>
               </ul>
             </div>
 
@@ -84,6 +85,7 @@ export function SiteFooter() {
             <a href="#" className="text-gray-400 hover:text-white transition-colors">Cookie Policy</a>
           </div>
         </div>
+
       </div>
     </footer>
   )
