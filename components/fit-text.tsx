@@ -1,11 +1,11 @@
 "use client"
 
-import { useEffect, useRef, useCallback, useState } from "react"
+import React, { useEffect, useRef, useCallback, useState } from "react"
 
 interface FitTextProps {
   children: string
   className?: string
-  as?: keyof JSX.IntrinsicElements
+  as?: keyof React.JSX.IntrinsicElements
   minFontSize?: number
   maxFontSize?: number
   /** Below this viewport width, allow text to wrap naturally (no fit-to-width) */
