@@ -85,7 +85,7 @@ export default function VehiclerLanding() {
     <div className="min-h-screen bg-white">
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-gray-100">
-        <div className="max-w-6xl mx-auto px-4 md:px-16 h-20 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-4 md:px-4 md:px-16 h-20 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <img src="/vehicler-logo.png" alt="Vehicler Logo" className="h-6 md:h-8 w-auto" />
           </div>
@@ -210,18 +210,13 @@ export default function VehiclerLanding() {
           />
         </div>
 
-        <div className="max-w-6xl mx-auto px-4 md:px-16 relative z-10">
+        <div className="max-w-6xl mx-auto px-4 md:px-4 md:px-16 relative z-10">
           <div className="max-w-5xl mx-auto">
             {/* Heading + description */}
             <div className="text-center mb-6">
-              <FitText
-                as="h1"
-                className="font-bold text-white mb-4"
-                minFontSize={20}
-                maxFontSize={120}
-              >
-                Nationwide Car Shipping You Can Trust
-              </FitText>
+              <h1 className="font-bold text-white mb-4 text-4xl md:text-6xl lg:text-7xl leading-tight">
+                Nationwide Car Shipping<br />You Can Trust
+              </h1>
               <p className="text-sm md:text-base text-blue-100 mt-4">
                 Safe, reliable, and affordable vehicle transport across all 50 states.
               </p>
@@ -335,10 +330,10 @@ export default function VehiclerLanding() {
       {/* How It Works */}
       <section id="how-it-works" className="py-12 bg-white">
         <div className="container mx-auto px-4">
-          <div className="max-w-6xl mx-auto px-16">
+          <div className="max-w-6xl mx-auto md:px-4 md:px-16">
             <div className="text-center mb-16">
               <h2 className="text-4xl font-bold text-vehicler-black mb-4">How It Works</h2>
-              <p className="text-xl text-vehicler-gray max-w-3xl mx-auto">
+              <p className="text-base md:text-xl text-vehicler-gray max-w-3xl mx-auto px-2 md:px-0">
                 Simple, transparent process from quote to delivery in just 4 easy steps.
               </p>
             </div>
@@ -391,7 +386,7 @@ export default function VehiclerLanding() {
       {/* Why Choose Vehicler */}
       <section className="py-12 bg-vehicler-light-gray">
         <div className="container mx-auto px-4">
-          <div className="max-w-6xl mx-auto px-16">
+          <div className="max-w-6xl mx-auto px-4 md:px-16">
             <div className="text-center mb-16">
               <h2 className="text-4xl font-bold text-vehicler-black mb-4">Why Choose Vehicler?</h2>
               <p className="text-xl text-vehicler-gray max-w-3xl mx-auto">
@@ -444,7 +439,7 @@ export default function VehiclerLanding() {
       {/* FAQ Section */}
       <section id="faq" className="py-12 bg-white">
         <div className="container mx-auto px-4">
-          <div className="max-w-6xl mx-auto px-16">
+          <div className="max-w-6xl mx-auto px-4 md:px-16">
             <div className="text-center mb-16">
               <h2 className="text-4xl font-bold text-vehicler-black mb-4">Frequently Asked Questions</h2>
               <p className="text-xl text-vehicler-gray max-w-3xl mx-auto">
@@ -528,7 +523,7 @@ export default function VehiclerLanding() {
       {/* Final CTA */}
       <section className="py-12 bg-gradient-to-r from-vehicler-blue to-vehicler-bright-blue text-white">
         <div className="container mx-auto px-4 text-center">
-          <div className="max-w-6xl mx-auto px-16">
+          <div className="max-w-6xl mx-auto px-4 md:px-16">
             <h2 className="text-4xl font-bold mb-6">Ready to Ship Your Vehicle?</h2>
             <p className="text-xl mb-8 max-w-3xl mx-auto">
               Join thousands of satisfied customers who trust Vehicler for safe, reliable vehicle transport nationwide.
@@ -555,7 +550,7 @@ export default function VehiclerLanding() {
 
       {/* ─────────────────── Footer ─────────────────── */}
       <footer className="bg-[#262626] text-white py-12">
-        <div className="max-w-6xl mx-auto px-16">
+        <div className="max-w-6xl mx-auto px-4 md:px-16">
           <div className="grid md:grid-cols-4 gap-8">
             {/* Logo + description */}
             <div className="space-y-6">
