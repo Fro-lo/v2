@@ -61,9 +61,9 @@ function StatusTimeline({ status }: { status: OrderStatus }) {
   return (
     <div className="relative">
       {/* Progress bar */}
-      <div className="absolute top-5 left-5 right-5 h-0.5 bg-gray-200">
+        <div className="absolute top-5 left-5 right-5 h-0.5 bg-gray-200">
         <div
-          className="h-full bg-vehicler-blue transition-all duration-500"
+          className="h-full bg-[#081C8B] transition-all duration-500"
           style={{ width: currentIndex === 0 ? "0%" : `${(currentIndex / (STATUS_STEPS.length - 1)) * 100}%` }}
         />
       </div>
@@ -75,9 +75,9 @@ function StatusTimeline({ status }: { status: OrderStatus }) {
           return (
             <div key={step.key} className="flex flex-col items-center gap-2">
               <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center z-10 transition-all
-                  ${isCompleted ? "bg-vehicler-blue text-white" : ""}
-                  ${isCurrent ? "bg-vehicler-blue text-white ring-4 ring-blue-100" : ""}
+          <div className="w-10 h-10 rounded-full flex items-center justify-center z-10 transition-all
+                  ${isCompleted ? "bg-[#081C8B] text-white" : ""}
+                  ${isCurrent ? "bg-[#081C8B] text-white ring-4 ring-blue-100" : ""}
                   ${!isCompleted && !isCurrent ? "bg-white border-2 border-gray-200 text-gray-400" : ""}
                 `}
               >
@@ -85,7 +85,7 @@ function StatusTimeline({ status }: { status: OrderStatus }) {
               </div>
               <span
                 className={`text-xs font-medium text-center max-w-[70px] leading-tight
-                  ${isCurrent ? "text-vehicler-blue" : isCompleted ? "text-vehicler-blue" : "text-gray-400"}
+                  ${isCurrent ? "text-[#081C8B]" : isCompleted ? "text-[#081C8B]" : "text-gray-400"}
                 `}
               >
                 {step.label}
@@ -104,7 +104,7 @@ function OrderCard({ order }: { order: Order }) {
   return (
     <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
       {/* Header */}
-      <div className="bg-vehicler-blue px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+      <div className="bg-[#081C8B] px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div>
           <p className="text-blue-200 text-xs font-medium uppercase tracking-wider">Booking ID</p>
           <p className="text-white text-xl font-bold">{order.booking_id}</p>
@@ -260,7 +260,7 @@ export default function FindMyVehiclePage() {
 
       <main className="flex-1">
         {/* Hero */}
-        <div className="bg-vehicler-blue py-12 px-4">
+        <div className="bg-[#081C8B] py-12 px-4">
           <div className="max-w-2xl mx-auto text-center">
             <h1 className="text-3xl md:text-4xl font-bold text-white mb-3 text-balance">
               Track Your Shipment
@@ -277,20 +277,20 @@ export default function FindMyVehiclePage() {
             {/* Toggle */}
             <div className="flex bg-gray-100 rounded-lg p-1 mb-4">
               <button
-                onClick={() => setSearchType("bookingId")}
+                onClick={() => { setSearchType("bookingId"); setSearchValue(""); }}
                 className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
                   searchType === "bookingId"
-                    ? "bg-white text-vehicler-blue shadow-sm"
+                    ? "bg-white text-[#081C8B] shadow-sm font-semibold"
                     : "text-gray-500 hover:text-gray-700"
                 }`}
               >
                 Booking ID
               </button>
               <button
-                onClick={() => setSearchType("email")}
+                onClick={() => { setSearchType("email"); setSearchValue(""); }}
                 className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
                   searchType === "email"
-                    ? "bg-white text-vehicler-blue shadow-sm"
+                    ? "bg-white text-[#081C8B] shadow-sm font-semibold"
                     : "text-gray-500 hover:text-gray-700"
                 }`}
               >
@@ -303,12 +303,12 @@ export default function FindMyVehiclePage() {
                 value={searchValue}
                 onChange={(e) => setSearchValue(e.target.value)}
                 placeholder={searchType === "bookingId" ? "e.g. #AB1X2Y" : "e.g. john@example.com"}
-                className="flex-1 h-11 border-gray-200 focus:border-vehicler-blue focus:ring-vehicler-blue"
+                className="flex-1 h-11 border-gray-200 focus:border-[#081C8B] focus:ring-[#081C8B]"
               />
               <Button
                 type="submit"
                 disabled={loading || !searchValue.trim()}
-                className="bg-vehicler-blue hover:bg-vehicler-dark-blue text-white h-11 px-6"
+                className="bg-[#081C8B] hover:bg-[#044BD9] text-white h-11 px-6"
               >
                 {loading ? (
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -348,7 +348,7 @@ export default function FindMyVehiclePage() {
           {orders.length > 0 && (
             <p className="text-center text-xs text-gray-400 pt-2">
               Showing {orders.length} order{orders.length > 1 ? "s" : ""}. Need help?{" "}
-              <a href="tel:+18554227872" className="text-vehicler-blue hover:underline font-medium">
+              <a href="tel:+18554227872" className="text-[#081C8B] hover:underline font-medium">
                 Call (855) 422-7872
               </a>
             </p>
