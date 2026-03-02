@@ -374,16 +374,16 @@ export default function VehiclerLanding() {
                 { Icon: Clock, title: "Fast Pickup", desc: "Quick pickup times with flexible scheduling to fit your timeline." },
                 { Icon: Truck, title: "Nationwide Coverage", desc: "We ship to all 50 states with our extensive carrier network." },
               ].map(({ Icon, title, desc }) => (
-                <Card key={title} className="p-4 md:p-6 hover:shadow-lg transition-shadow border-0 bg-white">
+                <Card key={title} className="px-3 py-4 md:p-6 hover:shadow-lg transition-shadow border-0 bg-white">
                   {/* Mobile: icon + desc side by side; Desktop: centered stack */}
                   <div className="flex items-start gap-3 md:flex-col md:items-center md:gap-0">
-                    <div className="w-12 h-12 md:w-16 md:h-16 bg-vehicler-blue/10 rounded-full flex items-center justify-center flex-shrink-0 md:mx-auto md:mb-6">
-                      <Icon className="w-6 h-6 md:w-8 md:h-8 text-vehicler-blue" />
+                    <div className="w-10 h-10 md:w-10 md:h-10 bg-vehicler-blue/10 rounded-full flex items-center justify-center flex-shrink-0 md:mx-auto md:mb-6">
+                      <Icon className="w-5 h-5 md:w-5 md:h-5 text-vehicler-blue" />
                     </div>
-                    <p className="text-vehicler-gray text-sm md:hidden leading-snug flex-1">{desc}</p>
+                    <p className="text-vehicler-gray text-xs md:hidden leading-snug flex-1">{desc}</p>
                   </div>
-                  <h3 className="text-base md:text-xl font-bold text-vehicler-black mt-2 md:mt-0 md:mb-4 md:text-center">{title}</h3>
-                  <p className="text-vehicler-gray text-sm hidden md:block md:text-center">{desc}</p>
+                  <h3 className="text-sm md:text-xl font-bold text-vehicler-black mt-2 md:mt-0 md:mb-4 text-center">{title}</h3>
+                  <p className="text-vehicler-gray text-xs hidden md:block md:text-center">{desc}</p>
                 </Card>
               ))}
             </div>
