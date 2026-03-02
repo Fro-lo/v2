@@ -386,6 +386,7 @@ export default function VehiclerLanding() {
                   <p className="text-vehicler-gray text-sm hidden md:block md:text-center">{desc}</p>
                 </Card>
               ))}
+            </div>
           </div>
         </div>
       </section>
