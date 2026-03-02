@@ -87,7 +87,7 @@ export default function VehiclerLanding() {
         <div className="max-w-6xl mx-auto px-4 md:px-16">
 
           {/* Row 1 — mobile only: call + hamburger (above logo) */}
-          <div className="flex items-center justify-between py-1.5 lg:hidden border-b border-gray-100">
+          <div className="flex items-center justify-between py-1.5 lg:hidden">
             <a href="tel:+18554227872" className="flex items-center space-x-1 text-vehicler-blue hover:text-vehicler-dark-blue transition-colors">
               <Phone className="w-3 h-3" />
               <span className="font-semibold text-xs">(855) 422-7872</span>
@@ -503,91 +503,92 @@ export default function VehiclerLanding() {
         </div>
       </section>
 
-      <footer className="bg-[#262626] text-white py-12">
+      <footer className="bg-[#262626] text-white py-10">
         <div className="max-w-6xl mx-auto px-4 md:px-16">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            {/* Logo + description */}
-            <div className="space-y-6">
-              <Link href="#quote">
-                <Image
-                  src="/vehicler-footer-logo.png"
-                  alt="Vehicler logo mark"
-                  width={160}
-                  height={40}
-                  priority
-                  className="cursor-pointer hover:opacity-80 transition-opacity"
-                />
-              </Link>
-              <p className="text-gray-300 text-sm leading-relaxed">
-                America's trusted vehicle transport company, delivering safe and reliable car shipping nationwide.
-              </p>
-              <div className="flex space-x-4">
-                {[
-                  { Icon: Facebook, label: "Facebook" },
-                  { Icon: Twitter, label: "Twitter" },
-                  { Icon: Instagram, label: "Instagram" },
-                  { Icon: Linkedin, label: "LinkedIn" },
-                ].map(({ Icon, label }) => (
-                  <a key={label} href="#" aria-label={`${label} link`}>
-                    <Icon className="w-5 h-5 text-gray-400 hover:text-white transition-colors" />
-                  </a>
-                ))}
-              </div>
-            </div>
 
+          {/* Logo + description + socials */}
+          <div className="mb-6 space-y-4">
+            <Link href="/">
+              <Image
+                src="/vehicler-footer-logo.png"
+                alt="Vehicler logo mark"
+                width={200}
+                height={200}
+                priority
+                className="w-full h-auto md:w-48 hover:opacity-80 transition-opacity cursor-pointer"
+              />
+            </Link>
+            <p className="text-gray-300 text-xs leading-relaxed md:max-w-xs">
+              America's trusted vehicle transport company, delivering safe and reliable car shipping nationwide.
+            </p>
+            <div className="flex space-x-4">
+              {[
+                { Icon: Facebook, label: "Facebook" },
+                { Icon: Twitter, label: "Twitter" },
+                { Icon: Instagram, label: "Instagram" },
+                { Icon: Linkedin, label: "LinkedIn" },
+              ].map(({ Icon, label }) => (
+                <a key={label} href="#" aria-label={`${label} link`}>
+                  <Icon className="w-4 h-4 text-gray-400 hover:text-white transition-colors" />
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* Three columns — always in one row */}
+          <div className="grid grid-cols-3 gap-2 md:gap-8 mb-6">
             {/* Services */}
             <div>
-              <h3 className="font-semibold text-white mb-4">Services</h3>
-              <ul className="space-y-3 text-sm">
+              <h3 className="font-semibold text-white mb-2 text-xs md:text-sm">Services</h3>
+              <ul className="space-y-1">
                 {[
                   { text: "Open Car Transport", href: "#" },
                   { text: "Enclosed Car Transport", href: "#" },
                   { text: "Motorcycle Shipping", href: "#" },
                   { text: "Classic Car Transport", href: "#" },
                 ].map((link) => (
-                  <li key={link.text}><a href={link.href} className="text-gray-300 hover:text-white transition-colors">{link.text}</a></li>
+                  <li key={link.text}><a href={link.href} className="text-gray-300 hover:text-white transition-colors text-[10px] md:text-xs">{link.text}</a></li>
                 ))}
               </ul>
             </div>
 
             {/* Company */}
             <div>
-              <h3 className="font-semibold text-white mb-4">Company</h3>
-              <ul className="space-y-3 text-sm">
+              <h3 className="font-semibold text-white mb-2 text-xs md:text-sm">Company</h3>
+              <ul className="space-y-1">
                 {[
                   { text: "About Us", href: "#" },
                   { text: "How It Works", href: "#how-it-works" },
                   { text: "Reviews", href: "#reviews" },
                   { text: "Careers", href: "#" },
                 ].map((link) => (
-                  <li key={link.text}><a href={link.href} className="text-gray-300 hover:text-white transition-colors">{link.text}</a></li>
+                  <li key={link.text}><a href={link.href} className="text-gray-300 hover:text-white transition-colors text-[10px] md:text-xs">{link.text}</a></li>
                 ))}
               </ul>
             </div>
 
             {/* Support */}
             <div>
-              <h3 className="font-semibold text-white mb-4">Support</h3>
-              <ul className="space-y-3 text-sm">
-                <li><a href="#" className="text-gray-300 hover:text-white transition-colors">Contact Us</a></li>
-                <li><a href="#faq" className="text-gray-300 hover:text-white transition-colors">FAQ</a></li>
-                <li><a href="https://business.vehicler.org/" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white transition-colors">For business</a></li>
-                <li><a href="#quote" className="text-gray-300 hover:text-white transition-colors">Get Quote</a></li>
+              <h3 className="font-semibold text-white mb-2 text-xs md:text-sm">Support</h3>
+              <ul className="space-y-1">
+                <li><a href="#" className="text-gray-300 hover:text-white transition-colors text-[10px] md:text-xs">Contact Us</a></li>
+                <li><a href="#faq" className="text-gray-300 hover:text-white transition-colors text-[10px] md:text-xs">FAQ</a></li>
+                <li><a href="https://business.vehicler.org/" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white transition-colors text-[10px] md:text-xs">For business</a></li>
+                <li><a href="#quote" className="text-gray-300 hover:text-white transition-colors text-[10px] md:text-xs">Get Quote</a></li>
               </ul>
             </div>
           </div>
 
-          {/* bottom row */}
-          <div className="border-t border-gray-600 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-400 text-sm">© {new Date().getFullYear()} Vehicler. All rights reserved.</p>
-            <div className="flex space-x-6 mt-4 md:mt-0 text-sm">
+          {/* Bottom bar */}
+          <div className="border-t border-gray-600 pt-4 flex flex-col md:flex-row justify-between items-center gap-2">
+            <p className="text-gray-400 text-[10px] md:text-xs">© {new Date().getFullYear()} Vehicler. All rights reserved.</p>
+            <div className="flex space-x-3 md:space-x-6 text-[10px] md:text-xs">
               {["Privacy Policy", "Terms of Service", "Cookie Policy"].map((item) => (
-                <a key={item} href="#" className="text-gray-400 hover:text-white transition-colors">
-                  {item}
-                </a>
+                <a key={item} href="#" className="text-gray-400 hover:text-white transition-colors">{item}</a>
               ))}
             </div>
           </div>
+
         </div>
       </footer>
     </div>
