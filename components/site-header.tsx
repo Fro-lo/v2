@@ -14,7 +14,7 @@ export function SiteHeader() {
       <div className="max-w-6xl mx-auto px-4 md:px-16">
 
         {/* Row 1 — mobile only: call button + hamburger (above logo) */}
-        <div className="flex items-center justify-between py-1.5 lg:hidden border-b border-gray-100">
+        <div className="flex items-center justify-between py-1.5 lg:hidden">
           <a
             href="tel:+18554227872"
             className="flex items-center space-x-1 text-vehicler-blue hover:text-vehicler-dark-blue transition-colors"
