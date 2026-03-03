@@ -518,7 +518,7 @@ export default function VehiclerLanding() {
                 className="w-full h-auto md:w-48 hover:opacity-80 transition-opacity cursor-pointer mb-4"
               />
             </Link>
-            <p className="text-gray-300 text-xs leading-relaxed md:max-w-xs">
+            <p className="text-gray-300 text-sm leading-relaxed md:max-w-xs">
               America's trusted vehicle transport company, delivering safe and reliable car shipping nationwide.
             </p>
             <div className="flex space-x-4">
@@ -539,7 +539,7 @@ export default function VehiclerLanding() {
           <div className="grid grid-cols-3 gap-x-1 gap-y-0 md:gap-8 mb-6">
             {/* Services */}
             <div>
-              <h3 className="font-semibold text-white mb-1 text-[10px] md:text-sm leading-tight">Services</h3>
+              <h3 className="font-semibold text-white mb-1 text-xs leading-tight">Services</h3>
               <ul className="space-y-0.5">
                 {[
                   { text: "Open Car Transport", href: "#" },
@@ -547,14 +547,14 @@ export default function VehiclerLanding() {
                   { text: "Motorcycle Shipping", href: "#" },
                   { text: "Classic Car Transport", href: "#" },
                 ].map((link) => (
-                  <li key={link.text}><a href={link.href} className="text-gray-300 hover:text-white transition-colors text-[9px] md:text-xs leading-tight block">{link.text}</a></li>
+                  <li key={link.text}><a href={link.href} className="text-gray-300 hover:text-white transition-colors text-xs leading-tight block">{link.text}</a></li>
                 ))}
               </ul>
             </div>
 
             {/* Company */}
             <div>
-              <h3 className="font-semibold text-white mb-1 text-[10px] md:text-sm leading-tight">Company</h3>
+              <h3 className="font-semibold text-white mb-1 text-xs leading-tight">Company</h3>
               <ul className="space-y-0.5">
                 {[
                   { text: "About Us", href: "#" },
@@ -562,27 +562,27 @@ export default function VehiclerLanding() {
                   { text: "Reviews", href: "#reviews" },
                   { text: "Careers", href: "#" },
                 ].map((link) => (
-                  <li key={link.text}><a href={link.href} className="text-gray-300 hover:text-white transition-colors text-[9px] md:text-xs leading-tight block">{link.text}</a></li>
+                  <li key={link.text}><a href={link.href} className="text-gray-300 hover:text-white transition-colors text-xs leading-tight block">{link.text}</a></li>
                 ))}
               </ul>
             </div>
 
             {/* Support */}
             <div>
-              <h3 className="font-semibold text-white mb-1 text-[10px] md:text-sm leading-tight">Support</h3>
+              <h3 className="font-semibold text-white mb-1 text-xs leading-tight">Support</h3>
               <ul className="space-y-0.5">
-                <li><a href="#" className="text-gray-300 hover:text-white transition-colors text-[9px] md:text-xs leading-tight block">Contact Us</a></li>
-                <li><a href="#faq" className="text-gray-300 hover:text-white transition-colors text-[9px] md:text-xs leading-tight block">FAQ</a></li>
-                <li><a href="https://business.vehicler.org/" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white transition-colors text-[9px] md:text-xs leading-tight block">For business</a></li>
-                <li><a href="#quote" className="text-gray-300 hover:text-white transition-colors text-[9px] md:text-xs leading-tight block">Get Quote</a></li>
+                <li><a href="#" className="text-gray-300 hover:text-white transition-colors text-xs leading-tight block">Contact Us</a></li>
+                <li><a href="#faq" className="text-gray-300 hover:text-white transition-colors text-xs leading-tight block">FAQ</a></li>
+                <li><a href="https://business.vehicler.org/" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white transition-colors text-xs leading-tight block">For business</a></li>
+                <li><a href="#quote" className="text-gray-300 hover:text-white transition-colors text-xs leading-tight block">Get Quote</a></li>
               </ul>
             </div>
           </div>
 
           {/* Bottom bar */}
           <div className="border-t border-gray-600 pt-4 flex flex-col md:flex-row justify-between items-center gap-2">
-            <p className="text-gray-400 text-[10px] md:text-xs">© {new Date().getFullYear()} Vehicler. All rights reserved.</p>
-            <div className="flex space-x-3 md:space-x-6 text-[10px] md:text-xs">
+            <p className="text-gray-400 text-xs">© {new Date().getFullYear()} Vehicler. All rights reserved.</p>
+            <div className="flex space-x-3 md:space-x-6 text-xs">
               {["Privacy Policy", "Terms of Service", "Cookie Policy"].map((item) => (
                 <a key={item} href="#" className="text-gray-400 hover:text-white transition-colors">{item}</a>
               ))}
