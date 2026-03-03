@@ -87,7 +87,7 @@ export default function VehiclerLanding() {
         <div className="max-w-6xl mx-auto px-4 md:px-16">
 
           {/* Row 1 — mobile only: call + hamburger (above logo) */}
-          <div className="flex items-center justify-between py-1.5 lg:hidden">
+          <div className="flex items-center justify-between py-0.5 lg:hidden">
             <a href="tel:+18554227872" className="flex items-center space-x-1 text-vehicler-blue hover:text-vehicler-dark-blue transition-colors">
               <Phone className="w-3 h-3" />
               <span className="font-semibold text-xs">(855) 422-7872</span>
@@ -108,7 +108,7 @@ export default function VehiclerLanding() {
           </div>
 
           {/* Row 2 (mobile) / single row (desktop): logo + nav */}
-          <div className="h-12 md:h-20 flex items-center justify-between">
+          <div className="h-9 md:h-20 flex items-center justify-between">
             <div className="flex items-center">
               <img src="/vehicler-logo.png" alt="Vehicler Logo" className="h-7 md:h-8 w-auto" />
             </div>
@@ -539,8 +539,8 @@ export default function VehiclerLanding() {
           <div className="grid grid-cols-3 gap-2 md:gap-8 mb-6">
             {/* Services */}
             <div>
-              <h3 className="font-semibold text-white mb-2 text-xs md:text-sm">Services</h3>
-              <ul className="space-y-1">
+              <h3 className="font-semibold text-white mb-1 text-xs md:text-sm">Services</h3>
+              <ul className="space-y-0.5">
                 {[
                   { text: "Open Car Transport", href: "#" },
                   { text: "Enclosed Car Transport", href: "#" },
@@ -554,8 +554,8 @@ export default function VehiclerLanding() {
 
             {/* Company */}
             <div>
-              <h3 className="font-semibold text-white mb-2 text-xs md:text-sm">Company</h3>
-              <ul className="space-y-1">
+              <h3 className="font-semibold text-white mb-1 text-xs md:text-sm">Company</h3>
+              <ul className="space-y-0.5">
                 {[
                   { text: "About Us", href: "#" },
                   { text: "How It Works", href: "#how-it-works" },
@@ -569,8 +569,8 @@ export default function VehiclerLanding() {
 
             {/* Support */}
             <div>
-              <h3 className="font-semibold text-white mb-2 text-xs md:text-sm">Support</h3>
-              <ul className="space-y-1">
+              <h3 className="font-semibold text-white mb-1 text-xs md:text-sm">Support</h3>
+              <ul className="space-y-0.5">
                 <li><a href="#" className="text-gray-300 hover:text-white transition-colors text-[10px] md:text-xs">Contact Us</a></li>
                 <li><a href="#faq" className="text-gray-300 hover:text-white transition-colors text-[10px] md:text-xs">FAQ</a></li>
                 <li><a href="https://business.vehicler.org/" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white transition-colors text-[10px] md:text-xs">For business</a></li>
