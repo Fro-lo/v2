@@ -507,7 +507,7 @@ export default function VehiclerLanding() {
         <div className="max-w-6xl mx-auto px-4 md:px-16">
 
           {/* Logo + description + socials */}
-          <div className="mb-6 space-y-4">
+          <div className="mb-6 space-y-3">
             <Link href="/">
               <Image
                 src="/vehicler-footer-logo.png"
@@ -515,7 +515,7 @@ export default function VehiclerLanding() {
                 width={200}
                 height={200}
                 priority
-                className="w-full h-auto md:w-48 hover:opacity-80 transition-opacity cursor-pointer"
+                className="w-full h-auto md:w-48 hover:opacity-80 transition-opacity cursor-pointer mb-4"
               />
             </Link>
             <p className="text-gray-300 text-xs leading-relaxed md:max-w-xs">
@@ -536,10 +536,10 @@ export default function VehiclerLanding() {
           </div>
 
           {/* Three columns — always in one row */}
-          <div className="grid grid-cols-3 gap-2 md:gap-8 mb-6">
+          <div className="grid grid-cols-3 gap-x-1 gap-y-0 md:gap-8 mb-6">
             {/* Services */}
             <div>
-              <h3 className="font-semibold text-white mb-1 text-xs md:text-sm">Services</h3>
+              <h3 className="font-semibold text-white mb-1 text-[10px] md:text-sm leading-tight">Services</h3>
               <ul className="space-y-0.5">
                 {[
                   { text: "Open Car Transport", href: "#" },
@@ -547,14 +547,14 @@ export default function VehiclerLanding() {
                   { text: "Motorcycle Shipping", href: "#" },
                   { text: "Classic Car Transport", href: "#" },
                 ].map((link) => (
-                  <li key={link.text}><a href={link.href} className="text-gray-300 hover:text-white transition-colors text-[10px] md:text-xs">{link.text}</a></li>
+                  <li key={link.text}><a href={link.href} className="text-gray-300 hover:text-white transition-colors text-[9px] md:text-xs leading-tight block">{link.text}</a></li>
                 ))}
               </ul>
             </div>
 
             {/* Company */}
             <div>
-              <h3 className="font-semibold text-white mb-1 text-xs md:text-sm">Company</h3>
+              <h3 className="font-semibold text-white mb-1 text-[10px] md:text-sm leading-tight">Company</h3>
               <ul className="space-y-0.5">
                 {[
                   { text: "About Us", href: "#" },
@@ -562,19 +562,19 @@ export default function VehiclerLanding() {
                   { text: "Reviews", href: "#reviews" },
                   { text: "Careers", href: "#" },
                 ].map((link) => (
-                  <li key={link.text}><a href={link.href} className="text-gray-300 hover:text-white transition-colors text-[10px] md:text-xs">{link.text}</a></li>
+                  <li key={link.text}><a href={link.href} className="text-gray-300 hover:text-white transition-colors text-[9px] md:text-xs leading-tight block">{link.text}</a></li>
                 ))}
               </ul>
             </div>
 
             {/* Support */}
             <div>
-              <h3 className="font-semibold text-white mb-1 text-xs md:text-sm">Support</h3>
+              <h3 className="font-semibold text-white mb-1 text-[10px] md:text-sm leading-tight">Support</h3>
               <ul className="space-y-0.5">
-                <li><a href="#" className="text-gray-300 hover:text-white transition-colors text-[10px] md:text-xs">Contact Us</a></li>
-                <li><a href="#faq" className="text-gray-300 hover:text-white transition-colors text-[10px] md:text-xs">FAQ</a></li>
-                <li><a href="https://business.vehicler.org/" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white transition-colors text-[10px] md:text-xs">For business</a></li>
-                <li><a href="#quote" className="text-gray-300 hover:text-white transition-colors text-[10px] md:text-xs">Get Quote</a></li>
+                <li><a href="#" className="text-gray-300 hover:text-white transition-colors text-[9px] md:text-xs leading-tight block">Contact Us</a></li>
+                <li><a href="#faq" className="text-gray-300 hover:text-white transition-colors text-[9px] md:text-xs leading-tight block">FAQ</a></li>
+                <li><a href="https://business.vehicler.org/" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white transition-colors text-[9px] md:text-xs leading-tight block">For business</a></li>
+                <li><a href="#quote" className="text-gray-300 hover:text-white transition-colors text-[9px] md:text-xs leading-tight block">Get Quote</a></li>
               </ul>
             </div>
           </div>
