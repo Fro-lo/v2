@@ -540,7 +540,7 @@ export default function VehiclerLanding() {
             {/* Services */}
             <div>
               <h3 className="font-semibold text-white mb-1 text-xs leading-tight">Services</h3>
-              <ul className="space-y-0.5">
+              <ul className="space-y-1">
                 {[
                   { text: "Open Car Transport", href: "#" },
                   { text: "Enclosed Car Transport", href: "#" },
@@ -555,7 +555,7 @@ export default function VehiclerLanding() {
             {/* Company */}
             <div>
               <h3 className="font-semibold text-white mb-1 text-xs leading-tight">Company</h3>
-              <ul className="space-y-0.5">
+              <ul className="space-y-1">
                 {[
                   { text: "About Us", href: "#" },
                   { text: "How It Works", href: "#how-it-works" },
@@ -570,7 +570,7 @@ export default function VehiclerLanding() {
             {/* Support */}
             <div>
               <h3 className="font-semibold text-white mb-1 text-xs leading-tight">Support</h3>
-              <ul className="space-y-0.5">
+              <ul className="space-y-1">
                 <li><a href="#" className="text-gray-300 hover:text-white transition-colors text-xs leading-tight block">Contact Us</a></li>
                 <li><a href="#faq" className="text-gray-300 hover:text-white transition-colors text-xs leading-tight block">FAQ</a></li>
                 <li><a href="https://business.vehicler.org/" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white transition-colors text-xs leading-tight block">For business</a></li>
