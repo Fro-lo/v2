@@ -515,7 +515,7 @@ export default function VehiclerLanding() {
                 width={200}
                 height={200}
                 priority
-                className="w-full h-auto md:w-48 hover:opacity-80 transition-opacity cursor-pointer mb-4"
+                className="w-full h-auto md:w-48 hover:opacity-80 transition-opacity cursor-pointer mb-8 md:mb-4"
               />
             </Link>
             <p className="text-gray-300 text-sm leading-relaxed md:max-w-xs">
