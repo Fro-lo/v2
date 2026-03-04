@@ -508,7 +508,7 @@ export default function VehiclerLanding() {
 
           {/* Logo + description + socials */}
           <div className="mb-6">
-            <Link href="/" className="block mb-10 md:mb-6">
+            <Link href="/" className="block">
               <Image
                 src="/vehicler-footer-logo.png"
                 alt="Vehicler logo mark"
@@ -518,6 +518,7 @@ export default function VehiclerLanding() {
                 className="w-full h-auto md:w-48 hover:opacity-80 transition-opacity cursor-pointer"
               />
             </Link>
+            <div className="h-8 md:h-4" />
             <p className="text-gray-300 text-sm leading-relaxed md:max-w-xs">
               America's trusted vehicle transport company, delivering safe and reliable car shipping nationwide.
             </p>
