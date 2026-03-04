@@ -507,15 +507,15 @@ export default function VehiclerLanding() {
         <div className="max-w-6xl mx-auto px-4 md:px-16">
 
           {/* Logo + description + socials */}
-          <div className="mb-6 space-y-3">
-            <Link href="/">
+          <div className="mb-6">
+            <Link href="/" className="block mb-10 md:mb-6">
               <Image
                 src="/vehicler-footer-logo.png"
                 alt="Vehicler logo mark"
                 width={200}
                 height={200}
                 priority
-                className="w-full h-auto md:w-48 hover:opacity-80 transition-opacity cursor-pointer mb-8 md:mb-4"
+                className="w-full h-auto md:w-48 hover:opacity-80 transition-opacity cursor-pointer"
               />
             </Link>
             <p className="text-gray-300 text-sm leading-relaxed md:max-w-xs">
