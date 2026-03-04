@@ -108,7 +108,7 @@ export default function VehiclerLanding() {
           </div>
 
           {/* Row 2 (mobile) / single row (desktop): logo + nav */}
-          <div className="h-9 md:h-20 flex items-center justify-between">
+          <div className="h-14 pb-3 md:pb-0 md:h-20 flex items-center justify-between">
             <div className="flex items-center">
               <img src="/vehicler-logo.png" alt="Vehicler Logo" className="h-7 md:h-8 w-auto" />
             </div>
