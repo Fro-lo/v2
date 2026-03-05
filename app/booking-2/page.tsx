@@ -708,7 +708,7 @@ export default function QuotePage() {
       >
         <div className="absolute inset-0 bg-[#6371BE] opacity-85"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="ml-16">
+          <div className="lg:ml-16">
             <div className="flex justify-between items-center py-4">
               <Link href="/" className="hover:opacity-80 transition-opacity">
                 <img src="/images/vehicler-logo-white.png" alt="Vehicler" className="h-8 w-auto" />
@@ -745,7 +745,7 @@ export default function QuotePage() {
                 }`}
               >
                 <form className="space-y-4">
-                  <div className="grid grid-cols-2 md:grid-cols-6 gap-3 items-end">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-3 items-end">
                     <div className="space-y-2 relative">
                       <Label
                         className={`text-sm font-medium ${showRequiredHints && (!searchForm.fromStreet || !searchForm.fromCity) ? "text-red-600" : "text-gray-700"}`}
@@ -1136,30 +1136,30 @@ export default function QuotePage() {
       </div>
 
       <div className="bg-[#F2F2F2] py-4 relative z-[1]">
-        <div className="max-w-4xl mx-auto px-4 pl-16">
-          <div className="flex items-center justify-center space-x-8">
-            <div className="flex items-center space-x-2">
+        <div className="max-w-4xl mx-auto px-4">
+          <div className="flex items-center justify-center space-x-2 md:space-x-8 overflow-x-auto">
+            <div className="flex items-center space-x-2 flex-shrink-0">
               <div className="w-6 h-6 bg-[#6371BE] rounded-full flex items-center justify-center">
                 <Flag className="w-3 h-3 text-white" />
               </div>
-              <span className="text-sm font-bold text-[#6371BE]">Contact Information</span>
+              <span className="text-xs md:text-sm font-bold text-[#6371BE] whitespace-nowrap">Contact Information</span>
             </div>
-            <div className="w-12 h-0.5 bg-gray-300"></div>
-            <div className="flex items-center space-x-2">
+            <div className="w-6 md:w-12 h-0.5 bg-gray-300 flex-shrink-0"></div>
+            <div className="flex items-center space-x-2 flex-shrink-0">
               <div className="w-6 h-6 border-2 border-gray-300 rounded-full bg-white"></div>
-              <span className="text-sm font-medium text-gray-500">Shipment Details</span>
+              <span className="text-xs md:text-sm font-medium text-gray-500 whitespace-nowrap">Shipment Details</span>
             </div>
-            <div className="w-12 h-0.5 bg-gray-300"></div>
-            <div className="flex items-center space-x-2">
+            <div className="w-6 md:w-12 h-0.5 bg-gray-300 flex-shrink-0"></div>
+            <div className="flex items-center space-x-2 flex-shrink-0">
               <div className="w-6 h-6 border-2 border-gray-300 rounded-full bg-white"></div>
-              <span className="text-sm font-medium text-gray-500">Book Shipment</span>
+              <span className="text-xs md:text-sm font-medium text-gray-500 whitespace-nowrap">Book Shipment</span>
             </div>
           </div>
         </div>
       </div>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="ml-16">
+        <div className="lg:ml-16">
           <div className="grid lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
               <div className="flex justify-between items-center mb-6">
@@ -1775,88 +1775,91 @@ export default function QuotePage() {
         </div>
       </div>
 
-      <footer className="bg-[#262626] text-white py-12">
-        <div className="max-w-6xl mx-auto px-16">
-          <div className="grid md:grid-cols-4 gap-8">
-            <div className="space-y-6">
-              <Link href="/" className="hover:opacity-80 transition-opacity">
-                <Image
-                  src="/images/vehicler-footer-logo.png"
-                  alt="Vehicler logo mark"
-                  width={160}
-                  height={40}
-                  priority
-                />
-              </Link>
-              <p className="text-gray-300 text-sm leading-relaxed">
-                America's trusted vehicle transport company, delivering safe and reliable car shipping nationwide.
-              </p>
-              <div className="flex space-x-4">
-                {[Facebook, Twitter, Instagram, Linkedin].map((Icon) => (
-                  <a key={Icon.displayName} href="#" aria-label={`${Icon.displayName} link`}>
-                    <Icon className="w-5 h-5 text-gray-400 hover:text-white transition-colors" />
-                  </a>
-                ))}
-              </div>
-            </div>
-            <FooterColumn
-              title="Services"
-              links={["Open Car Transport", "Enclosed Car Transport", "Motorcycle Shipping", "Classic Car Transport"]}
-            />
-            <FooterColumn title="Company" links={["About Us", "How It Works", "Reviews", "Careers"]} />
-            <FooterColumn title="Support" links={["Contact Us", "FAQ", "Track Shipment", "Get Quote"]} />
-          </div>
-          <div className="border-t border-gray-600 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-400 text-sm">© 2025 Vehicler. All rights reserved.</p>
-            <div className="flex space-x-6 mt-4 md:mt-0 text-sm">
-              {["Privacy Policy", "Terms of Service", "Cookie Policy"].map((item) => (
-                <a key={item} href="#" className="text-gray-400 hover:text-white transition-colors">
-                  {item}
+      <footer className="bg-[#262626] text-white py-10">
+        <div className="max-w-6xl mx-auto px-4 md:px-16">
+
+          {/* Logo + description + socials */}
+          <div className="mb-6">
+            <Link href="/" className="block">
+              <Image
+                src="/vehicler-footer-logo.png"
+                alt="Vehicler logo mark"
+                width={200}
+                height={200}
+                priority
+                className="w-full h-auto md:w-48 hover:opacity-80 transition-opacity cursor-pointer"
+              />
+            </Link>
+            <div className="h-8 md:h-4" />
+            <p className="text-gray-300 text-sm leading-relaxed md:max-w-xs">
+              America's trusted vehicle transport company, delivering safe and reliable car shipping nationwide.
+            </p>
+            <div className="flex space-x-4 mt-4">
+              {[
+                { Icon: Facebook, label: "Facebook" },
+                { Icon: Twitter, label: "Twitter" },
+                { Icon: Instagram, label: "Instagram" },
+                { Icon: Linkedin, label: "LinkedIn" },
+              ].map(({ Icon, label }) => (
+                <a key={label} href="#" aria-label={`${label} link`}>
+                  <Icon className="w-4 h-4 text-gray-400 hover:text-white transition-colors" />
                 </a>
               ))}
             </div>
           </div>
+
+          {/* Three columns — always in one row */}
+          <div className="grid grid-cols-3 gap-x-1 md:gap-8 mb-6">
+            <div>
+              <h3 className="font-semibold text-white mb-1 text-xs md:text-sm">Services</h3>
+              <ul className="space-y-1">
+                {[
+                  { text: "Open Car Transport", href: "#" },
+                  { text: "Enclosed Car Transport", href: "#" },
+                  { text: "Motorcycle Shipping", href: "#" },
+                  { text: "Classic Car Transport", href: "#" },
+                ].map((link) => (
+                  <li key={link.text}><a href={link.href} className="text-gray-300 hover:text-white transition-colors text-xs leading-tight block">{link.text}</a></li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-semibold text-white mb-1 text-xs md:text-sm">Company</h3>
+              <ul className="space-y-1">
+                {[
+                  { text: "About Us", href: "#" },
+                  { text: "How It Works", href: "/#how-it-works" },
+                  { text: "Reviews", href: "/#reviews" },
+                  { text: "Careers", href: "#" },
+                ].map((link) => (
+                  <li key={link.text}><a href={link.href} className="text-gray-300 hover:text-white transition-colors text-xs leading-tight block">{link.text}</a></li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-semibold text-white mb-1 text-xs md:text-sm">Support</h3>
+              <ul className="space-y-1">
+                <li><a href="#" className="text-gray-300 hover:text-white transition-colors text-xs leading-tight block">Contact Us</a></li>
+                <li><a href="/#faq" className="text-gray-300 hover:text-white transition-colors text-xs leading-tight block">FAQ</a></li>
+                <li><a href="/find-my-vehicle" className="text-gray-300 hover:text-white transition-colors text-xs leading-tight block">Track Shipment</a></li>
+                <li><a href="/#quote" className="text-gray-300 hover:text-white transition-colors text-xs leading-tight block">Get Quote</a></li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Bottom bar */}
+          <div className="border-t border-gray-600 pt-4 flex flex-col md:flex-row justify-between items-center gap-2">
+            <p className="text-gray-400 text-xs">© {new Date().getFullYear()} Vehicler. All rights reserved.</p>
+            <div className="flex space-x-3 md:space-x-6 text-xs">
+              {["Privacy Policy", "Terms of Service", "Cookie Policy"].map((item) => (
+                <a key={item} href="#" className="text-gray-400 hover:text-white transition-colors">{item}</a>
+              ))}
+            </div>
+          </div>
+
         </div>
       </footer>
     </div>
   )
 }
 
-interface FooterColumnProps {
-  title: string
-  links: string[]
-}
-
-function FooterColumn({ title, links }: FooterColumnProps) {
-  const getLinkHref = (link: string) => {
-    switch (link) {
-      case "How It Works":
-        return "/#how-it-works"
-      case "Reviews":
-        return "/#reviews"
-      case "FAQ":
-        return "/#faq"
-      case "Get Quote":
-        return "/#quote"
-      case "Track Shipment":
-        return "/find-my-vehicle"
-      default:
-        return "#"
-    }
-  }
-
-  return (
-    <div>
-      <h3 className="font-semibold text-white mb-4">{title}</h3>
-      <ul className="space-y-3 text-sm">
-        {links.map((link) => (
-          <li key={link}>
-            <a href={getLinkHref(link)} className="text-gray-300 hover:text-white transition-colors">
-              {link}
-            </a>
-          </li>
-        ))}
-      </ul>
-    </div>
-  )
-}
