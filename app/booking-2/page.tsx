@@ -1138,24 +1138,48 @@ export default function QuotePage() {
         </div>
       </div>
 
-      <div className="bg-[#F2F2F2] py-4 relative z-[1]">
+      <div className="bg-[#F2F2F2] py-3 relative z-[1]">
         <div className="max-w-4xl mx-auto px-4">
-          <div className="flex items-center justify-center space-x-2 md:space-x-8 overflow-x-auto">
+          {/* Mobile stepper: compact numbered circles */}
+          <div className="flex items-center justify-center md:hidden space-x-3">
+            <div className="flex items-center space-x-1.5">
+              <div className="w-6 h-6 bg-[#6371BE] rounded-full flex items-center justify-center flex-shrink-0">
+                <Flag className="w-3 h-3 text-white" />
+              </div>
+              <span className="text-xs font-bold text-[#6371BE]">Contact</span>
+            </div>
+            <div className="w-6 h-0.5 bg-gray-300 flex-shrink-0" />
+            <div className="flex items-center space-x-1.5">
+              <div className="w-6 h-6 border-2 border-gray-300 rounded-full bg-white flex items-center justify-center flex-shrink-0">
+                <span className="text-[9px] text-gray-400 font-bold">2</span>
+              </div>
+              <span className="text-xs font-medium text-gray-500">Shipment</span>
+            </div>
+            <div className="w-6 h-0.5 bg-gray-300 flex-shrink-0" />
+            <div className="flex items-center space-x-1.5">
+              <div className="w-6 h-6 border-2 border-gray-300 rounded-full bg-white flex items-center justify-center flex-shrink-0">
+                <span className="text-[9px] text-gray-400 font-bold">3</span>
+              </div>
+              <span className="text-xs font-medium text-gray-500">Book</span>
+            </div>
+          </div>
+          {/* Desktop stepper: full labels */}
+          <div className="hidden md:flex items-center justify-center space-x-8">
             <div className="flex items-center space-x-2 flex-shrink-0">
               <div className="w-6 h-6 bg-[#6371BE] rounded-full flex items-center justify-center">
                 <Flag className="w-3 h-3 text-white" />
               </div>
-              <span className="text-xs md:text-sm font-bold text-[#6371BE] whitespace-nowrap">Contact Information</span>
+              <span className="text-sm font-bold text-[#6371BE] whitespace-nowrap">Contact Information</span>
             </div>
-            <div className="w-6 md:w-12 h-0.5 bg-gray-300 flex-shrink-0"></div>
+            <div className="w-12 h-0.5 bg-gray-300 flex-shrink-0" />
             <div className="flex items-center space-x-2 flex-shrink-0">
-              <div className="w-6 h-6 border-2 border-gray-300 rounded-full bg-white"></div>
-              <span className="text-xs md:text-sm font-medium text-gray-500 whitespace-nowrap">Shipment Details</span>
+              <div className="w-6 h-6 border-2 border-gray-300 rounded-full bg-white" />
+              <span className="text-sm font-medium text-gray-500 whitespace-nowrap">Shipment Details</span>
             </div>
-            <div className="w-6 md:w-12 h-0.5 bg-gray-300 flex-shrink-0"></div>
+            <div className="w-12 h-0.5 bg-gray-300 flex-shrink-0" />
             <div className="flex items-center space-x-2 flex-shrink-0">
-              <div className="w-6 h-6 border-2 border-gray-300 rounded-full bg-white"></div>
-              <span className="text-xs md:text-sm font-medium text-gray-500 whitespace-nowrap">Book Shipment</span>
+              <div className="w-6 h-6 border-2 border-gray-300 rounded-full bg-white" />
+              <span className="text-sm font-medium text-gray-500 whitespace-nowrap">Book Shipment</span>
             </div>
           </div>
         </div>
@@ -1165,8 +1189,8 @@ export default function QuotePage() {
         <div className="lg:ml-16">
           <div className="grid lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-[#262626]">
+              <div className="mb-6">
+                <h2 className="text-2xl font-bold text-[#262626] mb-2">
                   Available Quotes ({filteredQuotes.length})
                   {isLoadingCarriers && <Loader2 className="inline h-5 w-5 ml-2 animate-spin text-[#6371BE]" />}
                 </h2>
@@ -1347,8 +1371,8 @@ export default function QuotePage() {
                       }`}
                       onClick={() => handleQuoteSelection(index)}
                     >
-                      <CardContent className="p-6">
-                        <div className="flex justify-between items-start">
+                      <CardContent className="p-4 md:p-6">
+                        <div className="flex flex-col md:flex-row md:justify-between md:items-start">
                           <div className="flex-1">
                             <div className="flex items-center justify-between mb-2">
                               <h3 className="font-semibold text-lg text-[#262626]">{quote.company}</h3>
@@ -1435,7 +1459,7 @@ export default function QuotePage() {
                             <p className="text-sm text-gray-600 line-clamp-2">{quote.description}</p>
                           </div>
 
-                          <div className="text-right ml-6">
+                          <div className="flex items-center justify-between mt-4 md:mt-0 md:ml-6 md:flex-col md:items-end">
                             <div className="text-3xl font-bold text-[#262626]">${quote.price}</div>
                             <Button
                               className={`mt-3 ${
@@ -1466,7 +1490,7 @@ export default function QuotePage() {
             </div>
 
             <div className="lg:col-span-1">
-              <Card className="sticky top-4">
+              <Card className="lg:sticky lg:top-4">
                 <CardHeader className="bg-gradient-to-r from-[#6371BE] to-[#081C8B] text-white">
                   <CardTitle>Complete Your Booking</CardTitle>
                   <p className="text-blue-100 text-sm">Provide your details to secure your quote</p>
