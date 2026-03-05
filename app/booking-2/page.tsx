@@ -4,12 +4,15 @@ import type React from "react"
 import { useState, useEffect, useCallback, useRef, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-import { Calendar } from "@/components/ui/calendar"
+import dynamic from "next/dynamic"
+
+const Calendar = dynamic(() => import("@/components/ui/calendar").then(m => ({ default: m.Calendar })), { ssr: false })
+const Slider = dynamic(() => import("@/components/ui/slider").then(m => ({ default: m.Slider })), { ssr: false })
+
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Slider } from "@/components/ui/slider"
 import {
   CalendarIcon,
   Shield,
