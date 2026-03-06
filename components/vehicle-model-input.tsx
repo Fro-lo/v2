@@ -57,10 +57,27 @@ export function VehicleModelInput({
   const updateDropdownRect = useCallback(() => {
     if (inputRef.current) {
       const rect = inputRef.current.getBoundingClientRect()
+      const dropdownWidth = rect.width
+      const viewportWidth = window.innerWidth
+      const margin = 8
+
+      // Clamp left so dropdown never goes off-screen right
+      const rawLeft = rect.left + window.scrollX
+      const clampedLeft = Math.min(rawLeft, window.scrollX + viewportWidth - dropdownWidth - margin)
+      const finalLeft = Math.max(window.scrollX + margin, clampedLeft)
+
+      // If not enough space below, show above
+      const spaceBelow = window.innerHeight - rect.bottom
+      const dropdownHeight = 240 // max-h-60
+      const showAbove = spaceBelow < dropdownHeight && rect.top > dropdownHeight
+      const top = showAbove
+        ? rect.top + window.scrollY - dropdownHeight - 4
+        : rect.bottom + window.scrollY + 4
+
       setDropdownRect({
-        top: rect.bottom + window.scrollY + 4,
-        left: rect.left + window.scrollX,
-        width: rect.width,
+        top,
+        left: finalLeft,
+        width: dropdownWidth,
       })
       setTooltipRect({
         top: rect.top + window.scrollY,

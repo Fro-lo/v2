@@ -1140,27 +1140,30 @@ export default function QuotePage() {
 
       <div className="bg-[#F2F2F2] py-3 relative z-[1]">
         <div className="max-w-4xl mx-auto px-4">
-          {/* Mobile stepper: compact numbered circles */}
-          <div className="flex items-center justify-center md:hidden space-x-3">
-            <div className="flex items-center space-x-1.5">
-              <div className="w-6 h-6 bg-[#6371BE] rounded-full flex items-center justify-center flex-shrink-0">
-                <Flag className="w-3 h-3 text-white" />
+          {/* Mobile stepper */}
+          <div className="flex items-center justify-center md:hidden">
+            {/* Step 1 */}
+            <div className="flex items-center space-x-1">
+              <div className="w-5 h-5 bg-[#6371BE] rounded-full flex items-center justify-center flex-shrink-0">
+                <Flag className="w-2.5 h-2.5 text-white" />
               </div>
-              <span className="text-xs font-bold text-[#6371BE]">Contact</span>
+              <span className="text-[11px] font-bold text-[#6371BE] leading-none">Contact Info</span>
             </div>
-            <div className="w-6 h-0.5 bg-gray-300 flex-shrink-0" />
-            <div className="flex items-center space-x-1.5">
-              <div className="w-6 h-6 border-2 border-gray-300 rounded-full bg-white flex items-center justify-center flex-shrink-0">
-                <span className="text-[9px] text-gray-400 font-bold">2</span>
+            <div className="flex-1 mx-2 h-0.5 bg-gray-300 max-w-[32px]" />
+            {/* Step 2 */}
+            <div className="flex items-center space-x-1">
+              <div className="w-5 h-5 border-2 border-gray-300 rounded-full bg-white flex items-center justify-center flex-shrink-0">
+                <span className="text-[8px] text-gray-400 font-bold leading-none">2</span>
               </div>
-              <span className="text-xs font-medium text-gray-500">Shipment</span>
+              <span className="text-[11px] font-medium text-gray-500 leading-none">Shipment</span>
             </div>
-            <div className="w-6 h-0.5 bg-gray-300 flex-shrink-0" />
-            <div className="flex items-center space-x-1.5">
-              <div className="w-6 h-6 border-2 border-gray-300 rounded-full bg-white flex items-center justify-center flex-shrink-0">
-                <span className="text-[9px] text-gray-400 font-bold">3</span>
+            <div className="flex-1 mx-2 h-0.5 bg-gray-300 max-w-[32px]" />
+            {/* Step 3 */}
+            <div className="flex items-center space-x-1">
+              <div className="w-5 h-5 border-2 border-gray-300 rounded-full bg-white flex items-center justify-center flex-shrink-0">
+                <span className="text-[8px] text-gray-400 font-bold leading-none">3</span>
               </div>
-              <span className="text-xs font-medium text-gray-500">Book</span>
+              <span className="text-[11px] font-medium text-gray-500 leading-none">Book</span>
             </div>
           </div>
           {/* Desktop stepper: full labels */}
