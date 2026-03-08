@@ -57,18 +57,23 @@ export function VehicleModelInput({
   const updateDropdownRect = useCallback(() => {
     if (inputRef.current) {
       const rect = inputRef.current.getBoundingClientRect()
-      const dropdownWidth = rect.width
       const viewportWidth = window.innerWidth
       const margin = 8
 
-      // Clamp left so dropdown never goes off-screen right
-      const rawLeft = rect.left + window.scrollX
-      const clampedLeft = Math.min(rawLeft, window.scrollX + viewportWidth - dropdownWidth - margin)
-      const finalLeft = Math.max(window.scrollX + margin, clampedLeft)
+      // On mobile, use almost full viewport width; on desktop use input width
+      const isMobile = viewportWidth < 768
+      const dropdownWidth = isMobile
+        ? viewportWidth - margin * 2
+        : rect.width
+
+      // Clamp left so dropdown never goes off-screen
+      const rawLeft = isMobile ? margin : rect.left + window.scrollX
+      const maxLeft = window.scrollX + viewportWidth - dropdownWidth - margin
+      const finalLeft = Math.max(window.scrollX + margin, Math.min(rawLeft, maxLeft))
 
       // If not enough space below, show above
       const spaceBelow = window.innerHeight - rect.bottom
-      const dropdownHeight = 240 // max-h-60
+      const dropdownHeight = 240
       const showAbove = spaceBelow < dropdownHeight && rect.top > dropdownHeight
       const top = showAbove
         ? rect.top + window.scrollY - dropdownHeight - 4

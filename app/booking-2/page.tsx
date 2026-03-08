@@ -712,7 +712,7 @@ export default function QuotePage() {
         <div className="absolute inset-0 bg-[#6371BE] opacity-85"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="lg:ml-16">
-            <div className="flex justify-between items-center py-4">
+            <div className="flex flex-col md:flex-row md:justify-between md:items-center py-4 gap-1 md:gap-0">
               <Link href="/" className="hover:opacity-80 transition-opacity">
                 <img src="/images/vehicler-logo-white.png" alt="Vehicler" className="h-8 w-auto" />
               </Link>
@@ -1311,9 +1311,9 @@ export default function QuotePage() {
                     )}
                   </div>
 
-                  <div className="flex items-center space-x-1">
-                    <span className="text-sm text-gray-600">Avg. rate</span>
+                  <div className="flex flex-col items-start">
                     <div className="flex">{renderStars(4)}</div>
+                    <span className="text-xs text-gray-600">Avg. rate</span>
                   </div>
                 </div>
               </div>
