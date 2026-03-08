@@ -28,35 +28,6 @@ import {
   Flag,
 } from "lucide-react"
 
-/* ─────────────────── Reusable footer column component ─────────────────── */
-interface FooterColumnProps {
-  title: string
-  links: Array<{ text: string; href: string }> | string[]
-}
-
-function FooterColumn({ title, links }: FooterColumnProps) {
-  return (
-    <div>
-      <h3 className="font-semibold text-white mb-4">{title}</h3>
-      <ul className="space-y-3 text-sm">
-        {links.map((link) => {
-          const isObject = typeof link === "object"
-          const text = isObject ? link.text : link
-          const href = isObject ? link.href : "#"
-
-          return (
-            <li key={text}>
-              <Link href={href} className="text-gray-300 hover:text-white transition-colors">
-                {text}
-              </Link>
-            </li>
-          )
-        })}
-      </ul>
-    </div>
-  )
-}
-
 export default function BookingPage() {
   const router = useRouter()
   const [editingFrom, setEditingFrom] = useState(false)
@@ -315,7 +286,7 @@ export default function BookingPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header - Vehicler Style with Pattern */}
+      {/* Header */}
       <header
         className="bg-[#6371BE] text-white relative overflow-hidden"
         style={{
@@ -328,34 +299,60 @@ export default function BookingPage() {
       >
         <div className="absolute inset-0 bg-[#6371BE] opacity-85"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="ml-16">
-            <div className="flex justify-between items-center py-4">
-              <Link href="/" className="hover:opacity-80 transition-opacity">
-                <img src="/vehicler-logo-header.png" alt="Vehicler" className="h-8 w-auto" />
-              </Link>
-              <div className="flex items-center space-x-2"></div>
-            </div>
+          {/* Mobile: phone row */}
+          <div className="flex items-center justify-between py-0.5 lg:hidden">
+            <a href="tel:+18554227872" className="flex items-center space-x-1 text-white/90 text-sm">
+              <span>☎ (855) 422-7872</span>
+            </a>
+          </div>
+          {/* Logo row */}
+          <div className="h-14 pb-3 md:pb-0 md:h-20 lg:ml-16 flex items-center justify-between">
+            <Link href="/" className="hover:opacity-80 transition-opacity">
+              <img src="/images/vehicler-logo-white.png" alt="Vehicler" className="h-8 w-auto" />
+            </Link>
           </div>
         </div>
       </header>
 
       <div className="relative overflow-hidden">
         {/* Progress Tracker */}
-        <div className="bg-[#F2F2F2] py-4">
-          <div className="max-w-4xl mx-auto px-4 pl-16">
-            <div className="flex items-center justify-center space-x-8">
+        <div className="bg-[#F2F2F2] py-3">
+          <div className="max-w-4xl mx-auto px-4">
+            {/* Mobile stepper */}
+            <div className="flex items-center justify-center md:hidden">
+              <div className="flex items-center space-x-1">
+                <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
+                <span className="text-[11px] font-medium text-[#262626] leading-none">Contact</span>
+              </div>
+              <div className="flex-1 mx-2 h-0.5 bg-green-500 max-w-[32px]" />
+              <div className="flex items-center space-x-1">
+                <div className="w-5 h-5 bg-[#6371BE] rounded-full flex items-center justify-center flex-shrink-0">
+                  <Flag className="w-2.5 h-2.5 text-white" />
+                </div>
+                <span className="text-[11px] font-bold text-[#6371BE] leading-none">Shipment</span>
+              </div>
+              <div className="flex-1 mx-2 h-0.5 bg-gray-300 max-w-[32px]" />
+              <div className="flex items-center space-x-1">
+                <div className="w-5 h-5 border-2 border-gray-300 rounded-full bg-white flex items-center justify-center flex-shrink-0">
+                  <span className="text-[8px] text-gray-400 font-bold leading-none">3</span>
+                </div>
+                <span className="text-[11px] font-medium text-gray-500 leading-none">Book</span>
+              </div>
+            </div>
+            {/* Desktop stepper */}
+            <div className="hidden md:flex items-center justify-center space-x-8">
               <div className="flex items-center space-x-2">
                 <CheckCircle className="w-6 h-6 text-green-500" />
                 <span className="text-sm font-medium text-[#262626]">Contact Information</span>
               </div>
-              <div className="w-12 h-0.5 bg-green-500"></div>
+              <div className="w-12 h-0.5 bg-green-500" />
               <div className="flex items-center space-x-2">
                 <div className="w-6 h-6 bg-[#6371BE] rounded-full flex items-center justify-center">
                   <Flag className="w-3 h-3 text-white" />
                 </div>
                 <span className="text-sm font-bold text-[#6371BE]">Shipment Details</span>
               </div>
-              <div className="w-12 h-0.5 bg-gray-300"></div>
+              <div className="w-12 h-0.5 bg-gray-300" />
               <div className="flex items-center space-x-2">
                 <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center">
                   <Flag className="w-3 h-3 text-white" />
@@ -367,10 +364,10 @@ export default function BookingPage() {
         </div>
 
         {/* Main Content */}
-        <div className="relative z-10 py-12">
+        <div className="relative z-10 py-6 md:py-12">
           <div className="container mx-auto px-4">
-            <div className="max-w-6xl mx-auto px-16">
-              <div className="grid lg:grid-cols-3 gap-8">
+            <div className="max-w-6xl mx-auto lg:px-16">
+              <div className="grid lg:grid-cols-3 gap-6 md:gap-8">
                 {/* Left Column - Form Preview */}
                 <div className="lg:col-span-2">
                   <Card className="shadow-md">
@@ -715,7 +712,7 @@ export default function BookingPage() {
 
                 {/* Right Column - Order Summary */}
                 <div className="lg:col-span-1">
-                  <Card className="shadow-md sticky top-8">
+                  <Card className="shadow-md lg:sticky lg:top-8">
                     <CardHeader className="pb-4">
                       <CardTitle
                         className="text-xl font-bold text-gray-900"
@@ -1047,60 +1044,71 @@ export default function BookingPage() {
           </div>
         </div>
 
-        {/* ─────────────────── Footer ─────────────────── */}
-        <footer className="bg-[#262626] text-white py-12">
-          <div className="max-w-6xl mx-auto px-16">
-            <div className="grid md:grid-cols-4 gap-8">
-              {/* Logo + description */}
-              <div className="space-y-6">
-                <Link href="/" className="hover:opacity-80 transition-opacity">
-                  <Image src="/vehicler-logo-footer.png" alt="Vehicler logo mark" width={160} height={40} priority />
-                </Link>
-                <p className="text-gray-300 text-sm leading-relaxed">
-                  America's trusted vehicle transport company, delivering safe and reliable car shipping nationwide.
-                </p>
-                <div className="flex space-x-4">
-                  {[Facebook, Twitter, Instagram, Linkedin].map((Icon) => (
-                    <a key={Icon.displayName} href="#" aria-label={`${Icon.displayName} link`}>
-                      <Icon className="w-5 h-5 text-gray-400 hover:text-white transition-colors" />
-                    </a>
-                  ))}
-                </div>
-              </div>
-              {/* Services */}
-              <FooterColumn
-                title="Services"
-                links={["Open Car Transport", "Enclosed Car Transport", "Motorcycle Shipping", "Classic Car Transport"]}
-              />
-              {/* Company */}
-              <FooterColumn
-                title="Company"
-                links={[
-                  { text: "About Us", href: "#" },
-                  { text: "How It Works", href: "/#how-it-works" },
-                  { text: "Reviews", href: "/#reviews" },
-                  { text: "Careers", href: "#" },
-                ]}
-              />
-              {/* Support */}
-              <FooterColumn
-                title="Support"
-                links={[
-                  { text: "Contact Us", href: "#" },
-                  { text: "FAQ", href: "/#faq" },
-                  { text: "Track Shipment", href: "/find-my-vehicle" },
-                  { text: "Get Quote", href: "/#quote" },
-                ]}
-              />
-            </div>
-            {/* bottom row */}
-            <div className="border-t border-gray-600 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
-              <p className="text-gray-400 text-sm">© 2025 Vehicler. All rights reserved.</p>
-              <div className="flex space-x-6 mt-4 md:mt-0 text-sm">
-                {["Privacy Policy", "Terms of Service", "Cookie Policy"].map((item) => (
-                  <a key={item} href="#" className="text-gray-400 hover:text-white transition-colors">
-                    {item}
+        {/* Footer */}
+        <footer className="bg-[#262626] text-white py-10">
+          <div className="max-w-6xl mx-auto px-4 md:px-16">
+            {/* Logo + description + socials */}
+            <div className="mb-6">
+              <Link href="/" className="block">
+                <Image
+                  src="/vehicler-footer-logo.png"
+                  alt="Vehicler logo mark"
+                  width={200}
+                  height={200}
+                  priority
+                  className="w-full h-auto md:w-48 hover:opacity-80 transition-opacity cursor-pointer"
+                />
+              </Link>
+              <div className="h-8 md:h-4" />
+              <p className="text-gray-300 text-sm leading-relaxed md:max-w-xs">
+                America's trusted vehicle transport company, delivering safe and reliable car shipping nationwide.
+              </p>
+              <div className="flex space-x-4 mt-4">
+                {[
+                  { Icon: Facebook, label: "Facebook" },
+                  { Icon: Twitter, label: "Twitter" },
+                  { Icon: Instagram, label: "Instagram" },
+                  { Icon: Linkedin, label: "LinkedIn" },
+                ].map(({ Icon, label }) => (
+                  <a key={label} href="#" aria-label={`${label} link`}>
+                    <Icon className="w-4 h-4 text-gray-400 hover:text-white transition-colors" />
                   </a>
+                ))}
+              </div>
+            </div>
+            {/* Three columns */}
+            <div className="grid grid-cols-3 gap-x-1 md:gap-8 mb-6">
+              <div>
+                <h3 className="font-semibold text-white mb-1 text-xs md:text-sm">Services</h3>
+                <ul className="space-y-1">
+                  {["Open Car Transport", "Enclosed Car Transport", "Motorcycle Shipping", "Classic Car Transport"].map((t) => (
+                    <li key={t}><a href="#" className="text-gray-300 hover:text-white transition-colors text-xs leading-tight block">{t}</a></li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h3 className="font-semibold text-white mb-1 text-xs md:text-sm">Company</h3>
+                <ul className="space-y-1">
+                  {[{ text: "About Us", href: "#" }, { text: "How It Works", href: "/#how-it-works" }, { text: "Reviews", href: "/#reviews" }, { text: "Careers", href: "#" }].map((l) => (
+                    <li key={l.text}><a href={l.href} className="text-gray-300 hover:text-white transition-colors text-xs leading-tight block">{l.text}</a></li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h3 className="font-semibold text-white mb-1 text-xs md:text-sm">Support</h3>
+                <ul className="space-y-1">
+                  {[{ text: "Contact Us", href: "#" }, { text: "FAQ", href: "/#faq" }, { text: "Track Shipment", href: "/find-my-vehicle" }, { text: "Get Quote", href: "/#quote" }].map((l) => (
+                    <li key={l.text}><a href={l.href} className="text-gray-300 hover:text-white transition-colors text-xs leading-tight block">{l.text}</a></li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+            {/* Bottom bar */}
+            <div className="border-t border-gray-600 pt-4 flex flex-col md:flex-row justify-between items-center gap-2">
+              <p className="text-gray-400 text-xs">© {new Date().getFullYear()} Vehicler. All rights reserved.</p>
+              <div className="flex space-x-3 md:space-x-6 text-xs">
+                {["Privacy Policy", "Terms of Service", "Cookie Policy"].map((item) => (
+                  <a key={item} href="#" className="text-gray-400 hover:text-white transition-colors">{item}</a>
                 ))}
               </div>
             </div>
