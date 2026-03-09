@@ -58,6 +58,7 @@ export function VehicleModelInput({
     if (inputRef.current) {
       const rect = inputRef.current.getBoundingClientRect()
       const viewportWidth = window.innerWidth
+      const viewportHeight = window.innerHeight
       const margin = 8
 
       // On mobile, use almost full viewport width; on desktop use input width
@@ -66,18 +67,18 @@ export function VehicleModelInput({
         ? viewportWidth - margin * 2
         : rect.width
 
-      // Clamp left so dropdown never goes off-screen
-      const rawLeft = isMobile ? margin : rect.left + window.scrollX
-      const maxLeft = window.scrollX + viewportWidth - dropdownWidth - margin
-      const finalLeft = Math.max(window.scrollX + margin, Math.min(rawLeft, maxLeft))
+      // For position: fixed, use viewport-relative coords (no scroll offset)
+      const rawLeft = isMobile ? margin : rect.left
+      const maxLeft = viewportWidth - dropdownWidth - margin
+      const finalLeft = Math.max(margin, Math.min(rawLeft, maxLeft))
 
       // If not enough space below, show above
-      const spaceBelow = window.innerHeight - rect.bottom
+      const spaceBelow = viewportHeight - rect.bottom
       const dropdownHeight = 240
       const showAbove = spaceBelow < dropdownHeight && rect.top > dropdownHeight
       const top = showAbove
-        ? rect.top + window.scrollY - dropdownHeight - 4
-        : rect.bottom + window.scrollY + 4
+        ? rect.top - dropdownHeight - 4
+        : rect.bottom + 4
 
       setDropdownRect({
         top,
@@ -85,8 +86,8 @@ export function VehicleModelInput({
         width: dropdownWidth,
       })
       setTooltipRect({
-        top: rect.top + window.scrollY,
-        left: rect.right + window.scrollX + 8,
+        top: rect.top,
+        left: rect.right + 8,
       })
     }
   }, [])
@@ -441,9 +442,8 @@ export function VehicleModelInput({
             style={{
               position: "fixed",
               top: dropdownRect.top,
-              left: Math.max(8, Math.min(dropdownRect.left, window.innerWidth - Math.min(dropdownRect.width, window.innerWidth - 16))),
-              width: Math.min(dropdownRect.width, window.innerWidth - 16),
-              maxWidth: "calc(100vw - 16px)",
+              left: dropdownRect.left,
+              width: dropdownRect.width,
               zIndex: 99999,
             }}
             className="shadow-lg border-2 border-[#6371BE]/20 max-h-80 overflow-y-auto"
@@ -513,9 +513,8 @@ export function VehicleModelInput({
             style={{
               position: "fixed",
               top: dropdownRect.top,
-              left: Math.max(8, Math.min(dropdownRect.left, window.innerWidth - Math.min(dropdownRect.width, window.innerWidth - 16))),
-              width: Math.min(dropdownRect.width, window.innerWidth - 16),
-              maxWidth: "calc(100vw - 16px)",
+              left: dropdownRect.left,
+              width: dropdownRect.width,
               zIndex: 99999,
             }}
             className="shadow-lg border-2 border-[#6371BE]/20 max-h-60 overflow-y-auto"
