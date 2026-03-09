@@ -85,10 +85,16 @@ export function VehicleModelInput({
         left: finalLeft,
         width: dropdownWidth,
       })
-      setTooltipRect({
-        top: rect.top,
-        left: rect.right + 8,
-      })
+      // On mobile, hide tooltip (it goes off-screen); on desktop show to the right
+      const isMobile = window.innerWidth < 768
+      if (isMobile) {
+        setTooltipRect(null)
+      } else {
+        setTooltipRect({
+          top: rect.top,
+          left: rect.right + 8,
+        })
+      }
     }
   }, [])
 
