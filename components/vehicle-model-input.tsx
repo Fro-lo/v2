@@ -439,10 +439,11 @@ export function VehicleModelInput({
           <Card
             ref={suggestionsRef}
             style={{
-              position: "absolute",
+              position: "fixed",
               top: dropdownRect.top,
-              left: dropdownRect.left,
-              width: dropdownRect.width,
+              left: Math.max(8, Math.min(dropdownRect.left, window.innerWidth - Math.min(dropdownRect.width, window.innerWidth - 16))),
+              width: Math.min(dropdownRect.width, window.innerWidth - 16),
+              maxWidth: "calc(100vw - 16px)",
               zIndex: 99999,
             }}
             className="shadow-lg border-2 border-[#6371BE]/20 max-h-80 overflow-y-auto"
@@ -510,10 +511,11 @@ export function VehicleModelInput({
           <Card
             ref={suggestionsRef}
             style={{
-              position: "absolute",
+              position: "fixed",
               top: dropdownRect.top,
-              left: dropdownRect.left,
-              width: dropdownRect.width,
+              left: Math.max(8, Math.min(dropdownRect.left, window.innerWidth - Math.min(dropdownRect.width, window.innerWidth - 16))),
+              width: Math.min(dropdownRect.width, window.innerWidth - 16),
+              maxWidth: "calc(100vw - 16px)",
               zIndex: 99999,
             }}
             className="shadow-lg border-2 border-[#6371BE]/20 max-h-60 overflow-y-auto"
