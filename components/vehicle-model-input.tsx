@@ -182,6 +182,9 @@ export function VehicleModelInput({
     setSelectedIndex(-1)
     setSelectedVehicle(vehicle)
     setShowYearSelection(true)
+    // Force update dropdown rect after state changes settle
+    setTimeout(() => updateDropdownRect(), 0)
+    console.log("[v0] handleSuggestionClick: showYearSelection=true, vehicle=", displayValue)
 
     if (onTransportRecommendation && vehicle.transportRecommendation) {
       const recommendation = {
@@ -550,9 +553,8 @@ export function VehicleModelInput({
             </CardContent>
           </Card>,
           document.body
-        )}
-
-        {/* Vehicle Details tooltip — rendered via portal to escape overflow clipping */}
+        )})()}
+ — rendered via portal to escape overflow clipping */}
         {mounted && enableSearch && showTooltip && !showYearSelection && tooltipRect && createPortal(
           <div
             style={{
