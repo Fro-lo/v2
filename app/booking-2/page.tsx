@@ -1805,82 +1805,94 @@ export default function QuotePage() {
         </div>
       </div>
 
-      <footer className="bg-[#262626] text-white py-10">
-        <div className="max-w-6xl mx-auto px-4 md:px-16">
+      <footer className="bg-[#262626] text-white py-10 md:py-12">
+        <div className="max-w-6xl mx-auto px-4 md:px-8">
 
-          {/* Logo + description + socials */}
-          <div className="mb-6">
-            <Link href="/" className="block">
-              <Image
-                src="/vehicler-footer-logo.png"
-                alt="Vehicler logo mark"
-                width={200}
-                height={200}
-                priority
-                className="w-full h-auto md:w-48 hover:opacity-80 transition-opacity cursor-pointer"
-              />
-            </Link>
-            <div className="h-8 md:h-4" />
-            <p className="text-gray-300 text-sm leading-relaxed md:max-w-xs">
-              America's trusted vehicle transport company, delivering safe and reliable car shipping nationwide.
-            </p>
-            <div className="flex space-x-4 mt-4">
-              {[
-                { Icon: Facebook, label: "Facebook" },
-                { Icon: Twitter, label: "Twitter" },
-                { Icon: Instagram, label: "Instagram" },
-                { Icon: Linkedin, label: "LinkedIn" },
-              ].map(({ Icon, label }) => (
-                <a key={label} href="#" aria-label={`${label} link`}>
-                  <Icon className="w-4 h-4 text-gray-400 hover:text-white transition-colors" />
-                </a>
-              ))}
+          {/* Desktop: 4-column grid */}
+          <div className="hidden md:grid md:grid-cols-4 md:gap-8 mb-8">
+            <div className="space-y-6">
+              <Link href="/" className="hover:opacity-80 transition-opacity block">
+                <Image src="/vehicler-footer-logo.png" alt="Vehicler logo mark" width={200} height={50} priority className="w-48 h-auto" />
+              </Link>
+              <p className="text-gray-300 text-sm leading-relaxed">America's trusted vehicle transport company, delivering safe and reliable car shipping nationwide.</p>
+              <div className="flex space-x-4">
+                {[{ Icon: Facebook, label: "Facebook" }, { Icon: Twitter, label: "Twitter" }, { Icon: Instagram, label: "Instagram" }, { Icon: Linkedin, label: "LinkedIn" }].map(({ Icon, label }) => (
+                  <a key={label} href="#" aria-label={`${label} link`}><Icon className="w-5 h-5 text-gray-400 hover:text-white transition-colors" /></a>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h3 className="font-semibold text-white mb-4">Services</h3>
+              <ul className="space-y-3 text-sm">
+                {["Open Car Transport", "Enclosed Car Transport", "Motorcycle Shipping", "Classic Car Transport"].map((t) => (
+                  <li key={t}><a href="#" className="text-gray-300 hover:text-white transition-colors">{t}</a></li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-semibold text-white mb-4">Company</h3>
+              <ul className="space-y-3 text-sm">
+                {[{ text: "About Us", href: "#" }, { text: "How It Works", href: "/#how-it-works" }, { text: "Reviews", href: "/#reviews" }, { text: "Careers", href: "#" }].map((l) => (
+                  <li key={l.text}><a href={l.href} className="text-gray-300 hover:text-white transition-colors">{l.text}</a></li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-semibold text-white mb-4">Support</h3>
+              <ul className="space-y-3 text-sm">
+                <li><a href="#" className="text-gray-300 hover:text-white transition-colors">Contact Us</a></li>
+                <li><a href="/#faq" className="text-gray-300 hover:text-white transition-colors">FAQ</a></li>
+                <li><a href="/find-my-vehicle" className="text-gray-300 hover:text-white transition-colors">Track Shipment</a></li>
+                <li><a href="/#quote" className="text-gray-300 hover:text-white transition-colors">Get Quote</a></li>
+              </ul>
             </div>
           </div>
 
-          {/* Three columns — always in one row */}
-          <div className="grid grid-cols-3 gap-x-1 md:gap-8 mb-6">
-            <div>
-              <h3 className="font-semibold text-white mb-1 text-xs md:text-sm">Services</h3>
-              <ul className="space-y-1">
-                {[
-                  { text: "Open Car Transport", href: "#" },
-                  { text: "Enclosed Car Transport", href: "#" },
-                  { text: "Motorcycle Shipping", href: "#" },
-                  { text: "Classic Car Transport", href: "#" },
-                ].map((link) => (
-                  <li key={link.text}><a href={link.href} className="text-gray-300 hover:text-white transition-colors text-xs leading-tight block">{link.text}</a></li>
-                ))}
-              </ul>
+          {/* Mobile: stacked logo + 3-col links */}
+          <div className="md:hidden mb-6">
+            <Link href="/" className="block mb-4">
+              <Image src="/vehicler-footer-logo.png" alt="Vehicler logo mark" width={200} height={200} priority className="w-full h-auto" />
+            </Link>
+            <div className="h-4" />
+            <p className="text-gray-300 text-sm leading-relaxed mb-4">America's trusted vehicle transport company, delivering safe and reliable car shipping nationwide.</p>
+            <div className="flex space-x-4 mb-6">
+              {[{ Icon: Facebook, label: "Facebook" }, { Icon: Twitter, label: "Twitter" }, { Icon: Instagram, label: "Instagram" }, { Icon: Linkedin, label: "LinkedIn" }].map(({ Icon, label }) => (
+                <a key={label} href="#" aria-label={`${label} link`}><Icon className="w-4 h-4 text-gray-400 hover:text-white transition-colors" /></a>
+              ))}
             </div>
-            <div>
-              <h3 className="font-semibold text-white mb-1 text-xs md:text-sm">Company</h3>
-              <ul className="space-y-1">
-                {[
-                  { text: "About Us", href: "#" },
-                  { text: "How It Works", href: "/#how-it-works" },
-                  { text: "Reviews", href: "/#reviews" },
-                  { text: "Careers", href: "#" },
-                ].map((link) => (
-                  <li key={link.text}><a href={link.href} className="text-gray-300 hover:text-white transition-colors text-xs leading-tight block">{link.text}</a></li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-semibold text-white mb-1 text-xs md:text-sm">Support</h3>
-              <ul className="space-y-1">
-                <li><a href="#" className="text-gray-300 hover:text-white transition-colors text-xs leading-tight block">Contact Us</a></li>
-                <li><a href="/#faq" className="text-gray-300 hover:text-white transition-colors text-xs leading-tight block">FAQ</a></li>
-                <li><a href="/find-my-vehicle" className="text-gray-300 hover:text-white transition-colors text-xs leading-tight block">Track Shipment</a></li>
-                <li><a href="/#quote" className="text-gray-300 hover:text-white transition-colors text-xs leading-tight block">Get Quote</a></li>
-              </ul>
+            <div className="grid grid-cols-3 gap-x-2">
+              <div>
+                <h3 className="font-semibold text-white mb-1 text-xs">Services</h3>
+                <ul className="space-y-1">
+                  {["Open Car Transport", "Enclosed Car Transport", "Motorcycle Shipping", "Classic Car Transport"].map((t) => (
+                    <li key={t}><a href="#" className="text-gray-300 hover:text-white transition-colors text-xs leading-tight block">{t}</a></li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h3 className="font-semibold text-white mb-1 text-xs">Company</h3>
+                <ul className="space-y-1">
+                  {[{ text: "About Us", href: "#" }, { text: "How It Works", href: "/#how-it-works" }, { text: "Reviews", href: "/#reviews" }, { text: "Careers", href: "#" }].map((l) => (
+                    <li key={l.text}><a href={l.href} className="text-gray-300 hover:text-white transition-colors text-xs leading-tight block">{l.text}</a></li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h3 className="font-semibold text-white mb-1 text-xs">Support</h3>
+                <ul className="space-y-1">
+                  <li><a href="#" className="text-gray-300 hover:text-white transition-colors text-xs leading-tight block">Contact Us</a></li>
+                  <li><a href="/#faq" className="text-gray-300 hover:text-white transition-colors text-xs leading-tight block">FAQ</a></li>
+                  <li><a href="/find-my-vehicle" className="text-gray-300 hover:text-white transition-colors text-xs leading-tight block">Track Shipment</a></li>
+                  <li><a href="/#quote" className="text-gray-300 hover:text-white transition-colors text-xs leading-tight block">Get Quote</a></li>
+                </ul>
+              </div>
             </div>
           </div>
 
           {/* Bottom bar */}
-          <div className="border-t border-gray-600 pt-4 flex flex-col md:flex-row justify-between items-center gap-2">
-            <p className="text-gray-400 text-xs">© {new Date().getFullYear()} Vehicler. All rights reserved.</p>
-            <div className="flex space-x-3 md:space-x-6 text-xs">
+          <div className="border-t border-gray-600 pt-6 md:pt-8 flex flex-col md:flex-row justify-between items-center gap-2">
+            <p className="text-gray-400 text-sm">© {new Date().getFullYear()} Vehicler. All rights reserved.</p>
+            <div className="flex space-x-4 md:space-x-6 text-sm">
               {["Privacy Policy", "Terms of Service", "Cookie Policy"].map((item) => (
                 <a key={item} href="#" className="text-gray-400 hover:text-white transition-colors">{item}</a>
               ))}
