@@ -235,7 +235,7 @@ export function HeroSearchForm() {
         <p className="text-sm text-gray-500 mb-4">
           Fill in the details and get instant quotes from verified carriers.
         </p>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 items-start">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 items-end">
           {/* Pick up from */}
           <div className="space-y-1.5 relative">
             <Label
@@ -435,7 +435,7 @@ export function HeroSearchForm() {
           </div>
 
           {/* Vehicle model */}
-          <div className="space-y-1.5 col-span-2 md:col-span-1">
+          <div className="col-span-2 md:col-span-1 flex flex-col justify-end">
             <VehicleModelInput
               value={searchForm.vehicleModel}
               onChange={handleVehicleModelChange}
