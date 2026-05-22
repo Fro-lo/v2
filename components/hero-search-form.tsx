@@ -436,12 +436,9 @@ export function HeroSearchForm() {
           </div>
         </div>
 
-        <div className="flex gap-3 items-end">
+        <div className="flex gap-3 items-center">
           {/* Vehicle model */}
-          <div className="space-y-1.5 flex-1">
-            <Label className={`text-xs font-semibold uppercase tracking-wide ${showRequiredHints && (!searchForm.vehicleModel || !searchForm.vehicleYear) ? "text-red-600" : "text-gray-500"}`}>
-              Vehicle model
-            </Label>
+          <div className="flex-1">
             <VehicleModelInput
               value={searchForm.vehicleModel}
               onChange={handleVehicleModelChange}
@@ -449,17 +446,14 @@ export function HeroSearchForm() {
               onYearChange={handleVehicleYearChange}
               onVehicleSelect={handleVehicleSelect}
               showRequiredHint={showRequiredHints && (!searchForm.vehicleModel || !searchForm.vehicleYear)}
-              className="text-sm"
+              className="text-sm h-10"
               enableSearch={true}
               hideLabel={true}
             />
           </div>
 
           {/* Vehicle condition */}
-          <div className="space-y-1.5 w-40 shrink-0">
-            <Label className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-              Condition
-            </Label>
+          <div className="w-40 shrink-0">
             <Popover open={showConditionDropdown} onOpenChange={setShowConditionDropdown}>
               <PopoverTrigger asChild>
                 <Button
@@ -490,10 +484,7 @@ export function HeroSearchForm() {
           </div>
 
           {/* Submit */}
-          <div className="space-y-1.5 w-44 shrink-0">
-            <Label className="text-xs font-semibold uppercase tracking-wide text-transparent select-none">
-              Action
-            </Label>
+          <div className="w-44 shrink-0">
             <Button
               type="button"
               className="w-full bg-[#044BD9] hover:bg-[#081C8B] text-white h-10 text-sm font-semibold"
