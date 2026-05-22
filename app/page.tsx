@@ -610,9 +610,8 @@ export default function VehiclerLanding() {
           <div className="border-t border-gray-600 pt-6 md:pt-8 flex flex-col md:flex-row justify-between items-center gap-2">
             <p className="text-gray-400 text-sm">© {new Date().getFullYear()} Vehicler. All rights reserved.</p>
             <div className="flex space-x-4 md:space-x-6 text-sm">
-              {["Privacy Policy", "Terms of Service", "Cookie Policy"].map((item) => (
-                <a key={item} href="#" className="text-gray-400 hover:text-white transition-colors">{item}</a>
-              ))}
+              <a href="https://business.vehicler.org/privacy" className="text-gray-400 hover:text-white transition-colors">Privacy Policy</a>
+              <a href="https://business.vehicler.org/terms" className="text-gray-400 hover:text-white transition-colors">Terms of Service</a>
             </div>
           </div>
 
