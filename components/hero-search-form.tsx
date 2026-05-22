@@ -235,6 +235,7 @@ export function HeroSearchForm() {
         <p className="text-sm text-gray-500 mb-4">
           Fill in the details and get instant quotes from verified carriers.
         </p>
+        <div className="flex flex-col gap-3">
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 items-end">
           {/* Pick up from */}
           <div className="space-y-1.5 relative">
@@ -433,9 +434,11 @@ export function HeroSearchForm() {
               </PopoverContent>
             </Popover>
           </div>
+        </div>
 
+        <div className="flex gap-3 items-end">
           {/* Vehicle model */}
-          <div className="space-y-1.5 col-span-2 md:col-span-1">
+          <div className="space-y-1.5 flex-1">
             <Label className={`text-xs font-semibold uppercase tracking-wide ${showRequiredHints && (!searchForm.vehicleModel || !searchForm.vehicleYear) ? "text-red-600" : "text-gray-500"}`}>
               Vehicle model
             </Label>
@@ -453,7 +456,7 @@ export function HeroSearchForm() {
           </div>
 
           {/* Vehicle condition */}
-          <div className="space-y-1.5">
+          <div className="space-y-1.5 w-40 shrink-0">
             <Label className="text-xs font-semibold uppercase tracking-wide text-gray-500">
               Condition
             </Label>
@@ -487,7 +490,7 @@ export function HeroSearchForm() {
           </div>
 
           {/* Submit */}
-          <div className="space-y-1.5">
+          <div className="space-y-1.5 w-44 shrink-0">
             <Label className="text-xs font-semibold uppercase tracking-wide text-transparent select-none">
               Action
             </Label>
@@ -499,6 +502,7 @@ export function HeroSearchForm() {
               Find Carriers
             </Button>
           </div>
+        </div>
         </div>
       </div>
     </div>
