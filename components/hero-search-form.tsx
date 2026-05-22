@@ -436,9 +436,9 @@ export function HeroSearchForm() {
           </div>
         </div>
 
-        <div className="flex gap-3 items-end">
+        <div className="grid gap-3 items-end" style={{ gridTemplateColumns: "1fr 160px 176px" }}>
           {/* Vehicle model */}
-          <div className="flex-1 space-y-1.5">
+          <div className="min-w-0 space-y-1.5">
             <Label className={`text-xs font-semibold uppercase tracking-wide ${showRequiredHints && (!searchForm.vehicleModel || !searchForm.vehicleYear) ? "text-red-600" : "text-gray-500"}`}>
               Vehicle model
             </Label>
@@ -456,7 +456,7 @@ export function HeroSearchForm() {
           </div>
 
           {/* Vehicle condition */}
-          <div className="w-40 shrink-0 space-y-1.5">
+          <div className="space-y-1.5">
             <Label className="text-xs font-semibold uppercase tracking-wide text-gray-500">
               Condition
             </Label>
@@ -490,7 +490,7 @@ export function HeroSearchForm() {
           </div>
 
           {/* Submit */}
-          <div className="w-44 shrink-0 space-y-1.5">
+          <div className="space-y-1.5">
             <Label className="text-xs font-semibold uppercase tracking-wide text-transparent select-none" aria-hidden="true">placeholder</Label>
             <Button
               type="button"
