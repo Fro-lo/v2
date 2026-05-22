@@ -21,6 +21,7 @@ interface VehicleModelInputProps {
   onTransportRecommendation?: (recommendation: { recommended: "open" | "enclosed"; reason: string }) => void
   onVehicleSelect?: (vehicle: GoogleSheetsVehicleModel & { selectedYear?: string }) => void
   enableSearch?: boolean
+  hideLabel?: boolean
 }
 
 export function VehicleModelInput({
@@ -34,6 +35,7 @@ export function VehicleModelInput({
   onTransportRecommendation,
   onVehicleSelect,
   enableSearch = false,
+  hideLabel = false,
 }: VehicleModelInputProps) {
   const [suggestions, setSuggestions] = useState<GoogleSheetsVehicleModel[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
@@ -403,13 +405,15 @@ export function VehicleModelInput({
   const yearOptions = getYearOptions()
 
   return (
-    <div className="space-y-2 relative z-[60000]">
-      <Label
-        htmlFor="vehicleModel"
-        className={`text-sm font-medium ${showRequiredHint && !value ? "text-red-600" : "text-gray-700"}`}
-      >
-        Vehicle model
-      </Label>
+    <div className={`relative z-[60000] ${hideLabel ? "" : "space-y-2"}`}>
+      {!hideLabel && (
+        <Label
+          htmlFor="vehicleModel"
+          className={`text-sm font-medium ${showRequiredHint && !value ? "text-red-600" : "text-gray-700"}`}
+        >
+          Vehicle model
+        </Label>
+      )}
 
       {/* Data Status Indicator */}
       {enableSearch && error && (

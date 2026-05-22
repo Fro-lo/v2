@@ -435,7 +435,10 @@ export function HeroSearchForm() {
           </div>
 
           {/* Vehicle model */}
-          <div className="col-span-2 md:col-span-1 flex flex-col justify-end">
+          <div className="space-y-1.5 col-span-2 md:col-span-1">
+            <Label className={`text-xs font-semibold uppercase tracking-wide ${showRequiredHints && (!searchForm.vehicleModel || !searchForm.vehicleYear) ? "text-red-600" : "text-gray-500"}`}>
+              Vehicle model
+            </Label>
             <VehicleModelInput
               value={searchForm.vehicleModel}
               onChange={handleVehicleModelChange}
@@ -445,6 +448,7 @@ export function HeroSearchForm() {
               showRequiredHint={showRequiredHints && (!searchForm.vehicleModel || !searchForm.vehicleYear)}
               className="text-sm"
               enableSearch={true}
+              hideLabel={true}
             />
           </div>
 
