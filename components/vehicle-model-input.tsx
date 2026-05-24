@@ -405,7 +405,7 @@ export function VehicleModelInput({
   const yearOptions = getYearOptions()
 
   return (
-    <div className={`relative z-[60000] min-w-0 ${hideLabel ? "" : "space-y-2"}`}>
+    <div className={`relative z-[60000] min-w-0 w-full ${hideLabel ? "" : "space-y-2"}`}>
       {!hideLabel && (
         <Label
           htmlFor="vehicleModel"
@@ -427,8 +427,8 @@ export function VehicleModelInput({
         </div>
       )}
 
-      <div className="relative">
-        <div className="relative">
+      <div className="relative w-full">
+        <div className="relative w-full">
           <input
             ref={inputRef}
             id="vehicleModel"
