@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Calendar as CalendarUI } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { CalendarIcon, ChevronDown, Loader2 } from "lucide-react"
+import { CalendarIcon, ChevronDown, Loader2, Search } from "lucide-react"
 import { format } from "date-fns"
 import { useZipLookup } from "@/hooks/use-zip-lookup"
 import { VehicleModelInput } from "@/components/vehicle-model-input"
@@ -435,21 +435,20 @@ export function HeroSearchForm() {
           </div>
 
           {/* Vehicle model */}
-          <div className="space-y-1.5 overflow-hidden">
+          <div className="space-y-1.5">
             <Label className={`text-xs font-semibold uppercase tracking-wide ${showRequiredHints && (!searchForm.vehicleModel || !searchForm.vehicleYear) ? "text-red-600" : "text-gray-500"}`}>
               Vehicle model
             </Label>
-            <VehicleModelInput
-              value={searchForm.vehicleModel}
-              onChange={handleVehicleModelChange}
-              year={searchForm.vehicleYear}
-              onYearChange={handleVehicleYearChange}
-              onVehicleSelect={handleVehicleSelect}
-              showRequiredHint={showRequiredHints && (!searchForm.vehicleModel || !searchForm.vehicleYear)}
-              className="text-sm"
-              enableSearch={true}
-              hideLabel={true}
-            />
+            <div className="relative h-10 flex items-center border border-gray-200 rounded-md bg-white px-3 gap-2 focus-within:ring-2 focus-within:ring-[#6371BE] focus-within:border-[#6371BE]">
+              <Search className="h-4 w-4 text-gray-400 shrink-0" />
+              <input
+                type="text"
+                value={searchForm.vehicleModel}
+                onChange={(e) => handleVehicleModelChange(e.target.value)}
+                placeholder="e.g., Toyota Camry, BMW 3 Series"
+                className="flex-1 min-w-0 text-sm bg-transparent outline-none text-gray-700 placeholder:text-gray-400"
+              />
+            </div>
           </div>
 
           {/* Vehicle condition */}
