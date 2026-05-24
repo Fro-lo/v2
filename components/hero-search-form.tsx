@@ -235,8 +235,7 @@ export function HeroSearchForm() {
         <p className="text-sm text-gray-500 mb-4">
           Fill in the details and get instant quotes from verified carriers.
         </p>
-        <div className="flex flex-col gap-3">
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 items-end">
+        <div className="grid grid-cols-3 gap-3 items-end">
           {/* Pick up from */}
           <div className="space-y-1.5 relative">
             <Label
@@ -434,11 +433,9 @@ export function HeroSearchForm() {
               </PopoverContent>
             </Popover>
           </div>
-        </div>
 
-        <div className="grid gap-3 items-end" style={{ gridTemplateColumns: "1fr 160px 176px" }}>
           {/* Vehicle model */}
-          <div className="min-w-0 space-y-1.5">
+          <div className="space-y-1.5 overflow-hidden">
             <Label className={`text-xs font-semibold uppercase tracking-wide ${showRequiredHints && (!searchForm.vehicleModel || !searchForm.vehicleYear) ? "text-red-600" : "text-gray-500"}`}>
               Vehicle model
             </Label>
@@ -500,7 +497,6 @@ export function HeroSearchForm() {
               Find Carriers
             </Button>
           </div>
-        </div>
         </div>
       </div>
     </div>
