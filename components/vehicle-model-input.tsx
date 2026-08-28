@@ -21,6 +21,7 @@ interface VehicleModelInputProps {
   onTransportRecommendation?: (recommendation: { recommended: "open" | "enclosed"; reason: string }) => void
   onVehicleSelect?: (vehicle: GoogleSheetsVehicleModel & { selectedYear?: string }) => void
   enableSearch?: boolean
+  hideLabel?: boolean
 }
 
 export function VehicleModelInput({
@@ -34,6 +35,7 @@ export function VehicleModelInput({
   onTransportRecommendation,
   onVehicleSelect,
   enableSearch = false,
+  hideLabel = false,
 }: VehicleModelInputProps) {
   const [suggestions, setSuggestions] = useState<GoogleSheetsVehicleModel[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
@@ -57,15 +59,43 @@ export function VehicleModelInput({
   const updateDropdownRect = useCallback(() => {
     if (inputRef.current) {
       const rect = inputRef.current.getBoundingClientRect()
+      const viewportWidth = window.innerWidth
+      const viewportHeight = window.innerHeight
+      const margin = 8
+
+      // On mobile, use almost full viewport width; on desktop use input width
+      const isMobile = viewportWidth < 768
+      const dropdownWidth = isMobile
+        ? viewportWidth - margin * 2
+        : rect.width
+
+      // For position: fixed, use viewport-relative coords (no scroll offset)
+      const rawLeft = isMobile ? margin : rect.left
+      const maxLeft = viewportWidth - dropdownWidth - margin
+      const finalLeft = Math.max(margin, Math.min(rawLeft, maxLeft))
+
+      // If not enough space below, show above
+      const spaceBelow = viewportHeight - rect.bottom
+      const dropdownHeight = 240
+      const showAbove = spaceBelow < dropdownHeight && rect.top > dropdownHeight
+      const top = showAbove
+        ? rect.top - dropdownHeight - 4
+        : rect.bottom + 4
+
       setDropdownRect({
-        top: rect.bottom + window.scrollY + 4,
-        left: rect.left + window.scrollX,
-        width: rect.width,
+        top,
+        left: finalLeft,
+        width: dropdownWidth,
       })
-      setTooltipRect({
-        top: rect.top + window.scrollY,
-        left: rect.right + window.scrollX + 8,
-      })
+      // On mobile, hide tooltip (it goes off-screen); on desktop show to the right
+      if (isMobile) {
+        setTooltipRect(null)
+      } else {
+        setTooltipRect({
+          top: rect.top,
+          left: rect.right + 8,
+        })
+      }
     }
   }, [])
 
@@ -154,6 +184,9 @@ export function VehicleModelInput({
     setSelectedIndex(-1)
     setSelectedVehicle(vehicle)
     setShowYearSelection(true)
+    // Force update dropdown rect after state changes settle
+    setTimeout(() => updateDropdownRect(), 0)
+    console.log("[v0] handleSuggestionClick: showYearSelection=true, vehicle=", displayValue)
 
     if (onTransportRecommendation && vehicle.transportRecommendation) {
       const recommendation = {
@@ -372,13 +405,15 @@ export function VehicleModelInput({
   const yearOptions = getYearOptions()
 
   return (
-    <div className="space-y-2 relative z-[60000]">
-      <Label
-        htmlFor="vehicleModel"
-        className={`text-sm font-medium ${showRequiredHint && !value ? "text-red-600" : "text-gray-700"}`}
-      >
-        Vehicle model
-      </Label>
+    <div className={`relative z-[60000] min-w-0 w-full ${hideLabel ? "" : "space-y-2"}`}>
+      {!hideLabel && (
+        <Label
+          htmlFor="vehicleModel"
+          className={`text-sm font-medium ${showRequiredHint && !value ? "text-red-600" : "text-gray-700"}`}
+        >
+          Vehicle model
+        </Label>
+      )}
 
       {/* Data Status Indicator */}
       {enableSearch && error && (
@@ -392,8 +427,8 @@ export function VehicleModelInput({
         </div>
       )}
 
-      <div className="relative">
-        <div className="relative">
+      <div className="relative w-full">
+        <div className="relative w-full">
           <input
             ref={inputRef}
             id="vehicleModel"
@@ -417,7 +452,7 @@ export function VehicleModelInput({
           <Card
             ref={suggestionsRef}
             style={{
-              position: "absolute",
+              position: "fixed",
               top: dropdownRect.top,
               left: dropdownRect.left,
               width: dropdownRect.width,
@@ -488,7 +523,7 @@ export function VehicleModelInput({
           <Card
             ref={suggestionsRef}
             style={{
-              position: "absolute",
+              position: "fixed",
               top: dropdownRect.top,
               left: dropdownRect.left,
               width: dropdownRect.width,
@@ -522,9 +557,8 @@ export function VehicleModelInput({
             </CardContent>
           </Card>,
           document.body
-        )}
-
-        {/* Vehicle Details tooltip — rendered via portal to escape overflow clipping */}
+        )})()}
+ — rendered via portal to escape overflow clipping */}
         {mounted && enableSearch && showTooltip && !showYearSelection && tooltipRect && createPortal(
           <div
             style={{

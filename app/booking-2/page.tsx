@@ -4,12 +4,15 @@ import type React from "react"
 import { useState, useEffect, useCallback, useRef, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-import { Calendar } from "@/components/ui/calendar"
+import dynamic from "next/dynamic"
+
+const Calendar = dynamic(() => import("@/components/ui/calendar").then(m => ({ default: m.Calendar })), { ssr: false })
+const Slider = dynamic(() => import("@/components/ui/slider").then(m => ({ default: m.Slider })), { ssr: false })
+
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Slider } from "@/components/ui/slider"
 import {
   CalendarIcon,
   Shield,
@@ -36,7 +39,7 @@ import Image from "next/image"
 import { useZipLookup } from "@/hooks/use-zip-lookup"
 import { useCarrierData } from "@/hooks/use-carrier-data"
 import { VehicleTransportPricingCalculator } from "@/lib/pricing-calculator"
-import { VehicleModelInput } from "@/components/vehicle-model-input"
+import { VehicleYearMakeModel } from "@/components/vehicle-year-make-model"
 import type { DateRange } from "react-day-picker"
 
 const US_STATES = [
@@ -109,6 +112,8 @@ interface SearchFormData {
   pickupEndDate: Date | undefined
   vehicleModel: string
   vehicleYear: string
+  vehicleMake: string
+  vehicleMakeId: string
   vehicleCondition: string
   vehicleCategory: string
 }
@@ -138,6 +143,8 @@ export default function QuotePage() {
     pickupEndDate: undefined,
     vehicleModel: "",
     vehicleYear: "",
+    vehicleMake: "",
+    vehicleMakeId: "",
     vehicleCondition: "Operable",
     vehicleCategory: "",
   })
@@ -281,6 +288,8 @@ export default function QuotePage() {
       toZip: toZip || "",
       vehicleModel: urlParams.get("vehicleModel") || "",
       vehicleYear: urlParams.get("vehicleYear") || "",
+      vehicleMake: urlParams.get("vehicleMake") || "",
+      vehicleMakeId: "",
       vehicleCondition: urlParams.get("vehicleCondition") || "Operable",
       vehicleCategory: urlParams.get("vehicleCategory") || "",
       pickupStartDate: urlParams.get("pickupStartDate") ? new Date(urlParams.get("pickupStartDate")!) : undefined,
@@ -456,28 +465,6 @@ export default function QuotePage() {
     }
   }, [])
 
-  const handleVehicleModelChange = useCallback((value: string) => {
-    setSearchForm((prev) => ({ ...prev, vehicleModel: value }))
-  }, [])
-
-  const handleVehicleYearChange = useCallback((year: string) => {
-    setSearchForm((prev) => ({ ...prev, vehicleYear: year }))
-  }, [])
-
-  const handleVehicleSelect = useCallback((vehicle: any) => {
-    setSearchForm((prev) => ({
-      ...prev,
-      vehicleCategory: vehicle.category,
-      vehicleYear: vehicle.selectedYear || prev.vehicleYear,
-    }))
-  }, [])
-
-  const handleTransportRecommendation = useCallback(
-    (recommendation: { recommended: "open" | "enclosed"; reason: string }) => {
-      setTransportRecommendation(recommendation)
-    },
-    [],
-  )
 
   const handleQuoteSelection = useCallback(
     (index: number) => {
@@ -550,6 +537,7 @@ export default function QuotePage() {
       if (searchForm.toAddress) params.set("toAddress", searchForm.toAddress)
       if (searchForm.vehicleModel) params.set("vehicleModel", searchForm.vehicleModel)
       if (searchForm.vehicleYear) params.set("vehicleYear", searchForm.vehicleYear)
+      if (searchForm.vehicleMake) params.set("vehicleMake", searchForm.vehicleMake)
       if (searchForm.vehicleCategory) params.set("vehicleCategory", searchForm.vehicleCategory)
       if (searchForm.vehicleCondition) params.set("vehicleCondition", searchForm.vehicleCondition)
 
@@ -708,8 +696,8 @@ export default function QuotePage() {
       >
         <div className="absolute inset-0 bg-[#6371BE] opacity-85"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="ml-16">
-            <div className="flex justify-between items-center py-4">
+          <div className="lg:ml-16">
+            <div className="flex flex-col md:flex-row md:justify-between md:items-center py-4 gap-1 md:gap-0">
               <Link href="/" className="hover:opacity-80 transition-opacity">
                 <img src="/images/vehicler-logo-white.png" alt="Vehicler" className="h-8 w-auto" />
               </Link>
@@ -745,7 +733,7 @@ export default function QuotePage() {
                 }`}
               >
                 <form className="space-y-4">
-                  <div className="grid grid-cols-2 md:grid-cols-6 gap-3 items-end">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-8 gap-3 items-end">
                     <div className="space-y-2 relative">
                       <Label
                         className={`text-sm font-medium ${showRequiredHints && (!searchForm.fromStreet || !searchForm.fromCity) ? "text-red-600" : "text-gray-700"}`}
@@ -1014,19 +1002,33 @@ export default function QuotePage() {
                       </Popover>
                     </div>
 
-                    <div className="space-y-2">
-                      <VehicleModelInput
-                        value={searchForm.vehicleModel}
-                        onChange={handleVehicleModelChange}
-                        year={searchForm.vehicleYear}
-                        onYearChange={handleVehicleYearChange}
-                        onVehicleSelect={handleVehicleSelect}
-                        showRequiredHint={showRequiredHints && (!searchForm.vehicleModel || !searchForm.vehicleYear)}
-                        onTransportRecommendation={handleTransportRecommendation}
-                        className="text-sm"
-                        enableSearch={hasSearched}
-                      />
-                    </div>
+                    <VehicleYearMakeModel
+                      value={{
+                        year: searchForm.vehicleYear,
+                        make: searchForm.vehicleMake,
+                        makeId: searchForm.vehicleMakeId,
+                        model:
+                          searchForm.vehicleMake &&
+                          searchForm.vehicleModel
+                            .toUpperCase()
+                            .startsWith(searchForm.vehicleMake.toUpperCase())
+                            ? searchForm.vehicleModel.slice(searchForm.vehicleMake.length).trim()
+                            : searchForm.vehicleModel,
+                      }}
+                      onChange={(v) =>
+                        setSearchForm((prev) => ({
+                          ...prev,
+                          vehicleYear: v.year,
+                          vehicleMake: v.make,
+                          vehicleMakeId: v.makeId,
+                          vehicleModel: [v.make, v.model].filter(Boolean).join(" ").trim(),
+                        }))
+                      }
+                      showRequiredHint={
+                        showRequiredHints &&
+                        (!searchForm.vehicleYear || !searchForm.vehicleMake || !searchForm.vehicleModel)
+                      }
+                    />
 
                     <div className="space-y-2">
                       <Label
@@ -1135,35 +1137,62 @@ export default function QuotePage() {
         </div>
       </div>
 
-      <div className="bg-[#F2F2F2] py-4 relative z-[1]">
-        <div className="max-w-4xl mx-auto px-4 pl-16">
-          <div className="flex items-center justify-center space-x-8">
-            <div className="flex items-center space-x-2">
+      <div className="bg-[#F2F2F2] py-3 relative z-[1]">
+        <div className="max-w-4xl mx-auto px-4">
+          {/* Mobile stepper */}
+          <div className="flex items-center justify-center md:hidden">
+            {/* Step 1 */}
+            <div className="flex items-center space-x-1">
+              <div className="w-5 h-5 bg-[#6371BE] rounded-full flex items-center justify-center flex-shrink-0">
+                <Flag className="w-2.5 h-2.5 text-white" />
+              </div>
+              <span className="text-[11px] font-bold text-[#6371BE] leading-none">Contact Info</span>
+            </div>
+            <div className="flex-1 mx-2 h-0.5 bg-gray-300 max-w-[32px]" />
+            {/* Step 2 */}
+            <div className="flex items-center space-x-1">
+              <div className="w-5 h-5 border-2 border-gray-300 rounded-full bg-white flex items-center justify-center flex-shrink-0">
+                <span className="text-[8px] text-gray-400 font-bold leading-none">2</span>
+              </div>
+              <span className="text-[11px] font-medium text-gray-500 leading-none">Shipment</span>
+            </div>
+            <div className="flex-1 mx-2 h-0.5 bg-gray-300 max-w-[32px]" />
+            {/* Step 3 */}
+            <div className="flex items-center space-x-1">
+              <div className="w-5 h-5 border-2 border-gray-300 rounded-full bg-white flex items-center justify-center flex-shrink-0">
+                <span className="text-[8px] text-gray-400 font-bold leading-none">3</span>
+              </div>
+              <span className="text-[11px] font-medium text-gray-500 leading-none">Book</span>
+            </div>
+          </div>
+          {/* Desktop stepper: full labels */}
+          <div className="hidden md:flex items-center justify-center space-x-8">
+            <div className="flex items-center space-x-2 flex-shrink-0">
               <div className="w-6 h-6 bg-[#6371BE] rounded-full flex items-center justify-center">
                 <Flag className="w-3 h-3 text-white" />
               </div>
-              <span className="text-sm font-bold text-[#6371BE]">Contact Information</span>
+              <span className="text-sm font-bold text-[#6371BE] whitespace-nowrap">Contact Information</span>
             </div>
-            <div className="w-12 h-0.5 bg-gray-300"></div>
-            <div className="flex items-center space-x-2">
-              <div className="w-6 h-6 border-2 border-gray-300 rounded-full bg-white"></div>
-              <span className="text-sm font-medium text-gray-500">Shipment Details</span>
+            <div className="w-12 h-0.5 bg-gray-300 flex-shrink-0" />
+            <div className="flex items-center space-x-2 flex-shrink-0">
+              <div className="w-6 h-6 border-2 border-gray-300 rounded-full bg-white" />
+              <span className="text-sm font-medium text-gray-500 whitespace-nowrap">Shipment Details</span>
             </div>
-            <div className="w-12 h-0.5 bg-gray-300"></div>
-            <div className="flex items-center space-x-2">
-              <div className="w-6 h-6 border-2 border-gray-300 rounded-full bg-white"></div>
-              <span className="text-sm font-medium text-gray-500">Book Shipment</span>
+            <div className="w-12 h-0.5 bg-gray-300 flex-shrink-0" />
+            <div className="flex items-center space-x-2 flex-shrink-0">
+              <div className="w-6 h-6 border-2 border-gray-300 rounded-full bg-white" />
+              <span className="text-sm font-medium text-gray-500 whitespace-nowrap">Book Shipment</span>
             </div>
           </div>
         </div>
       </div>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="ml-16">
+        <div className="lg:ml-16">
           <div className="grid lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-[#262626]">
+              <div className="mb-6">
+                <h2 className="text-2xl font-bold text-[#262626] mb-2">
                   Available Quotes ({filteredQuotes.length})
                   {isLoadingCarriers && <Loader2 className="inline h-5 w-5 ml-2 animate-spin text-[#6371BE]" />}
                 </h2>
@@ -1281,9 +1310,9 @@ export default function QuotePage() {
                     )}
                   </div>
 
-                  <div className="flex items-center space-x-1">
-                    <span className="text-sm text-gray-600">Avg. rate</span>
+                  <div className="flex flex-col items-start">
                     <div className="flex">{renderStars(4)}</div>
+                    <span className="text-xs text-gray-600">Avg. rate</span>
                   </div>
                 </div>
               </div>
@@ -1344,8 +1373,8 @@ export default function QuotePage() {
                       }`}
                       onClick={() => handleQuoteSelection(index)}
                     >
-                      <CardContent className="p-6">
-                        <div className="flex justify-between items-start">
+                      <CardContent className="p-4 md:p-6">
+                        <div className="flex flex-col md:flex-row md:justify-between md:items-start">
                           <div className="flex-1">
                             <div className="flex items-center justify-between mb-2">
                               <h3 className="font-semibold text-lg text-[#262626]">{quote.company}</h3>
@@ -1432,7 +1461,7 @@ export default function QuotePage() {
                             <p className="text-sm text-gray-600 line-clamp-2">{quote.description}</p>
                           </div>
 
-                          <div className="text-right ml-6">
+                          <div className="flex items-center justify-between mt-4 md:mt-0 md:ml-6 md:flex-col md:items-end">
                             <div className="text-3xl font-bold text-[#262626]">${quote.price}</div>
                             <Button
                               className={`mt-3 ${
@@ -1463,7 +1492,7 @@ export default function QuotePage() {
             </div>
 
             <div className="lg:col-span-1">
-              <Card className="sticky top-4">
+              <Card className="lg:sticky lg:top-4">
                 <CardHeader className="bg-gradient-to-r from-[#6371BE] to-[#081C8B] text-white">
                   <CardTitle>Complete Your Booking</CardTitle>
                   <p className="text-blue-100 text-sm">Provide your details to secure your quote</p>
@@ -1775,88 +1804,102 @@ export default function QuotePage() {
         </div>
       </div>
 
-      <footer className="bg-[#262626] text-white py-12">
-        <div className="max-w-6xl mx-auto px-16">
-          <div className="grid md:grid-cols-4 gap-8">
+      <footer className="bg-[#262626] text-white py-10 md:py-12">
+        <div className="max-w-6xl mx-auto px-4 md:px-8">
+
+          {/* Desktop: 4-column grid */}
+          <div className="hidden md:grid md:grid-cols-4 md:gap-8 mb-8">
             <div className="space-y-6">
-              <Link href="/" className="hover:opacity-80 transition-opacity">
-                <Image
-                  src="/images/vehicler-footer-logo.png"
-                  alt="Vehicler logo mark"
-                  width={160}
-                  height={40}
-                  priority
-                />
+              <Link href="/" className="hover:opacity-80 transition-opacity block">
+                <Image src="/vehicler-footer-logo.png" alt="Vehicler logo mark" width={200} height={50} priority className="w-48 h-auto" />
               </Link>
-              <p className="text-gray-300 text-sm leading-relaxed">
-                America's trusted vehicle transport company, delivering safe and reliable car shipping nationwide.
-              </p>
+              <p className="text-gray-300 text-sm leading-relaxed">America's trusted vehicle transport company, delivering safe and reliable car shipping nationwide.</p>
               <div className="flex space-x-4">
-                {[Facebook, Twitter, Instagram, Linkedin].map((Icon) => (
-                  <a key={Icon.displayName} href="#" aria-label={`${Icon.displayName} link`}>
-                    <Icon className="w-5 h-5 text-gray-400 hover:text-white transition-colors" />
-                  </a>
+                {[{ Icon: Facebook, label: "Facebook" }, { Icon: Twitter, label: "Twitter" }, { Icon: Instagram, label: "Instagram" }, { Icon: Linkedin, label: "LinkedIn" }].map(({ Icon, label }) => (
+                  <a key={label} href="#" aria-label={`${label} link`}><Icon className="w-5 h-5 text-gray-400 hover:text-white transition-colors" /></a>
                 ))}
               </div>
             </div>
-            <FooterColumn
-              title="Services"
-              links={["Open Car Transport", "Enclosed Car Transport", "Motorcycle Shipping", "Classic Car Transport"]}
-            />
-            <FooterColumn title="Company" links={["About Us", "How It Works", "Reviews", "Careers"]} />
-            <FooterColumn title="Support" links={["Contact Us", "FAQ", "Track Shipment", "Get Quote"]} />
-          </div>
-          <div className="border-t border-gray-600 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-400 text-sm">© 2025 Vehicler. All rights reserved.</p>
-            <div className="flex space-x-6 mt-4 md:mt-0 text-sm">
-              {["Privacy Policy", "Terms of Service", "Cookie Policy"].map((item) => (
-                <a key={item} href="#" className="text-gray-400 hover:text-white transition-colors">
-                  {item}
-                </a>
-              ))}
+            <div>
+              <h3 className="font-semibold text-white mb-4">Services</h3>
+              <ul className="space-y-3 text-sm">
+                {["Open Car Transport", "Enclosed Car Transport", "Motorcycle Shipping", "Classic Car Transport"].map((t) => (
+                  <li key={t}><a href="#" className="text-gray-300 hover:text-white transition-colors">{t}</a></li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-semibold text-white mb-4">Company</h3>
+              <ul className="space-y-3 text-sm">
+                {[{ text: "About Us", href: "#" }, { text: "How It Works", href: "/#how-it-works" }, { text: "Reviews", href: "/#reviews" }, { text: "Careers", href: "#" }].map((l) => (
+                  <li key={l.text}><a href={l.href} className="text-gray-300 hover:text-white transition-colors">{l.text}</a></li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-semibold text-white mb-4">Support</h3>
+              <ul className="space-y-3 text-sm">
+                <li><a href="#" className="text-gray-300 hover:text-white transition-colors">Contact Us</a></li>
+                <li><a href="/#faq" className="text-gray-300 hover:text-white transition-colors">FAQ</a></li>
+                <li><a href="/find-my-vehicle" className="text-gray-300 hover:text-white transition-colors">Track Shipment</a></li>
+                <li><a href="/#quote" className="text-gray-300 hover:text-white transition-colors">Get Quote</a></li>
+              </ul>
             </div>
           </div>
+
+          {/* Mobile: stacked logo + 3-col links */}
+          <div className="md:hidden mb-6">
+            <Link href="/" className="block mb-4">
+              <Image src="/vehicler-footer-logo.png" alt="Vehicler logo mark" width={200} height={200} priority className="w-full h-auto" />
+            </Link>
+            <div className="h-4" />
+            <p className="text-gray-300 text-sm leading-relaxed mb-4">America's trusted vehicle transport company, delivering safe and reliable car shipping nationwide.</p>
+            <div className="flex space-x-4 mb-6">
+              {[{ Icon: Facebook, label: "Facebook" }, { Icon: Twitter, label: "Twitter" }, { Icon: Instagram, label: "Instagram" }, { Icon: Linkedin, label: "LinkedIn" }].map(({ Icon, label }) => (
+                <a key={label} href="#" aria-label={`${label} link`}><Icon className="w-4 h-4 text-gray-400 hover:text-white transition-colors" /></a>
+              ))}
+            </div>
+            <div className="grid grid-cols-3 gap-x-2">
+              <div>
+                <h3 className="font-semibold text-white mb-1 text-xs">Services</h3>
+                <ul className="space-y-1">
+                  {["Open Car Transport", "Enclosed Car Transport", "Motorcycle Shipping", "Classic Car Transport"].map((t) => (
+                    <li key={t}><a href="#" className="text-gray-300 hover:text-white transition-colors text-xs leading-tight block">{t}</a></li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h3 className="font-semibold text-white mb-1 text-xs">Company</h3>
+                <ul className="space-y-1">
+                  {[{ text: "About Us", href: "#" }, { text: "How It Works", href: "/#how-it-works" }, { text: "Reviews", href: "/#reviews" }, { text: "Careers", href: "#" }].map((l) => (
+                    <li key={l.text}><a href={l.href} className="text-gray-300 hover:text-white transition-colors text-xs leading-tight block">{l.text}</a></li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h3 className="font-semibold text-white mb-1 text-xs">Support</h3>
+                <ul className="space-y-1">
+                  <li><a href="#" className="text-gray-300 hover:text-white transition-colors text-xs leading-tight block">Contact Us</a></li>
+                  <li><a href="/#faq" className="text-gray-300 hover:text-white transition-colors text-xs leading-tight block">FAQ</a></li>
+                  <li><a href="/find-my-vehicle" className="text-gray-300 hover:text-white transition-colors text-xs leading-tight block">Track Shipment</a></li>
+                  <li><a href="/#quote" className="text-gray-300 hover:text-white transition-colors text-xs leading-tight block">Get Quote</a></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom bar */}
+          <div className="border-t border-gray-600 pt-6 md:pt-8 flex flex-col md:flex-row justify-between items-center gap-2">
+            <p className="text-gray-400 text-sm">© {new Date().getFullYear()} Vehicler. All rights reserved.</p>
+            <div className="flex space-x-4 md:space-x-6 text-sm">
+              <a href="https://business.vehicler.org/privacy" className="text-gray-400 hover:text-white transition-colors">Privacy Policy</a>
+              <a href="https://business.vehicler.org/terms" className="text-gray-400 hover:text-white transition-colors">Terms of Service</a>
+            </div>
+          </div>
+
         </div>
       </footer>
     </div>
   )
 }
 
-interface FooterColumnProps {
-  title: string
-  links: string[]
-}
-
-function FooterColumn({ title, links }: FooterColumnProps) {
-  const getLinkHref = (link: string) => {
-    switch (link) {
-      case "How It Works":
-        return "/#how-it-works"
-      case "Reviews":
-        return "/#reviews"
-      case "FAQ":
-        return "/#faq"
-      case "Get Quote":
-        return "/#quote"
-      case "Track Shipment":
-        return "/find-my-vehicle"
-      default:
-        return "#"
-    }
-  }
-
-  return (
-    <div>
-      <h3 className="font-semibold text-white mb-4">{title}</h3>
-      <ul className="space-y-3 text-sm">
-        {links.map((link) => (
-          <li key={link}>
-            <a href={getLinkHref(link)} className="text-gray-300 hover:text-white transition-colors">
-              {link}
-            </a>
-          </li>
-        ))}
-      </ul>
-    </div>
-  )
-}

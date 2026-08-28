@@ -718,7 +718,7 @@ export default function BookingPage() {
         </div>
       </div>
 
-      {/* ─────────────────── Footer ─────────────────── */}
+      {/* ─────────────────���─ Footer ─────────────────── */}
       <footer className="bg-[#262626] text-white py-12">
         <div className="max-w-6xl mx-auto px-16">
           <div className="grid md:grid-cols-4 gap-8">
@@ -780,9 +780,9 @@ export default function BookingPage() {
           <div className="border-t border-gray-600 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
             <p className="text-gray-400 text-sm">© 2025 Vehicler. All rights reserved.</p>
             <div className="flex space-x-6 mt-4 md:mt-0 text-sm">
-              {["Privacy Policy", "Terms of Service", "Cookie Policy"].map((item) => (
-                <a key={item} href="#" className="text-gray-400 hover:text-white transition-colors">
-                  {item}
+              {[{ text: "Privacy Policy", href: "https://business.vehicler.org/privacy" }, { text: "Terms of Service", href: "https://business.vehicler.org/terms" }].map((item) => (
+                <a key={item.text} href={item.href} className="text-gray-400 hover:text-white transition-colors">
+                  {item.text}
                 </a>
               ))}
             </div>

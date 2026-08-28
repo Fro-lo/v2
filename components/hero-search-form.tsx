@@ -10,7 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { CalendarIcon, ChevronDown, Loader2 } from "lucide-react"
 import { format } from "date-fns"
 import { useZipLookup } from "@/hooks/use-zip-lookup"
-import { VehicleModelInput } from "@/components/vehicle-model-input"
+import { VehicleYearMakeModel } from "@/components/vehicle-year-make-model"
 import type { DateRange } from "react-day-picker"
 
 
@@ -29,6 +29,8 @@ interface SearchFormData {
   pickupEndDate: Date | undefined
   vehicleModel: string
   vehicleYear: string
+  vehicleMake: string
+  vehicleMakeId: string
   vehicleCondition: string
   vehicleCategory: string
 }
@@ -59,6 +61,8 @@ export function HeroSearchForm() {
     pickupEndDate: undefined,
     vehicleModel: "",
     vehicleYear: "",
+    vehicleMake: "",
+    vehicleMakeId: "",
     vehicleCondition: "Operable",
     vehicleCategory: "",
   })
@@ -121,22 +125,6 @@ export function HeroSearchForm() {
     }
   }, [])
 
-  const handleVehicleModelChange = useCallback((value: string) => {
-    setSearchForm((prev) => ({ ...prev, vehicleModel: value }))
-  }, [])
-
-  const handleVehicleYearChange = useCallback((year: string) => {
-    setSearchForm((prev) => ({ ...prev, vehicleYear: year }))
-  }, [])
-
-  const handleVehicleSelect = useCallback((vehicle: any) => {
-    setSearchForm((prev) => ({
-      ...prev,
-      vehicleCategory: vehicle.category,
-      vehicleYear: vehicle.selectedYear || prev.vehicleYear,
-    }))
-  }, [])
-
   const getPickupAddressDisplay = () => {
     const parts = [
       searchForm.fromHouseNumber,
@@ -178,8 +166,9 @@ export function HeroSearchForm() {
       { field: "fromZip", name: "Pick up ZIP code" },
       { field: "toZip", name: "Deliver to ZIP code" },
       { field: "pickupStartDate", name: "Pickup date" },
-      { field: "vehicleModel", name: "Vehicle model" },
       { field: "vehicleYear", name: "Vehicle year" },
+      { field: "vehicleMake", name: "Vehicle make" },
+      { field: "vehicleModel", name: "Vehicle model" },
     ]
 
     const missingFields = requiredFields.filter(({ field }) => {
@@ -204,8 +193,13 @@ export function HeroSearchForm() {
     if (searchForm.toCity) params.set("toCity", searchForm.toCity)
     if (searchForm.toState) params.set("toState", searchForm.toState)
     if (searchForm.toZip) params.set("toZip", searchForm.toZip)
-    if (searchForm.vehicleModel) params.set("vehicleModel", searchForm.vehicleModel)
+    const combinedModel = [searchForm.vehicleMake, searchForm.vehicleModel]
+      .filter(Boolean)
+      .join(" ")
+      .trim()
+    if (combinedModel) params.set("vehicleModel", combinedModel)
     if (searchForm.vehicleYear) params.set("vehicleYear", searchForm.vehicleYear)
+    if (searchForm.vehicleMake) params.set("vehicleMake", searchForm.vehicleMake)
     if (searchForm.vehicleCategory) params.set("vehicleCategory", searchForm.vehicleCategory)
     if (searchForm.vehicleCondition) params.set("vehicleCondition", searchForm.vehicleCondition)
     if (searchForm.pickupStartDate) params.set("pickupStartDate", searchForm.pickupStartDate.toISOString())
@@ -235,7 +229,7 @@ export function HeroSearchForm() {
         <p className="text-sm text-gray-500 mb-4">
           Fill in the details and get instant quotes from verified carriers.
         </p>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 items-end">
+        <div className="grid grid-cols-3 gap-3 items-end">
           {/* Pick up from */}
           <div className="space-y-1.5 relative">
             <Label
@@ -385,7 +379,7 @@ export function HeroSearchForm() {
           </div>
 
           {/* Pickup dates */}
-          <div className="space-y-1.5 col-span-2 md:col-span-1">
+          <div className="space-y-1.5">
             <Label
               className={`text-xs font-semibold uppercase tracking-wide ${
                 showRequiredHints && !searchForm.pickupStartDate ? "text-red-600" : "text-gray-500"
@@ -434,19 +428,28 @@ export function HeroSearchForm() {
             </Popover>
           </div>
 
-          {/* Vehicle model */}
-          <div className="space-y-1.5 col-span-2 md:col-span-1">
-            <VehicleModelInput
-              value={searchForm.vehicleModel}
-              onChange={handleVehicleModelChange}
-              year={searchForm.vehicleYear}
-              onYearChange={handleVehicleYearChange}
-              onVehicleSelect={handleVehicleSelect}
-              showRequiredHint={showRequiredHints && (!searchForm.vehicleModel || !searchForm.vehicleYear)}
-              className="text-sm"
-              enableSearch={true}
-            />
-          </div>
+          {/* Vehicle year / make / model */}
+          <VehicleYearMakeModel
+            value={{
+              year: searchForm.vehicleYear,
+              make: searchForm.vehicleMake,
+              makeId: searchForm.vehicleMakeId,
+              model: searchForm.vehicleModel,
+            }}
+            onChange={(v) =>
+              setSearchForm((prev) => ({
+                ...prev,
+                vehicleYear: v.year,
+                vehicleMake: v.make,
+                vehicleMakeId: v.makeId,
+                vehicleModel: v.model,
+              }))
+            }
+            showRequiredHint={
+              showRequiredHints &&
+              (!searchForm.vehicleYear || !searchForm.vehicleMake || !searchForm.vehicleModel)
+            }
+          />
 
           {/* Vehicle condition */}
           <div className="space-y-1.5">
@@ -483,10 +486,8 @@ export function HeroSearchForm() {
           </div>
 
           {/* Submit */}
-          <div className="space-y-1.5">
-            <Label className="text-xs font-semibold uppercase tracking-wide text-transparent select-none">
-              Action
-            </Label>
+          <div className="space-y-1.5 col-span-2">
+            <Label className="text-xs font-semibold uppercase tracking-wide text-transparent select-none" aria-hidden="true">placeholder</Label>
             <Button
               type="button"
               className="w-full bg-[#044BD9] hover:bg-[#081C8B] text-white h-10 text-sm font-semibold"

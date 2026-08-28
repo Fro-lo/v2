@@ -84,11 +84,31 @@ export default function VehiclerLanding() {
     <div className="min-h-screen bg-white">
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-gray-100">
-        {/* Single row on desktop, two rows on mobile */}
         <div className="max-w-6xl mx-auto px-4 md:px-16">
 
-          {/* Row 1: logo (mobile) / full nav (desktop) */}
-          <div className="h-14 md:h-20 flex items-center justify-between">
+          {/* Row 1 — mobile only: call + hamburger (above logo) */}
+          <div className="flex items-center justify-between py-0.5 lg:hidden">
+            <a href="tel:+18554227872" className="flex items-center space-x-1 text-vehicler-blue hover:text-vehicler-dark-blue transition-colors">
+              <Phone className="w-3 h-3" />
+              <span className="font-semibold text-xs">(855) 422-7872</span>
+            </a>
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="p-1 rounded-md text-vehicler-black hover:text-vehicler-blue hover:bg-gray-50 transition-colors"
+              aria-label="Toggle mobile menu"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {isMobileMenuOpen ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                )}
+              </svg>
+            </button>
+          </div>
+
+          {/* Row 2 (mobile) / single row (desktop): logo + nav */}
+          <div className="h-14 pb-3 md:pb-0 md:h-20 flex items-center justify-between">
             <div className="flex items-center">
               <img src="/vehicler-logo.png" alt="Vehicler Logo" className="h-7 md:h-8 w-auto" />
             </div>
@@ -113,27 +133,6 @@ export default function VehiclerLanding() {
                 <span className="font-semibold">(855) 422-7872</span>
               </a>
             </div>
-          </div>
-
-          {/* Row 2: phone + hamburger — mobile only */}
-          <div className="flex items-center justify-between pb-3 lg:hidden border-t border-gray-100 pt-2">
-            <a href="tel:+18554227872" className="flex items-center space-x-2 text-vehicler-blue hover:text-vehicler-dark-blue transition-colors">
-              <Phone className="w-4 h-4" />
-              <span className="font-semibold text-sm">(855) 422-7872</span>
-            </a>
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-2 rounded-md text-vehicler-black hover:text-vehicler-blue hover:bg-gray-50 transition-colors"
-              aria-label="Toggle mobile menu"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                {isMobileMenuOpen ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                )}
-              </svg>
-            </button>
           </div>
         </div>
 
@@ -327,9 +326,9 @@ export default function VehiclerLanding() {
       <section id="how-it-works" className="py-12 bg-white">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto px-4 md:px-16">
-            <div className="text-center mb-16">
+            <div className="text-center mb-6 md:mb-16">
               <h2 className="text-4xl font-bold text-vehicler-black mb-4">How It Works</h2>
-              <p className="text-base md:text-xl text-vehicler-gray max-w-3xl mx-auto px-2 md:px-0">
+              <p className="text-sm md:text-xl text-vehicler-gray max-w-3xl mx-auto px-2 md:px-0">
                 Simple, transparent process from quote to delivery in just 4 easy steps.
               </p>
             </div>
@@ -368,42 +367,25 @@ export default function VehiclerLanding() {
               </p>
             </div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-              <Card className="text-center p-8 hover:shadow-lg transition-shadow border-0 bg-white">
-                <div className="w-16 h-16 bg-vehicler-blue/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <Shield className="w-8 h-8 text-vehicler-blue" />
-                </div>
-                <h3 className="text-xl font-bold text-vehicler-black mb-4">Fully Insured</h3>
-                <p className="text-vehicler-gray">
-                  Every shipment is covered by comprehensive insurance for your peace of mind.
-                </p>
-              </Card>
-
-              <Card className="text-center p-8 hover:shadow-lg transition-shadow border-0 bg-white">
-                <div className="w-16 h-16 bg-vehicler-blue/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <Award className="w-8 h-8 text-vehicler-blue" />
-                </div>
-                <h3 className="text-xl font-bold text-vehicler-black mb-4">5-Star Rated</h3>
-                <p className="text-vehicler-gray">
-                  Thousands of satisfied customers rate us 5 stars for exceptional service.
-                </p>
-              </Card>
-
-              <Card className="text-center p-8 hover:shadow-lg transition-shadow border-0 bg-white">
-                <div className="w-16 h-16 bg-vehicler-blue/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <Clock className="w-8 h-8 text-vehicler-blue" />
-                </div>
-                <h3 className="text-xl font-bold text-vehicler-black mb-4">Fast Pickup</h3>
-                <p className="text-vehicler-gray">Quick pickup times with flexible scheduling to fit your timeline.</p>
-              </Card>
-
-              <Card className="text-center p-8 hover:shadow-lg transition-shadow border-0 bg-white">
-                <div className="w-16 h-16 bg-vehicler-blue/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <Truck className="w-8 h-8 text-vehicler-blue" />
-                </div>
-                <h3 className="text-xl font-bold text-vehicler-black mb-4">Nationwide Coverage</h3>
-                <p className="text-vehicler-gray">We ship to all 50 states with our extensive carrier network.</p>
-              </Card>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
+              {[
+                { Icon: Shield, title: "Fully Insured", desc: "Every shipment is covered by comprehensive insurance for your peace of mind." },
+                { Icon: Award, title: "5-Star Rated", desc: "Thousands of satisfied customers rate us 5 stars for exceptional service." },
+                { Icon: Clock, title: "Fast Pickup", desc: "Quick pickup times with flexible scheduling to fit your timeline." },
+                { Icon: Truck, title: "Nationwide Coverage", desc: "We ship to all 50 states with our extensive carrier network." },
+              ].map(({ Icon, title, desc }) => (
+                <Card key={title} className="px-3 py-4 md:p-6 hover:shadow-lg transition-shadow border-0 bg-white">
+                  {/* Mobile: icon + desc side by side; Desktop: centered stack */}
+                  <div className="flex items-start gap-3 md:flex-col md:items-center md:gap-0">
+                    <div className="w-10 h-10 md:w-10 md:h-10 bg-vehicler-blue/10 rounded-full flex items-center justify-center flex-shrink-0 md:mx-auto md:mb-6">
+                      <Icon className="w-5 h-5 md:w-5 md:h-5 text-vehicler-blue" />
+                    </div>
+                    <p className="text-vehicler-gray text-xs md:hidden leading-snug flex-1">{desc}</p>
+                  </div>
+                  <h3 className="text-sm md:text-xl font-bold text-vehicler-black mt-2 md:mt-0 md:mb-4 text-center">{title}</h3>
+                  <p className="text-vehicler-gray text-xs hidden md:block md:text-center">{desc}</p>
+                </Card>
+              ))}
             </div>
           </div>
         </div>
@@ -521,76 +503,118 @@ export default function VehiclerLanding() {
         </div>
       </section>
 
-      {/* ─────────────────── Footer ─────────────────── */}
-      <footer className="bg-[#262626] text-white py-12">
-        <div className="max-w-6xl mx-auto px-4 md:px-16">
-          <div className="grid md:grid-cols-4 gap-8">
-            {/* Logo + description */}
+      <footer className="bg-[#262626] text-white py-10 md:py-12">
+        <div className="max-w-6xl mx-auto px-4 md:px-8">
+
+          {/* Desktop: 4-column grid. Mobile: stacked logo + 3-col links */}
+          <div className="hidden md:grid md:grid-cols-4 md:gap-8 mb-8">
+            {/* Col 1: Logo + description + socials */}
             <div className="space-y-6">
-              <Link href="#quote">
+              <Link href="/" className="hover:opacity-80 transition-opacity block">
                 <Image
                   src="/vehicler-footer-logo.png"
                   alt="Vehicler logo mark"
-                  width={160}
-                  height={40}
+                  width={200}
+                  height={50}
                   priority
-                  className="cursor-pointer hover:opacity-80 transition-opacity"
+                  className="w-48 h-auto"
                 />
               </Link>
               <p className="text-gray-300 text-sm leading-relaxed">
                 America's trusted vehicle transport company, delivering safe and reliable car shipping nationwide.
               </p>
               <div className="flex space-x-4">
-                {[Facebook, Twitter, Instagram, Linkedin].map((Icon) => (
-                  <a key={Icon.displayName} href="#" aria-label={`${Icon.displayName} link`}>
+                {[{ Icon: Facebook, label: "Facebook" }, { Icon: Twitter, label: "Twitter" }, { Icon: Instagram, label: "Instagram" }, { Icon: Linkedin, label: "LinkedIn" }].map(({ Icon, label }) => (
+                  <a key={label} href="#" aria-label={`${label} link`}>
                     <Icon className="w-5 h-5 text-gray-400 hover:text-white transition-colors" />
                   </a>
                 ))}
               </div>
             </div>
-            {/* Services */}
-            <FooterColumn
-              title="Services"
-              links={[
-                { text: "Open Car Transport", href: "#" },
-                { text: "Enclosed Car Transport", href: "#" },
-                { text: "Motorcycle Shipping", href: "#" },
-                { text: "Classic Car Transport", href: "#" },
-              ]}
-            />
-            {/* Company */}
-            <FooterColumn
-              title="Company"
-              links={[
-                { text: "About Us", href: "#" },
-                { text: "How It Works", href: "#how-it-works" },
-                { text: "Reviews", href: "#reviews" },
-                { text: "Careers", href: "#" },
-              ]}
-            />
-            {/* Support */}
-            <FooterColumn
-              title="Support"
-              links={[
-                { text: "Contact Us", href: "#" },
-                { text: "FAQ", href: "#faq" },
-                { text: "For business", href: "https://business.vehicler.org/", external: true },
-                // { text: "Track Shipment", href: "/find-my-vehicle" }, // Temporarily hidden
-                { text: "Get Quote", href: "#quote" },
-              ]}
-            />
+            {/* Col 2: Services */}
+            <div>
+              <h3 className="font-semibold text-white mb-4">Services</h3>
+              <ul className="space-y-3 text-sm">
+                {["Open Car Transport", "Enclosed Car Transport", "Motorcycle Shipping", "Classic Car Transport"].map((t) => (
+                  <li key={t}><a href="#" className="text-gray-300 hover:text-white transition-colors">{t}</a></li>
+                ))}
+              </ul>
+            </div>
+            {/* Col 3: Company */}
+            <div>
+              <h3 className="font-semibold text-white mb-4">Company</h3>
+              <ul className="space-y-3 text-sm">
+                {[{ text: "About Us", href: "#" }, { text: "How It Works", href: "#how-it-works" }, { text: "Reviews", href: "#reviews" }, { text: "Careers", href: "#" }].map((l) => (
+                  <li key={l.text}><a href={l.href} className="text-gray-300 hover:text-white transition-colors">{l.text}</a></li>
+                ))}
+              </ul>
+            </div>
+            {/* Col 4: Support */}
+            <div>
+              <h3 className="font-semibold text-white mb-4">Support</h3>
+              <ul className="space-y-3 text-sm">
+                <li><a href="#" className="text-gray-300 hover:text-white transition-colors">Contact Us</a></li>
+                <li><a href="#faq" className="text-gray-300 hover:text-white transition-colors">FAQ</a></li>
+                <li><a href="https://business.vehicler.org/" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white transition-colors">For business</a></li>
+                <li><a href="#quote" className="text-gray-300 hover:text-white transition-colors">Get Quote</a></li>
+              </ul>
+            </div>
           </div>
-          {/* bottom row */}
-          <div className="border-t border-gray-600 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-400 text-sm">© 2025 Vehicler. All rights reserved.</p>
-            <div className="flex space-x-6 mt-4 md:mt-0 text-sm">
-              {["Privacy Policy", "Terms of Service", "Cookie Policy"].map((item) => (
-                <a key={item} href="#" className="text-gray-400 hover:text-white transition-colors">
-                  {item}
+
+          {/* Mobile: logo block + 3-col grid */}
+          <div className="md:hidden mb-6">
+            <Link href="/" className="block mb-4">
+              <Image src="/vehicler-footer-logo.png" alt="Vehicler logo mark" width={200} height={200} priority className="w-full h-auto" />
+            </Link>
+            <div className="h-4" />
+            <p className="text-gray-300 text-sm leading-relaxed mb-4">
+              America's trusted vehicle transport company, delivering safe and reliable car shipping nationwide.
+            </p>
+            <div className="flex space-x-4 mb-6">
+              {[{ Icon: Facebook, label: "Facebook" }, { Icon: Twitter, label: "Twitter" }, { Icon: Instagram, label: "Instagram" }, { Icon: Linkedin, label: "LinkedIn" }].map(({ Icon, label }) => (
+                <a key={label} href="#" aria-label={`${label} link`}>
+                  <Icon className="w-4 h-4 text-gray-400 hover:text-white transition-colors" />
                 </a>
               ))}
             </div>
+            <div className="grid grid-cols-3 gap-x-2">
+              <div>
+                <h3 className="font-semibold text-white mb-1 text-xs">Services</h3>
+                <ul className="space-y-1">
+                  {["Open Car Transport", "Enclosed Car Transport", "Motorcycle Shipping", "Classic Car Transport"].map((t) => (
+                    <li key={t}><a href="#" className="text-gray-300 hover:text-white transition-colors text-xs leading-tight block">{t}</a></li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h3 className="font-semibold text-white mb-1 text-xs">Company</h3>
+                <ul className="space-y-1">
+                  {[{ text: "About Us", href: "#" }, { text: "How It Works", href: "#how-it-works" }, { text: "Reviews", href: "#reviews" }, { text: "Careers", href: "#" }].map((l) => (
+                    <li key={l.text}><a href={l.href} className="text-gray-300 hover:text-white transition-colors text-xs leading-tight block">{l.text}</a></li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h3 className="font-semibold text-white mb-1 text-xs">Support</h3>
+                <ul className="space-y-1">
+                  <li><a href="#" className="text-gray-300 hover:text-white transition-colors text-xs leading-tight block">Contact Us</a></li>
+                  <li><a href="#faq" className="text-gray-300 hover:text-white transition-colors text-xs leading-tight block">FAQ</a></li>
+                  <li><a href="https://business.vehicler.org/" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white transition-colors text-xs leading-tight block">For business</a></li>
+                  <li><a href="#quote" className="text-gray-300 hover:text-white transition-colors text-xs leading-tight block">Get Quote</a></li>
+                </ul>
+              </div>
+            </div>
           </div>
+
+          {/* Bottom bar */}
+          <div className="border-t border-gray-600 pt-6 md:pt-8 flex flex-col md:flex-row justify-between items-center gap-2">
+            <p className="text-gray-400 text-sm">© {new Date().getFullYear()} Vehicler. All rights reserved.</p>
+            <div className="flex space-x-4 md:space-x-6 text-sm">
+              <a href="https://business.vehicler.org/privacy" className="text-gray-400 hover:text-white transition-colors">Privacy Policy</a>
+              <a href="https://business.vehicler.org/terms" className="text-gray-400 hover:text-white transition-colors">Terms of Service</a>
+            </div>
+          </div>
+
         </div>
       </footer>
     </div>
