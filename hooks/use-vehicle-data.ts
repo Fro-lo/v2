@@ -78,12 +78,18 @@ export function useVehicleData(year: string, make: string, makeId: string) {
     }
   }, [])
 
+  // makeId может отсутствовать при предзаполнении из URL (есть только имя
+  // марки). В этом случае резолвим id по имени из загруженного списка марок.
+  const effectiveMakeId =
+    makeId || (make ? (makeOptions.find((m) => m.name === make.toUpperCase())?.id ?? "") : "")
+
   // ---- Загрузка моделей (по makeId + year) --------------------------------
   useEffect(() => {
-    if (!makeId) {
+    if (!effectiveMakeId) {
       setModels([])
       return
     }
+    const makeId = effectiveMakeId
     const cacheKey = `${makeId}-${year}`
     if (modelsCache.current[cacheKey]) {
       setModels(modelsCache.current[cacheKey])
@@ -134,7 +140,7 @@ export function useVehicleData(year: string, make: string, makeId: string) {
     return () => {
       cancelled = true
     }
-  }, [makeId, year])
+  }, [effectiveMakeId, year])
 
   const makes = makeOptions.map((m) => m.name)
 

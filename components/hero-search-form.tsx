@@ -193,7 +193,11 @@ export function HeroSearchForm() {
     if (searchForm.toCity) params.set("toCity", searchForm.toCity)
     if (searchForm.toState) params.set("toState", searchForm.toState)
     if (searchForm.toZip) params.set("toZip", searchForm.toZip)
-    if (searchForm.vehicleModel) params.set("vehicleModel", searchForm.vehicleModel)
+    const combinedModel = [searchForm.vehicleMake, searchForm.vehicleModel]
+      .filter(Boolean)
+      .join(" ")
+      .trim()
+    if (combinedModel) params.set("vehicleModel", combinedModel)
     if (searchForm.vehicleYear) params.set("vehicleYear", searchForm.vehicleYear)
     if (searchForm.vehicleMake) params.set("vehicleMake", searchForm.vehicleMake)
     if (searchForm.vehicleCategory) params.set("vehicleCategory", searchForm.vehicleCategory)

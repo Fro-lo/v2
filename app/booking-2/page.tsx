@@ -39,7 +39,7 @@ import Image from "next/image"
 import { useZipLookup } from "@/hooks/use-zip-lookup"
 import { useCarrierData } from "@/hooks/use-carrier-data"
 import { VehicleTransportPricingCalculator } from "@/lib/pricing-calculator"
-import { VehicleModelInput } from "@/components/vehicle-model-input"
+import { VehicleYearMakeModel } from "@/components/vehicle-year-make-model"
 import type { DateRange } from "react-day-picker"
 
 const US_STATES = [
@@ -112,6 +112,8 @@ interface SearchFormData {
   pickupEndDate: Date | undefined
   vehicleModel: string
   vehicleYear: string
+  vehicleMake: string
+  vehicleMakeId: string
   vehicleCondition: string
   vehicleCategory: string
 }
@@ -141,6 +143,8 @@ export default function QuotePage() {
     pickupEndDate: undefined,
     vehicleModel: "",
     vehicleYear: "",
+    vehicleMake: "",
+    vehicleMakeId: "",
     vehicleCondition: "Operable",
     vehicleCategory: "",
   })
@@ -284,6 +288,8 @@ export default function QuotePage() {
       toZip: toZip || "",
       vehicleModel: urlParams.get("vehicleModel") || "",
       vehicleYear: urlParams.get("vehicleYear") || "",
+      vehicleMake: urlParams.get("vehicleMake") || "",
+      vehicleMakeId: "",
       vehicleCondition: urlParams.get("vehicleCondition") || "Operable",
       vehicleCategory: urlParams.get("vehicleCategory") || "",
       pickupStartDate: urlParams.get("pickupStartDate") ? new Date(urlParams.get("pickupStartDate")!) : undefined,
@@ -459,28 +465,6 @@ export default function QuotePage() {
     }
   }, [])
 
-  const handleVehicleModelChange = useCallback((value: string) => {
-    setSearchForm((prev) => ({ ...prev, vehicleModel: value }))
-  }, [])
-
-  const handleVehicleYearChange = useCallback((year: string) => {
-    setSearchForm((prev) => ({ ...prev, vehicleYear: year }))
-  }, [])
-
-  const handleVehicleSelect = useCallback((vehicle: any) => {
-    setSearchForm((prev) => ({
-      ...prev,
-      vehicleCategory: vehicle.category,
-      vehicleYear: vehicle.selectedYear || prev.vehicleYear,
-    }))
-  }, [])
-
-  const handleTransportRecommendation = useCallback(
-    (recommendation: { recommended: "open" | "enclosed"; reason: string }) => {
-      setTransportRecommendation(recommendation)
-    },
-    [],
-  )
 
   const handleQuoteSelection = useCallback(
     (index: number) => {
@@ -553,6 +537,7 @@ export default function QuotePage() {
       if (searchForm.toAddress) params.set("toAddress", searchForm.toAddress)
       if (searchForm.vehicleModel) params.set("vehicleModel", searchForm.vehicleModel)
       if (searchForm.vehicleYear) params.set("vehicleYear", searchForm.vehicleYear)
+      if (searchForm.vehicleMake) params.set("vehicleMake", searchForm.vehicleMake)
       if (searchForm.vehicleCategory) params.set("vehicleCategory", searchForm.vehicleCategory)
       if (searchForm.vehicleCondition) params.set("vehicleCondition", searchForm.vehicleCondition)
 
@@ -748,7 +733,7 @@ export default function QuotePage() {
                 }`}
               >
                 <form className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-3 items-end">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-8 gap-3 items-end">
                     <div className="space-y-2 relative">
                       <Label
                         className={`text-sm font-medium ${showRequiredHints && (!searchForm.fromStreet || !searchForm.fromCity) ? "text-red-600" : "text-gray-700"}`}
@@ -1017,19 +1002,33 @@ export default function QuotePage() {
                       </Popover>
                     </div>
 
-                    <div className="space-y-2">
-                      <VehicleModelInput
-                        value={searchForm.vehicleModel}
-                        onChange={handleVehicleModelChange}
-                        year={searchForm.vehicleYear}
-                        onYearChange={handleVehicleYearChange}
-                        onVehicleSelect={handleVehicleSelect}
-                        showRequiredHint={showRequiredHints && (!searchForm.vehicleModel || !searchForm.vehicleYear)}
-                        onTransportRecommendation={handleTransportRecommendation}
-                        className="text-sm"
-                        enableSearch={hasSearched}
-                      />
-                    </div>
+                    <VehicleYearMakeModel
+                      value={{
+                        year: searchForm.vehicleYear,
+                        make: searchForm.vehicleMake,
+                        makeId: searchForm.vehicleMakeId,
+                        model:
+                          searchForm.vehicleMake &&
+                          searchForm.vehicleModel
+                            .toUpperCase()
+                            .startsWith(searchForm.vehicleMake.toUpperCase())
+                            ? searchForm.vehicleModel.slice(searchForm.vehicleMake.length).trim()
+                            : searchForm.vehicleModel,
+                      }}
+                      onChange={(v) =>
+                        setSearchForm((prev) => ({
+                          ...prev,
+                          vehicleYear: v.year,
+                          vehicleMake: v.make,
+                          vehicleMakeId: v.makeId,
+                          vehicleModel: [v.make, v.model].filter(Boolean).join(" ").trim(),
+                        }))
+                      }
+                      showRequiredHint={
+                        showRequiredHints &&
+                        (!searchForm.vehicleYear || !searchForm.vehicleMake || !searchForm.vehicleModel)
+                      }
+                    />
 
                     <div className="space-y-2">
                       <Label
