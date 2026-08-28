@@ -7,10 +7,10 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Calendar as CalendarUI } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { CalendarIcon, ChevronDown, Loader2, Search } from "lucide-react"
+import { CalendarIcon, ChevronDown, Loader2 } from "lucide-react"
 import { format } from "date-fns"
 import { useZipLookup } from "@/hooks/use-zip-lookup"
-import { VehicleModelInput } from "@/components/vehicle-model-input"
+import { VehicleYearMakeModel } from "@/components/vehicle-year-make-model"
 import type { DateRange } from "react-day-picker"
 
 
@@ -29,6 +29,8 @@ interface SearchFormData {
   pickupEndDate: Date | undefined
   vehicleModel: string
   vehicleYear: string
+  vehicleMake: string
+  vehicleMakeId: string
   vehicleCondition: string
   vehicleCategory: string
 }
@@ -59,6 +61,8 @@ export function HeroSearchForm() {
     pickupEndDate: undefined,
     vehicleModel: "",
     vehicleYear: "",
+    vehicleMake: "",
+    vehicleMakeId: "",
     vehicleCondition: "Operable",
     vehicleCategory: "",
   })
@@ -121,22 +125,6 @@ export function HeroSearchForm() {
     }
   }, [])
 
-  const handleVehicleModelChange = useCallback((value: string) => {
-    setSearchForm((prev) => ({ ...prev, vehicleModel: value }))
-  }, [])
-
-  const handleVehicleYearChange = useCallback((year: string) => {
-    setSearchForm((prev) => ({ ...prev, vehicleYear: year }))
-  }, [])
-
-  const handleVehicleSelect = useCallback((vehicle: any) => {
-    setSearchForm((prev) => ({
-      ...prev,
-      vehicleCategory: vehicle.category,
-      vehicleYear: vehicle.selectedYear || prev.vehicleYear,
-    }))
-  }, [])
-
   const getPickupAddressDisplay = () => {
     const parts = [
       searchForm.fromHouseNumber,
@@ -178,8 +166,9 @@ export function HeroSearchForm() {
       { field: "fromZip", name: "Pick up ZIP code" },
       { field: "toZip", name: "Deliver to ZIP code" },
       { field: "pickupStartDate", name: "Pickup date" },
-      { field: "vehicleModel", name: "Vehicle model" },
       { field: "vehicleYear", name: "Vehicle year" },
+      { field: "vehicleMake", name: "Vehicle make" },
+      { field: "vehicleModel", name: "Vehicle model" },
     ]
 
     const missingFields = requiredFields.filter(({ field }) => {
@@ -206,6 +195,7 @@ export function HeroSearchForm() {
     if (searchForm.toZip) params.set("toZip", searchForm.toZip)
     if (searchForm.vehicleModel) params.set("vehicleModel", searchForm.vehicleModel)
     if (searchForm.vehicleYear) params.set("vehicleYear", searchForm.vehicleYear)
+    if (searchForm.vehicleMake) params.set("vehicleMake", searchForm.vehicleMake)
     if (searchForm.vehicleCategory) params.set("vehicleCategory", searchForm.vehicleCategory)
     if (searchForm.vehicleCondition) params.set("vehicleCondition", searchForm.vehicleCondition)
     if (searchForm.pickupStartDate) params.set("pickupStartDate", searchForm.pickupStartDate.toISOString())
@@ -434,22 +424,28 @@ export function HeroSearchForm() {
             </Popover>
           </div>
 
-          {/* Vehicle model */}
-          <div className="space-y-1.5">
-            <Label className={`text-xs font-semibold uppercase tracking-wide ${showRequiredHints && (!searchForm.vehicleModel || !searchForm.vehicleYear) ? "text-red-600" : "text-gray-500"}`}>
-              Vehicle model
-            </Label>
-            <div className="relative h-10 flex items-center border border-gray-200 rounded-md bg-white px-3 gap-2 focus-within:ring-2 focus-within:ring-[#6371BE] focus-within:border-[#6371BE]">
-              <Search className="h-4 w-4 text-gray-400 shrink-0" />
-              <input
-                type="text"
-                value={searchForm.vehicleModel}
-                onChange={(e) => handleVehicleModelChange(e.target.value)}
-                placeholder="e.g., Toyota Camry, BMW 3 Series"
-                className="flex-1 min-w-0 text-sm bg-transparent outline-none text-gray-700 placeholder:text-gray-400"
-              />
-            </div>
-          </div>
+          {/* Vehicle year / make / model */}
+          <VehicleYearMakeModel
+            value={{
+              year: searchForm.vehicleYear,
+              make: searchForm.vehicleMake,
+              makeId: searchForm.vehicleMakeId,
+              model: searchForm.vehicleModel,
+            }}
+            onChange={(v) =>
+              setSearchForm((prev) => ({
+                ...prev,
+                vehicleYear: v.year,
+                vehicleMake: v.make,
+                vehicleMakeId: v.makeId,
+                vehicleModel: v.model,
+              }))
+            }
+            showRequiredHint={
+              showRequiredHints &&
+              (!searchForm.vehicleYear || !searchForm.vehicleMake || !searchForm.vehicleModel)
+            }
+          />
 
           {/* Vehicle condition */}
           <div className="space-y-1.5">
@@ -486,7 +482,7 @@ export function HeroSearchForm() {
           </div>
 
           {/* Submit */}
-          <div className="space-y-1.5">
+          <div className="space-y-1.5 col-span-2">
             <Label className="text-xs font-semibold uppercase tracking-wide text-transparent select-none" aria-hidden="true">placeholder</Label>
             <Button
               type="button"
