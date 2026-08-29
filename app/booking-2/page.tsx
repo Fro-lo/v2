@@ -40,6 +40,7 @@ import { useZipLookup } from "@/hooks/use-zip-lookup"
 import { useCarrierData } from "@/hooks/use-carrier-data"
 import { VehicleTransportPricingCalculator } from "@/lib/pricing-calculator"
 import { VehicleYearMakeModel } from "@/components/vehicle-year-make-model"
+import { getTransportRecommendation } from "@/lib/transport-recommendation"
 import type { DateRange } from "react-day-picker"
 
 const US_STATES = [
@@ -300,6 +301,12 @@ export default function QuotePage() {
       ...prev,
       ...initialFormData,
     }))
+
+    if (initialFormData.vehicleYear && initialFormData.vehicleMake && initialFormData.vehicleModel) {
+      setTransportRecommendation(
+        getTransportRecommendation(initialFormData.vehicleYear, initialFormData.vehicleMake),
+      )
+    }
 
     const hasFullData =
       (initialFormData.fromCity || initialFormData.fromZip) &&
@@ -1015,7 +1022,7 @@ export default function QuotePage() {
                             ? searchForm.vehicleModel.slice(searchForm.vehicleMake.length).trim()
                             : searchForm.vehicleModel,
                       }}
-                      onChange={(v) =>
+                      onChange={(v) => {
                         setSearchForm((prev) => ({
                           ...prev,
                           vehicleYear: v.year,
@@ -1023,7 +1030,12 @@ export default function QuotePage() {
                           vehicleMakeId: v.makeId,
                           vehicleModel: [v.make, v.model].filter(Boolean).join(" ").trim(),
                         }))
-                      }
+                        if (v.year && v.make && v.model) {
+                          setTransportRecommendation(getTransportRecommendation(v.year, v.make))
+                        } else {
+                          setTransportRecommendation(null)
+                        }
+                      }}
                       showRequiredHint={
                         showRequiredHints &&
                         (!searchForm.vehicleYear || !searchForm.vehicleMake || !searchForm.vehicleModel)
